@@ -2,8 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Calculator, Loader2, Camera, X } from "lucide-react";
-import { useState } from "react";
+import { Upload, Calculator, Loader2, Camera, X, Image } from "lucide-react";
+import { useState, useRef } from "react";
 
 interface DeathAnalyzerProps {
   scenario: string;
@@ -22,6 +22,11 @@ export const DeathAnalyzer = ({
 }: DeathAnalyzerProps) => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const exampleScenarios = [
     "9 Tylenol pills",
@@ -32,23 +37,35 @@ export const DeathAnalyzer = ({
     "Spider bite",
   ];
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (file: File) => {
+    setUploadedImage(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    setScenario("");
+    setShowCamera(false);
+  };
+
+  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setUploadedImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-      // Clear text scenario when image is uploaded
-      setScenario("");
+      handleFileSelect(file);
+    }
+  };
+
+  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
     }
   };
 
   const removeImage = () => {
     setUploadedImage(null);
     setImagePreview(null);
+    setShowCamera(false);
   };
 
   const handleAnalyze = () => {
@@ -66,7 +83,7 @@ export const DeathAnalyzer = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Image Upload Section */}
+        {/* Image/Camera Section */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-gray-300">
             <Camera className="w-4 h-4" />
@@ -88,22 +105,64 @@ export const DeathAnalyzer = ({
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-700/30 hover:bg-slate-600/30 transition-colors">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-8 h-8 mb-2 text-gray-400" />
-                <p className="text-sm text-gray-400">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+            <div className="space-y-3">
+              {/* Camera and Upload Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => cameraInputRef.current?.click()}
+                  variant="outline"
+                  className="bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:text-white h-20 flex flex-col items-center justify-center gap-2"
+                >
+                  <Camera className="w-6 h-6" />
+                  <span className="text-xs">Take Photo</span>
+                </Button>
+                
+                <Button
+                  onClick={() => uploadInputRef.current?.click()}
+                  variant="outline"
+                  className="bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:text-white h-20 flex flex-col items-center justify-center gap-2"
+                >
+                  <Image className="w-6 h-6" />
+                  <span className="text-xs">Upload Image</span>
+                </Button>
               </div>
-              <input 
-                type="file" 
-                className="hidden" 
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </label>
+
+              {/* Alternative drag and drop area */}
+              <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-700/30 hover:bg-slate-600/30 transition-colors">
+                <div className="flex flex-col items-center justify-center">
+                  <Upload className="w-6 h-6 mb-1 text-gray-400" />
+                  <p className="text-xs text-gray-400">
+                    Or drag and drop here
+                  </p>
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleUpload}
+                />
+              </label>
+            </div>
           )}
+
+          {/* Hidden camera input for mobile */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={handleCameraCapture}
+          />
+
+          {/* Hidden upload input */}
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleUpload}
+          />
         </div>
 
         {/* Text Scenario Section */}
