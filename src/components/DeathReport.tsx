@@ -91,9 +91,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
     {
       icon: Clock,
       label: "Estimated Time to Death",
-      value: analysis.timeToD
-
-,
+      value: analysis.timeToDeath,
       color: "text-orange-400"
     },
     {
