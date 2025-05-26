@@ -1,0 +1,188 @@
+
+import { useRef, useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Camera, X, Scan, Zap } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+
+interface CameraScannerProps {
+  onCapture: (imageFile: File) => void;
+  onClose: () => void;
+  onScan: (imageFile: File) => void;
+}
+
+export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    startCamera();
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      setIsLoading(true);
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: 'environment', // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+      
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      setError('Camera access denied. Please allow camera permissions.');
+      setIsLoading(false);
+    }
+  };
+
+  const captureImage = (isScanning = false) => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return;
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw the video frame to canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert canvas to blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], `death-scan-${Date.now()}.jpg`, {
+          type: 'image/jpeg'
+        });
+        
+        if (isScanning) {
+          onScan(file);
+        } else {
+          onCapture(file);
+        }
+      }
+    }, 'image/jpeg', 0.8);
+  };
+
+  const handleClose = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    onClose();
+  };
+
+  if (error) {
+    return (
+      <Card className="bg-slate-800/50 border-slate-700">
+        <CardContent className="p-6 text-center">
+          <div className="text-red-400 mb-4">
+            <Camera className="w-12 h-12 mx-auto mb-2" />
+            <p>{error}</p>
+          </div>
+          <Button onClick={handleClose} variant="outline" className="bg-slate-700 border-slate-600">
+            Close
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-slate-800/50 border-slate-700 overflow-hidden">
+      <CardContent className="p-0 relative">
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 z-10 bg-red-600 hover:bg-red-700 text-white rounded-full p-2"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Camera feed */}
+        <div className="relative bg-black aspect-video">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+              <div className="text-center text-white">
+                <Camera className="w-12 h-12 mx-auto mb-2 animate-pulse" />
+                <p>Starting camera...</p>
+              </div>
+            </div>
+          )}
+          
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+            onLoadedMetadata={() => setIsLoading(false)}
+          />
+
+          {/* Scanning overlay */}
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Scanning frame */}
+            <div className="absolute inset-4 border-2 border-red-400 rounded-lg">
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-red-400 rounded-tl-lg"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-red-400 rounded-tr-lg"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-red-400 rounded-bl-lg"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-red-400 rounded-br-lg"></div>
+            </div>
+            
+            {/* Center crosshair */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="w-8 h-8 border-2 border-red-400 rounded-full bg-red-400/20"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Control buttons */}
+        <div className="p-4 bg-slate-900/90">
+          <div className="flex justify-center gap-4">
+            <Button
+              onClick={() => captureImage(true)}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl"
+            >
+              <Scan className="w-5 h-5 mr-2" />
+              Death Scan
+            </Button>
+            
+            <Button
+              onClick={() => captureImage(false)}
+              disabled={isLoading}
+              variant="outline"
+              className="bg-slate-700 border-slate-600 text-white px-6 py-3 rounded-xl"
+            >
+              <Camera className="w-5 h-5 mr-2" />
+              Take Photo
+            </Button>
+          </div>
+          
+          <p className="text-center text-xs text-gray-400 mt-3">
+            Point camera at food, drink, or object to analyze death potential
+          </p>
+        </div>
+
+        {/* Hidden canvas for image capture */}
+        <canvas ref={canvasRef} className="hidden" />
+      </CardContent>
+    </Card>
+  );
+};

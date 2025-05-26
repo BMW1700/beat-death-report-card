@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Calculator, Loader2, Camera, X, Image } from "lucide-react";
 import { useState, useRef } from "react";
+import { CameraScanner } from "./CameraScanner";
 
 interface DeathAnalyzerProps {
   scenario: string;
@@ -23,9 +24,6 @@ export const DeathAnalyzer = ({
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const exampleScenarios = [
@@ -48,13 +46,6 @@ export const DeathAnalyzer = ({
     setShowCamera(false);
   };
 
-  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  };
-
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -72,7 +63,28 @@ export const DeathAnalyzer = ({
     onAnalyze(uploadedImage || undefined);
   };
 
+  const handleCameraCapture = (file: File) => {
+    handleFileSelect(file);
+  };
+
+  const handleCameraScan = (file: File) => {
+    handleFileSelect(file);
+    // Immediately trigger analysis for scan
+    setTimeout(() => onAnalyze(file), 100);
+  };
+
   const canAnalyzeWithInput = (canAnalyze && scenario.trim()) || uploadedImage;
+
+  // Show camera scanner if active
+  if (showCamera) {
+    return (
+      <CameraScanner
+        onCapture={handleCameraCapture}
+        onScan={handleCameraScan}
+        onClose={() => setShowCamera(false)}
+      />
+    );
+  }
 
   return (
     <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
@@ -109,12 +121,12 @@ export const DeathAnalyzer = ({
               {/* Camera and Upload Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <Button
-                  onClick={() => cameraInputRef.current?.click()}
+                  onClick={() => setShowCamera(true)}
                   variant="outline"
                   className="bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:text-white h-20 flex flex-col items-center justify-center gap-2"
                 >
                   <Camera className="w-6 h-6" />
-                  <span className="text-xs">Take Photo</span>
+                  <span className="text-xs">Live Camera</span>
                 </Button>
                 
                 <Button
@@ -144,16 +156,6 @@ export const DeathAnalyzer = ({
               </label>
             </div>
           )}
-
-          {/* Hidden camera input for mobile */}
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={handleCameraCapture}
-          />
 
           {/* Hidden upload input */}
           <input
