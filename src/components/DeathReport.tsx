@@ -10,7 +10,9 @@ import {
   Brain, 
   Shield, 
   MessageSquare,
-  Loader2 
+  Loader2,
+  Flame,
+  Target
 } from "lucide-react";
 import { DeathAnalysis, UserData } from "@/pages/Index";
 
@@ -27,7 +29,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-green-400" />
-            Death Report Card
+            Death Scanner Report
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
@@ -35,7 +37,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
           <p className="text-gray-300 text-center">
             Consulting the Grim Reaper's database...
             <br />
-            <span className="text-sm text-gray-400">This may take a moment</span>
+            <span className="text-sm text-gray-400">Analyzing death potential</span>
           </p>
         </CardContent>
       </Card>
@@ -48,7 +50,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-green-400" />
-            Death Report Card
+            Death Scanner Report
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
@@ -56,16 +58,38 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
           <p className="text-gray-400 text-center">
             No death analysis yet.
             <br />
-            <span className="text-sm">Enter a scenario to see your mortality report.</span>
+            <span className="text-sm">Upload an image or enter a scenario to scan for death potential.</span>
           </p>
         </CardContent>
       </Card>
     );
   }
 
+  const getKillRatingColor = (rating: number) => {
+    switch (rating) {
+      case 1: return "text-green-400";
+      case 2: return "text-yellow-400";
+      case 3: return "text-orange-400";
+      case 4: return "text-red-400";
+      case 5: return "text-red-600";
+      default: return "text-gray-400";
+    }
+  };
+
+  const getKillRatingBg = (rating: number) => {
+    switch (rating) {
+      case 1: return "bg-green-900/30 border-green-600/30";
+      case 2: return "bg-yellow-900/30 border-yellow-600/30";
+      case 3: return "bg-orange-900/30 border-orange-600/30";
+      case 4: return "bg-red-900/30 border-red-600/30";
+      case 5: return "bg-red-900/50 border-red-500/50";
+      default: return "bg-gray-900/30 border-gray-600/30";
+    }
+  };
+
   const reportItems = [
     {
-      icon: FileText,
+      icon: Target,
       label: "Item/Scenario",
       value: analysis.item,
       color: "text-blue-400"
@@ -84,6 +108,12 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
     },
     {
       icon: Skull,
+      label: "How It Kills You",
+      value: analysis.mechanism,
+      color: "text-red-400"
+    },
+    {
+      icon: Brain,
       label: "Lethal Dose/Exposure",
       value: analysis.lethalDose,
       color: "text-purple-400"
@@ -95,14 +125,8 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
       color: "text-orange-400"
     },
     {
-      icon: Brain,
-      label: "Mechanism of Death",
-      value: analysis.mechanism,
-      color: "text-red-400"
-    },
-    {
       icon: Shield,
-      label: "How to Avoid It",
+      label: "Survival Tip",
       value: analysis.survival,
       color: "text-green-400"
     },
@@ -119,10 +143,30 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <FileText className="w-5 h-5 text-green-400" />
-          Death Report Card
+          Death Scanner Report
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Kill Rating Badge */}
+        {analysis.killRating && (
+          <div className={`p-4 rounded-lg border ${getKillRatingBg(analysis.killRating)}`}>
+            <div className="flex items-center gap-3">
+              <Flame className={`w-6 h-6 ${getKillRatingColor(analysis.killRating)}`} />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white font-medium">Kill Rating:</span>
+                  <Badge variant="outline" className={`${getKillRatingColor(analysis.killRating)} border-current`}>
+                    {analysis.killRating}/5
+                  </Badge>
+                </div>
+                <p className={`text-sm ${getKillRatingColor(analysis.killRating)} mt-1`}>
+                  {analysis.killRatingText}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {reportItems.map((item, index) => (
           <div key={index} className="space-y-2">
             <div className="flex items-center gap-2">

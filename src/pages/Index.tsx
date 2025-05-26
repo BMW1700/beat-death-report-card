@@ -22,6 +22,8 @@ export interface UserData {
 export interface DeathAnalysis {
   item: string;
   allergyRisk: string;
+  killRating?: number;
+  killRatingText?: string;
   lethalDose: string;
   timeToDeath: string;
   mechanism: string;
@@ -42,28 +44,128 @@ const Index = () => {
   const [analysis, setAnalysis] = useState<DeathAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleAnalyze = async () => {
-    if (!scenario.trim() || !userData.weight) {
+  // Death analysis database for different scenarios
+  const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
+    const weight = parseFloat(userData.weight);
+    const isKg = userData.weightUnit === "kg";
+    const weightInKg = isKg ? weight : weight * 0.453592;
+    
+    // Convert common scenarios to lowercase for matching
+    const lowerItem = item.toLowerCase();
+    
+    if (lowerItem.includes("tylenol") || lowerItem.includes("acetaminophen")) {
+      const pillCount = parseInt(item.match(/\d+/)?.[0] || "1");
+      const totalMg = pillCount * 500; // Assuming 500mg pills
+      const mgPerKg = totalMg / weightInKg;
+      
+      return {
+        item: `${pillCount} Tylenol pills (${totalMg}mg total)`,
+        allergyRisk: userData.allergies.toLowerCase().includes("acetaminophen") ? "Yes - acetaminophen allergy detected" : "No known acetaminophen allergies",
+        killRating: mgPerKg > 150 ? 5 : mgPerKg > 100 ? 4 : mgPerKg > 75 ? 3 : 2,
+        killRatingText: mgPerKg > 150 ? "Horrible MF, you're already dead" : mgPerKg > 100 ? "Big yikes, could get ugly" : mgPerKg > 75 ? "Uh oh, not great" : "Meh, low-key risky",
+        lethalDose: `~150mg/kg (${Math.round(150 * weightInKg)}mg for your weight)`,
+        timeToDeath: mgPerKg > 150 ? "12-24 hours" : "24-72 hours if untreated",
+        mechanism: "Acute liver failure leading to hepatic encephalopathy and multi-organ failure",
+        survival: "Immediately call poison control and get to ER - N-acetylcysteine can save you if given within 8 hours",
+        finalWords: pillCount > 15 ? "Your liver just filed for unemployment 💀" : "Paracetamol? More like para-see-ya-later 💊"
+      };
+    }
+    
+    if (lowerItem.includes("energy drink")) {
+      const drinkCount = parseInt(item.match(/\d+/)?.[0] || "1");
+      const totalCaffeine = drinkCount * 150; // Assuming 150mg per drink
+      const caffeinePerKg = totalCaffeine / weightInKg;
+      
+      return {
+        item: `${drinkCount} energy drinks (~${totalCaffeine}mg caffeine)`,
+        allergyRisk: "No - unless you're allergic to having a pulse",
+        killRating: caffeinePerKg > 150 ? 5 : caffeinePerKg > 100 ? 4 : caffeinePerKg > 50 ? 3 : 1,
+        killRatingText: caffeinePerKg > 150 ? "Horrible MF, you're already dead" : caffeinePerKg > 100 ? "Big yikes, could get ugly" : caffeinePerKg > 50 ? "Uh oh, not great" : "No Problemo",
+        lethalDose: `~150-200mg/kg (${Math.round(150 * weightInKg)}mg for your weight)`,
+        timeToDeath: caffeinePerKg > 150 ? "30 minutes to 2 hours" : "2-6 hours",
+        mechanism: "Cardiac arrhythmia, seizures, and cardiovascular collapse",
+        survival: "Stop drinking them and call 911 if you feel chest pain or irregular heartbeat",
+        finalWords: drinkCount > 10 ? "Your heart is about to break up with you ⚡" : "Redbull gives you wings... to heaven 👼"
+      };
+    }
+    
+    if (lowerItem.includes("quarter") && (lowerItem.includes("swallow") || lowerItem.includes("ate"))) {
+      const quarterCount = parseInt(item.match(/\d+/)?.[0] || "1");
+      
+      return {
+        item: `${quarterCount} swallowed quarters`,
+        allergyRisk: "No - unless you're allergic to poor financial decisions",
+        killRating: quarterCount > 5 ? 4 : quarterCount > 2 ? 3 : 2,
+        killRatingText: quarterCount > 5 ? "Big yikes, could get ugly" : quarterCount > 2 ? "Uh oh, not great" : "Meh, low-key risky",
+        lethalDose: "Multiple coins causing complete bowel obstruction",
+        timeToDeath: "Days to weeks if untreated",
+        mechanism: "Intestinal obstruction leading to perforation, sepsis, and death",
+        survival: "Get to the ER immediately for X-rays and possible emergency surgery",
+        finalWords: quarterCount > 3 ? "Making change has never been this expensive 💰" : "That's not how you invest in quarters 🪙"
+      };
+    }
+    
+    if (lowerItem.includes("freezer") || lowerItem.includes("locked") || lowerItem.includes("cold")) {
+      return {
+        item: "Locked in a walk-in freezer",
+        allergyRisk: "No - but your body is about to be allergic to functioning",
+        killRating: 5,
+        killRatingText: "Horrible MF, you're already dead",
+        lethalDose: "Core body temperature below 90°F (32°C)",
+        timeToDeath: "30 minutes to 3 hours depending on clothing",
+        mechanism: "Severe hypothermia causing cardiac arrhythmia and respiratory failure",
+        survival: "Bang on the door, stay moving, conserve body heat, and pray someone finds you",
+        finalWords: "Chilling out has never been this literal ❄️"
+      };
+    }
+    
+    // Default analysis for unknown items
+    return {
+      item: item,
+      allergyRisk: userData.allergies && userData.allergies.toLowerCase() !== "none" ? "Possible - check your known allergies" : "Unknown - depends on the substance",
+      killRating: 3,
+      killRatingText: "Uh oh, not great",
+      lethalDose: "Variable based on substance and exposure method",
+      timeToDeath: "Highly variable - could be minutes to days",
+      mechanism: "Multiple potential pathways depending on the substance",
+      survival: "Avoid direct contact and seek immediate medical attention if symptoms occur",
+      finalWords: "Death finds a way, but so does Google... maybe try that first? 🤔"
+    };
+  };
+
+  const analyzeImageWithAI = async (imageFile: File): Promise<string> => {
+    // This would integrate with an AI vision service like OpenAI GPT-4 Vision
+    // For now, return a mock description
+    return "bottle of household bleach cleaner";
+  };
+
+  const handleAnalyze = async (imageFile?: File) => {
+    if ((!scenario.trim() && !imageFile) || !userData.weight) {
       return;
     }
     
     setIsAnalyzing(true);
     
-    // Simulate analysis delay for dramatic effect
-    setTimeout(() => {
-      const mockAnalysis: DeathAnalysis = {
-        item: scenario,
-        allergyRisk: userData.allergies.toLowerCase() !== "none" && userData.allergies ? "Yes - potential anaphylactic shock risk" : "No known allergies detected",
-        lethalDose: "Analysis based on scenario complexity",
-        timeToDeath: "Variable based on exposure",
-        mechanism: "Multiple potential pathways",
-        survival: "Avoid direct contact and seek immediate medical attention",
-        finalWords: "Death finds a way, but so does intelligence."
-      };
+    try {
+      let itemToAnalyze = scenario;
       
+      if (imageFile) {
+        // Simulate AI image analysis
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        itemToAnalyze = await analyzeImageWithAI(imageFile);
+      }
+      
+      // Simulate analysis delay for dramatic effect
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const mockAnalysis = getAnalysisForScenario(itemToAnalyze, userData);
       setAnalysis(mockAnalysis);
+      
+    } catch (error) {
+      console.error("Analysis failed:", error);
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -79,7 +181,7 @@ const Index = () => {
             <Skull className="w-12 h-12 text-red-500" />
           </div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Your darkly funny, science-informed AI agent that reveals how common items and scenarios can kill you. 
+            Your darkly funny, science-informed AI death scanner that reveals how common items and scenarios can kill you. 
             Based on YOUR unique biology.
           </p>
           <div className="flex items-center justify-center gap-2 mt-4 text-yellow-400">
@@ -98,7 +200,7 @@ const Index = () => {
               setScenario={setScenario} 
               onAnalyze={handleAnalyze}
               isAnalyzing={isAnalyzing}
-              canAnalyze={!!scenario.trim() && !!userData.weight}
+              canAnalyze={!!userData.weight}
             />
           </div>
 
