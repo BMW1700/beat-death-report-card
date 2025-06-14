@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,15 @@ import { Upload, Skull, Calculator, AlertTriangle } from "lucide-react";
 import { DeathAnalyzer } from "@/components/DeathAnalyzer";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
+import { ShareDeathReport } from "@/components/ShareDeathReport";
+import { ChallengeFriend } from "@/components/ChallengeFriend";
+import { TrendingDeaths } from "@/components/TrendingDeaths";
+import { DeathScore } from "@/components/DeathScore";
+import { Achievements } from "@/components/Achievements";
+import { Leaderboard } from "@/components/Leaderboard";
+import { ItemHistory } from "@/components/ItemHistory";
+import { DailyDeathFact } from "@/components/DailyDeathFact";
+import { UserStories } from "@/components/UserStories";
 
 export interface UserData {
   weight: string;
@@ -191,9 +199,11 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column - User Profile & Input */}
           <div className="space-y-6">
+            {/* PHASE 3: PERSONALIZATION */}
+            <DailyDeathFact />
             <UserProfile userData={userData} setUserData={setUserData} />
             <DeathAnalyzer 
               scenario={scenario} 
@@ -202,11 +212,29 @@ const Index = () => {
               isAnalyzing={isAnalyzing}
               canAnalyze={!!userData.weight}
             />
+            
+            {/* PHASE 2: PROGRESSION */}
+            <DeathScore />
+            <Achievements />
+            <ChallengeFriend />
           </div>
 
-          {/* Right Column - Death Report */}
+          {/* Center Column - Death Report, Trending, Share */}
           <div className="space-y-6">
+            <TrendingDeaths />
             <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} />
+            <ShareDeathReport deathReport={analysis ? `${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"` : undefined}/>
+            <ItemHistory />
+          </div>
+
+          {/* Right Column - Leaderboard, User Stories, Community */}
+          <div className="space-y-6">
+            <Leaderboard />
+            <UserStories />
+            <div className="bg-slate-700/50 p-4 rounded-lg mt-4">
+              <div className="text-xs text-white">Refer a friend with your invite code: <code>BD-{Math.floor(Math.random()*9999)}</code></div>
+              <div className="text-xs text-purple-300 mt-1">Stay tuned for Scan-off Battles and Creator Mode!</div>
+            </div>
           </div>
         </div>
 
