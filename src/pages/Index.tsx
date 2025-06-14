@@ -301,6 +301,7 @@ const Index = () => {
               <div className="text-xs text-white">Refer a friend with your invite code: <code>BD-{Math.floor(Math.random()*9999)}</code></div>
               <div className="text-xs text-purple-300 mt-1">Stay tuned for Scan-off Battles and Creator Mode!</div>
             </div>
+            {/* Enhanced Community Features */}
             <div className="backdrop-blur-xl bg-slate-800/60 border border-red-700/10 shadow-lg rounded-2xl">
               <DeathDuel />
             </div>
