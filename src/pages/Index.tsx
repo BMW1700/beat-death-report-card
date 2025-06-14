@@ -196,22 +196,22 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white pt-16">
+    <div className="min-h-screen bg-gradient-to-br from-[#221755] via-[#320D39] to-[#0A0818] text-white pt-16">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Skull className="w-12 h-12 text-red-500" />
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-red-500 to-purple-400 bg-clip-text text-transparent">
+            <Skull className="w-12 h-12 text-red-500 drop-shadow-[0_0_6px_rgba(220,38,120,.7)]" />
+            <h1 className="text-7xl font-bold font-playfair tracking-tight bg-gradient-to-r from-yellow-300 via-purple-400 to-red-500 bg-clip-text text-transparent drop-shadow-[0_1px_12px_rgba(80,30,170,0.20)]">
               BeatDeath
             </h1>
-            <Skull className="w-12 h-12 text-red-500" />
+            <Skull className="w-12 h-12 text-red-500 drop-shadow-[0_0_6px_rgba(220,38,120,.7)]" />
           </div>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-2xl font-playfair text-purple-100/90 max-w-2xl mx-auto drop-shadow">
             Your darkly funny, science-informed AI death scanner that reveals how common items and scenarios can kill you. 
             Based on YOUR unique biology.
           </p>
-          <div className="flex items-center justify-center gap-2 mt-4 text-yellow-400">
+          <div className="flex items-center justify-center gap-2 mt-4 text-yellow-300 drop-shadow">
             <AlertTriangle className="w-5 h-5" />
             <span className="text-sm font-medium">For Entertainment Only - Not Medical Advice</span>
             <AlertTriangle className="w-5 h-5" />
@@ -222,61 +222,120 @@ const Index = () => {
           {/* Left Column - User Profile & Input */}
           <div className="space-y-6">
             {/* PHASE 3: PERSONALIZATION */}
-            <DeathSpinWheel />
-            <DailyDeathFact />
-            <UserProfile userData={userData} setUserData={setUserData} />
-            <DeathAnalyzer 
-              scenario={scenario} 
-              setScenario={setScenario} 
-              onAnalyze={handleAnalyze}
-              isAnalyzing={isAnalyzing}
-              canAnalyze={!!userData.weight}
-            />
-            
+            <div className="backdrop-blur-md bg-slate-800/60 border border-purple-600/70 shadow-2xl rounded-2xl transition-all duration-200">
+              <DeathSpinWheel />
+            </div>
+            <div className="backdrop-blur-md bg-slate-800/60 border border-purple-600/70 shadow-2xl rounded-2xl transition-all duration-200">
+              <DailyDeathFact />
+            </div>
+            <div className="backdrop-blur-lg bg-slate-800/70 border border-purple-800/70 shadow-xl rounded-2xl transition-all duration-200">
+              <UserProfile userData={userData} setUserData={setUserData} />
+            </div>
+            <div className="backdrop-blur-lg bg-slate-800/70 border border-green-700/60 shadow-xl rounded-2xl transition-all duration-200">
+              <DeathAnalyzer 
+                scenario={scenario} 
+                setScenario={setScenario} 
+                onAnalyze={handleAnalyze}
+                isAnalyzing={isAnalyzing}
+                canAnalyze={!!userData.weight}
+              />
+            </div>
             {/* PHASE 2: PROGRESSION */}
-            <DeathScore />
-            <Achievements />
-            <ChallengeFriend />
-            <GlobalDeathMap />
-            <WhatIfSimulator />
-            <RiskProfile />
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-yellow-700/30 shadow-lg rounded-2xl">
+              <DeathScore />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-purple-700/20 shadow-lg rounded-2xl">
+              <Achievements />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-red-700/30 shadow-lg rounded-2xl">
+              <ChallengeFriend />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-blue-900/30 shadow-lg rounded-2xl">
+              <GlobalDeathMap />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-cyan-700/30 shadow-lg rounded-2xl">
+              <WhatIfSimulator />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-green-700/30 shadow-lg rounded-2xl">
+              <RiskProfile />
+            </div>
           </div>
 
           {/* Center Column - Death Report, Trending, Share */}
           <div className="space-y-6">
-            <TrendingDeaths />
-            <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} />
-            <ShareDeathReport deathReport={analysis ? `${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"` : undefined}/>
-            <ItemHistory />
-            <DeathTrendsDashboard />
-            <ScanHistoryAnalytics />
-            <PremiumUpsell />
+            <div className="backdrop-blur-2xl bg-slate-800/70 border border-yellow-400/10 shadow-xl rounded-2xl">
+              <TrendingDeaths />
+            </div>
+            <div className="backdrop-blur-lg bg-slate-800/80 border border-purple-900/30 shadow-2xl rounded-2xl">
+              <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} />
+            </div>
+            <div className="backdrop-blur-md bg-slate-800/70 border border-blue-600/15 shadow-md rounded-2xl">
+              <ShareDeathReport deathReport={analysis ? `${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"` : undefined}/>
+            </div>
+            <div className="backdrop-blur-md bg-slate-800/70 border border-gray-800/15 shadow-md rounded-2xl">
+              <ItemHistory />
+            </div>
+            <div className="backdrop-blur-md bg-slate-800/70 border border-purple-700/10 shadow-lg rounded-2xl">
+              <DeathTrendsDashboard />
+            </div>
+            <div className="backdrop-blur-md bg-slate-800/70 border border-green-700/10 shadow-md rounded-2xl">
+              <ScanHistoryAnalytics />
+            </div>
+            <div className="backdrop-blur-md bg-slate-800/70 border border-pink-700/10 shadow-md rounded-2xl">
+              <PremiumUpsell />
+            </div>
           </div>
 
           {/* Right Column - Leaderboard, User Stories, Community */}
           <div className="space-y-6">
-            <ImmortalModeCopilot />
-            <Leaderboard />
-            <UserStories />
-            <div className="bg-slate-700/50 p-4 rounded-lg mt-4">
+            <div className="backdrop-blur-2xl bg-slate-800/65 border border-green-900/15 shadow-2xl rounded-2xl">
+              <ImmortalModeCopilot />
+            </div>
+            <div className="backdrop-blur-2xl bg-slate-800/65 border border-yellow-700/20 shadow-xl rounded-2xl">
+              <Leaderboard />
+            </div>
+            <div className="backdrop-blur-2xl bg-slate-800/65 border border-pink-700/15 shadow-lg rounded-2xl">
+              <UserStories />
+            </div>
+            <div className="bg-slate-700/70 p-4 rounded-xl mt-4 shadow border border-purple-700/25">
               <div className="text-xs text-white">Refer a friend with your invite code: <code>BD-{Math.floor(Math.random()*9999)}</code></div>
               <div className="text-xs text-purple-300 mt-1">Stay tuned for Scan-off Battles and Creator Mode!</div>
             </div>
-            <DeathDuel />
-            <ScenarioContest />
-            <ExpertQA />
-            <CommunityLeaderboard />
-            <LocalizedFacts />
-            <RegionalTrending />
-            <LanguageSwitcher />
-            <GlobalMarketingBanner />
-            <AffiliateOffers />
-            <InAppPurchases />
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-red-700/10 shadow-lg rounded-2xl">
+              <DeathDuel />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-indigo-700/15 shadow-lg rounded-2xl">
+              <ScenarioContest />
+            </div>
+            <div className="backdrop-blur-2xl bg-slate-800/65 border border-emerald-700/10 shadow-md rounded-2xl">
+              <ExpertQA />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-yellow-700/10 shadow-lg rounded-2xl">
+              <CommunityLeaderboard />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-orange-700/10 shadow-lg rounded-2xl">
+              <LocalizedFacts />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-cyan-700/10 shadow-lg rounded-2xl">
+              <RegionalTrending />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-pink-400/10 shadow-lg rounded-2xl">
+              <LanguageSwitcher />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-purple-400/10 shadow-lg rounded-2xl">
+              <GlobalMarketingBanner />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-amber-700/10 shadow-lg rounded-2xl">
+              <AffiliateOffers />
+            </div>
+            <div className="backdrop-blur-xl bg-slate-800/60 border border-green-400/10 shadow-lg rounded-2xl">
+              <InAppPurchases />
+            </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-16 text-gray-400">
+        <div className="text-center mt-16 text-gray-400 font-playfair">
           <p className="text-sm">
             Stay smart. Stay weird. Be BeatDeath. 💀
           </p>
