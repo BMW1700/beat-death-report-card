@@ -35,6 +35,8 @@ import { LocalizedFacts } from "@/components/LocalizedFacts";
 import { RegionalTrending } from "@/components/RegionalTrending";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { GlobalMarketingBanner } from "@/components/GlobalMarketingBanner";
+import { DeathSpinWheel } from "@/components/DeathSpinWheel";
+import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
 
 export interface UserData {
   weight: string;
@@ -220,6 +222,7 @@ const Index = () => {
           {/* Left Column - User Profile & Input */}
           <div className="space-y-6">
             {/* PHASE 3: PERSONALIZATION */}
+            <DeathSpinWheel />
             <DailyDeathFact />
             <UserProfile userData={userData} setUserData={setUserData} />
             <DeathAnalyzer 
@@ -252,6 +255,7 @@ const Index = () => {
 
           {/* Right Column - Leaderboard, User Stories, Community */}
           <div className="space-y-6">
+            <ImmortalModeCopilot />
             <Leaderboard />
             <UserStories />
             <div className="bg-slate-700/50 p-4 rounded-lg mt-4">
