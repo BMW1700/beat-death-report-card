@@ -194,7 +194,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white pt-16">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
@@ -276,29 +276,6 @@ const Index = () => {
           <p className="text-sm">
             Stay smart. Stay weird. Be BeatDeath. 💀
           </p>
-        </div>
-
-        {/* NEXT PHASES NAVIGATION */}
-        <div className="container mx-auto mt-12 mb-20">
-          <h2 className="text-2xl font-bold mb-4 text-purple-200">Explore What’s Next for BeatDeath</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="/phase9" className="block bg-purple-900 hover:bg-purple-800 border-purple-700 border rounded-lg p-6 text-white text-center transition-all shadow-lg">
-              <span className="font-bold block mb-1">Phase 9</span>
-              <span className="text-purple-200 text-sm">API & Dev Platform</span>
-            </a>
-            <a href="/phase10" className="block bg-teal-900 hover:bg-teal-800 border-teal-700 border rounded-lg p-6 text-white text-center transition-all shadow-lg">
-              <span className="font-bold block mb-1">Phase 10</span>
-              <span className="text-teal-200 text-sm">Live Events & IRL</span>
-            </a>
-            <a href="/phase11" className="block bg-pink-900 hover:bg-pink-800 border-pink-700 border rounded-lg p-6 text-white text-center transition-all shadow-lg">
-              <span className="font-bold block mb-1">Phase 11</span>
-              <span className="text-pink-200 text-sm">Wellness Integrations</span>
-            </a>
-            <a href="/phase12" className="block bg-yellow-900 hover:bg-yellow-800 border-yellow-700 border rounded-lg p-6 text-white text-center transition-all shadow-lg">
-              <span className="font-bold block mb-1">Phase 12</span>
-              <span className="text-yellow-200 text-sm">Science & Education</span>
-            </a>
-          </div>
         </div>
       </div>
     </div>

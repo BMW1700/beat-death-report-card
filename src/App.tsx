@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,10 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Phase9Page from "./pages/Phase9Page";
-import Phase10Page from "./pages/Phase10Page";
-import Phase11Page from "./pages/Phase11Page";
-import Phase12Page from "./pages/Phase12Page";
+import ApiPlatformPage from "./pages/ApiPlatformPage";
+import LiveEventsPage from "./pages/LiveEventsPage";
+import WellnessPage from "./pages/WellnessPage";
+import SciencePage from "./pages/SciencePage";
+import { MainNavBar } from "@/components/MainNavBar";
 
 const queryClient = new QueryClient();
 
@@ -18,16 +20,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* Custom PHASE routes */}
-          <Route path="/phase9" element={<Phase9Page />} />
-          <Route path="/phase10" element={<Phase10Page />} />
-          <Route path="/phase11" element={<Phase11Page />} />
-          <Route path="/phase12" element={<Phase12Page />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <MainNavBar />
+        <div className="pt-16">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/api-platform" element={<ApiPlatformPage />} />
+            <Route path="/live-events" element={<LiveEventsPage />} />
+            <Route path="/wellness" element={<WellnessPage />} />
+            <Route path="/science" element={<SciencePage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
