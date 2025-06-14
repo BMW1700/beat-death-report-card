@@ -19,6 +19,23 @@ import { ItemHistory } from "@/components/ItemHistory";
 import { DailyDeathFact } from "@/components/DailyDeathFact";
 import { UserStories } from "@/components/UserStories";
 
+import { GlobalDeathMap } from "@/components/GlobalDeathMap";
+import { DeathTrendsDashboard } from "@/components/DeathTrendsDashboard";
+import { WhatIfSimulator } from "@/components/WhatIfSimulator";
+import { RiskProfile } from "@/components/RiskProfile";
+import { DeathDuel } from "@/components/DeathDuel";
+import { ScenarioContest } from "@/components/ScenarioContest";
+import { ExpertQA } from "@/components/ExpertQA";
+import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
+import { PremiumUpsell } from "@/components/PremiumUpsell";
+import { InAppPurchases } from "@/components/InAppPurchases";
+import { AffiliateOffers } from "@/components/AffiliateOffers";
+import { ScanHistoryAnalytics } from "@/components/ScanHistoryAnalytics";
+import { LocalizedFacts } from "@/components/LocalizedFacts";
+import { RegionalTrending } from "@/components/RegionalTrending";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { GlobalMarketingBanner } from "@/components/GlobalMarketingBanner";
+
 export interface UserData {
   weight: string;
   weightUnit: "lbs" | "kg";
@@ -217,6 +234,9 @@ const Index = () => {
             <DeathScore />
             <Achievements />
             <ChallengeFriend />
+            <GlobalDeathMap />
+            <WhatIfSimulator />
+            <RiskProfile />
           </div>
 
           {/* Center Column - Death Report, Trending, Share */}
@@ -225,6 +245,9 @@ const Index = () => {
             <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} />
             <ShareDeathReport deathReport={analysis ? `${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"` : undefined}/>
             <ItemHistory />
+            <DeathTrendsDashboard />
+            <ScanHistoryAnalytics />
+            <PremiumUpsell />
           </div>
 
           {/* Right Column - Leaderboard, User Stories, Community */}
@@ -235,6 +258,16 @@ const Index = () => {
               <div className="text-xs text-white">Refer a friend with your invite code: <code>BD-{Math.floor(Math.random()*9999)}</code></div>
               <div className="text-xs text-purple-300 mt-1">Stay tuned for Scan-off Battles and Creator Mode!</div>
             </div>
+            <DeathDuel />
+            <ScenarioContest />
+            <ExpertQA />
+            <CommunityLeaderboard />
+            <LocalizedFacts />
+            <RegionalTrending />
+            <LanguageSwitcher />
+            <GlobalMarketingBanner />
+            <AffiliateOffers />
+            <InAppPurchases />
           </div>
         </div>
 
