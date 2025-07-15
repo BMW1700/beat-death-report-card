@@ -3,33 +3,60 @@ import { Card } from "@/components/ui/card";
 
 // Professional API Platform Page, styled after reference image
 const ApiPlatformPage = () => (
-  <div className="min-h-screen pt-16 bg-gradient-to-br from-[#211d3e] via-[#662d91] to-[#241b3b] flex items-center justify-center">
-    <div className="max-w-3xl w-full px-4">
-      <div className="rounded-2xl border-2 border-purple-300 shadow-2xl bg-gradient-to-br from-purple-700 via-purple-800 to-purple-900/90 p-10 sm:p-12" style={{ backdropFilter: "blur(8px)" }}>
-        <h1 className="text-3xl sm:text-4xl font-bold font-serif text-white mb-6 tracking-tight">API Platform &amp; Developer Tools</h1>
-        <ul className="list-disc pl-6 space-y-3 text-lg sm:text-xl text-purple-100 font-medium">
-          <li>
-            <span className="font-semibold text-white">Public API:</span> Programmatically analyze death scenarios &amp; scans
-          </li>
-          <li>
-            <span className="font-semibold text-white">Developer portal:</span> Docs, API keys, integrations
-          </li>
-          <li>
-            <span className="font-semibold text-white">SDKs/libraries:</span> For major platforms
-          </li>
-          <li>
-            <span className="font-semibold text-white">Sample BeatDeath bots &amp; plugins:</span> Try and build community integrations
-          </li>
-        </ul>
-        <div className="mt-8 space-y-4">
-          <div className="bg-purple-900/60 border border-purple-500/40 rounded-lg px-6 py-4">
-            <div className="text-white text-lg font-bold mb-1">Coming soon:</div>
-            <ul className="list-disc pl-5 text-purple-200 text-base space-y-1">
-              <li>Auto-generated API docs (OpenAPI/Swagger)</li>
-              <li>Easy developer onboarding</li>
-              <li>Sandbox for test scans & scenario queries</li>
-              <li>Marketplace for open-source plugins</li>
-            </ul>
+  <div className="min-h-screen pt-16 bg-background flex items-center justify-center transition-colors duration-300">
+    <div className="max-w-4xl w-full px-4 animate-fade-in">
+      <div className="glass-card p-10 sm:p-12 shadow-2xl">
+        <h1 className="text-4xl sm:text-5xl font-bold font-playfair gradient-text mb-8 tracking-tight text-center">
+          API Platform &amp; Developer Tools
+        </h1>
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="glass-card p-6 border-primary/20">
+              <h3 className="text-xl font-semibold text-primary mb-3">Public API</h3>
+              <p className="text-muted-foreground">Programmatically analyze death scenarios &amp; scans with our REST API</p>
+            </div>
+            <div className="glass-card p-6 border-success/20">
+              <h3 className="text-xl font-semibold text-success mb-3">Developer Portal</h3>
+              <p className="text-muted-foreground">Complete docs, API keys, and integration guides</p>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div className="glass-card p-6 border-accent/20">
+              <h3 className="text-xl font-semibold text-accent mb-3">SDKs & Libraries</h3>
+              <p className="text-muted-foreground">Native support for JavaScript, Python, React, and more</p>
+            </div>
+            <div className="glass-card p-6 border-warning/20">
+              <h3 className="text-xl font-semibold text-warning mb-3">Community</h3>
+              <p className="text-muted-foreground">Sample BeatDeath bots &amp; community plugins</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-12">
+          <div className="glass-card p-8 border-primary/30">
+            <h2 className="text-2xl font-bold text-primary mb-4">Coming Soon</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <ul className="space-y-2 text-card-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  Auto-generated API docs (OpenAPI/Swagger)
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-success rounded-full"></div>
+                  Easy developer onboarding
+                </li>
+              </ul>
+              <ul className="space-y-2 text-card-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-accent rounded-full"></div>
+                  Sandbox for test scans &amp; scenario queries
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-warning rounded-full"></div>
+                  Marketplace for open-source plugins
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
