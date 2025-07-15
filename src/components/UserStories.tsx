@@ -18,7 +18,7 @@ export const UserStories = () => {
     setInput("");
   };
   return (
-    <Card className="bg-slate-800 border-slate-700">
+    <Card className="glass-card border-accent/20">
       <CardTitle className="flex items-center gap-2 p-3 text-purple-300">
         <MessageSquare className="w-5 h-5" />
         User Death Stories
@@ -28,7 +28,7 @@ export const UserStories = () => {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Share your wildest death-defying scenario..."
-          className="w-full bg-slate-700 text-white rounded p-2 mb-2"
+          className="w-full bg-input border-border text-card-foreground rounded p-2 mb-2"
           rows={2}
         />
         <Button size="sm" onClick={addStory} className="mb-2">Submit</Button>

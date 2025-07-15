@@ -9,7 +9,7 @@ const items = [
 ];
 
 export const ItemHistory = () => (
-  <Card className="bg-slate-800 border-slate-700">
+  <Card className="glass-card">
     <CardTitle className="p-3 flex items-center gap-2 text-blue-400">
       <FileText className="w-5 h-5" />
       My BeatDeath Scans

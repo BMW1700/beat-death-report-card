@@ -11,7 +11,7 @@ const trending = [
 ];
 
 export const TrendingDeaths = () => (
-  <Card className="bg-slate-800 border-slate-700">
+  <Card className="glass-card border-accent/20">
     <CardTitle className="p-3 text-lg flex items-center gap-2 text-orange-400">
       <Flame className="w-5 h-5" />
       Trending Deaths

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 const LiveEventsPage = () => (
-  <div className="min-h-screen pt-16 bg-background">
+  <div className="min-h-screen pt-16 gradient-secondary-bg">
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-4xl mx-auto animate-fade-in">
         <h1 className="text-5xl font-bold font-playfair gradient-text text-center mb-12">

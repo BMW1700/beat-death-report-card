@@ -7,7 +7,7 @@ const demo = [
   { name: "ToxinDoc", xp: 850 }
 ];
 export const Leaderboard = () => (
-  <Card className="bg-slate-800 border-slate-700">
+  <Card className="glass-card border-warning/20">
     <CardTitle className="p-3 flex items-center gap-2 text-green-400">
       <TrendingUp className="w-5 h-5" />
       Leaderboard

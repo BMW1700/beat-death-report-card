@@ -4,47 +4,47 @@
 
 @layer base {
   :root {
-    /* BeatDeath App Design System - Light Mode with Enhanced Purple */
-    --background: 268 30% 96%;
-    --foreground: 268 25% 15%;
+    /* BeatDeath App Design System - Matching Reference Image */
+    --background: 268 45% 15%;
+    --foreground: 268 15% 95%;
 
-    --card: 268 50% 98%;
-    --card-foreground: 268 25% 15%;
+    --card: 268 55% 18%;
+    --card-foreground: 268 15% 95%;
 
-    --popover: 268 50% 98%;
-    --popover-foreground: 268 25% 15%;
+    --popover: 268 55% 18%;
+    --popover-foreground: 268 15% 95%;
 
-    /* Enhanced Purple Theme */
+    /* Exact Purple Theme from Reference */
     --primary: 268 100% 65%;
-    --primary-foreground: 268 50% 98%;
+    --primary-foreground: 268 15% 95%;
     --primary-glow: 268 100% 85%;
 
-    --secondary: 268 20% 88%;
-    --secondary-foreground: 268 25% 15%;
+    --secondary: 268 35% 22%;
+    --secondary-foreground: 268 15% 95%;
 
-    --muted: 268 15% 90%;
-    --muted-foreground: 268 20% 45%;
+    --muted: 268 25% 25%;
+    --muted-foreground: 268 15% 70%;
 
-    --accent: 316 80% 65%;
-    --accent-foreground: 268 50% 98%;
+    --accent: 316 90% 65%;
+    --accent-foreground: 268 15% 95%;
 
-    --destructive: 0 85% 60%;
+    --destructive: 0 90% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 70% 50%;
+    --success: 120 75% 55%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 95% 60%;
+    --warning: 45 100% 65%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 268 25% 80%;
-    --input: 268 20% 85%;
+    --border: 268 40% 35%;
+    --input: 268 35% 25%;
     --ring: 268 100% 65%;
 
-    /* Purple Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(268 100% 65%), hsl(316 80% 65%));
-    --gradient-secondary: linear-gradient(180deg, hsl(268 50% 98%), hsl(268 20% 88%));
-    --gradient-dark: linear-gradient(135deg, hsl(268 50% 20%), hsl(268 80% 10%));
+    /* Perfect Purple Gradients matching reference */
+    --gradient-primary: linear-gradient(135deg, hsl(268 100% 65%), hsl(316 90% 65%));
+    --gradient-secondary: linear-gradient(180deg, hsl(268 45% 15%), hsl(268 55% 18%));
+    --gradient-dark: linear-gradient(135deg, hsl(268 60% 8%), hsl(268 70% 5%));
 
     --radius: 0.75rem;
 
@@ -66,29 +66,29 @@
   }
 
   .dark {
-    /* BeatDeath App Dark Mode - Enhanced Purple Death Theme */
-    --background: 268 60% 8%;
-    --foreground: 268 30% 95%;
+    /* BeatDeath App Dark Mode - Same as light mode for consistency */
+    --background: 268 45% 15%;
+    --foreground: 268 15% 95%;
 
-    --card: 268 50% 12%;
-    --card-foreground: 268 30% 95%;
+    --card: 268 55% 18%;
+    --card-foreground: 268 15% 95%;
 
-    --popover: 268 50% 10%;
-    --popover-foreground: 268 30% 95%;
+    --popover: 268 55% 18%;
+    --popover-foreground: 268 15% 95%;
 
     /* Enhanced Purple Theme for Dark Mode */
-    --primary: 268 100% 75%;
-    --primary-foreground: 268 60% 8%;
-    --primary-glow: 268 100% 90%;
+    --primary: 268 100% 65%;
+    --primary-foreground: 268 15% 95%;
+    --primary-glow: 268 100% 85%;
 
-    --secondary: 268 30% 18%;
-    --secondary-foreground: 268 30% 95%;
+    --secondary: 268 35% 22%;
+    --secondary-foreground: 268 15% 95%;
 
-    --muted: 268 25% 15%;
-    --muted-foreground: 268 15% 65%;
+    --muted: 268 25% 25%;
+    --muted-foreground: 268 15% 70%;
 
-    --accent: 316 90% 70%;
-    --accent-foreground: 268 60% 8%;
+    --accent: 316 90% 65%;
+    --accent-foreground: 268 15% 95%;
 
     --destructive: 0 90% 65%;
     --destructive-foreground: 0 0% 100%;
@@ -99,14 +99,14 @@
     --warning: 45 100% 65%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 268 25% 22%;
-    --input: 268 25% 18%;
-    --ring: 268 100% 75%;
+    --border: 268 40% 35%;
+    --input: 268 35% 25%;
+    --ring: 268 100% 65%;
 
     /* Dark Purple Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(268 100% 75%), hsl(316 90% 70%));
-    --gradient-secondary: linear-gradient(180deg, hsl(268 50% 12%), hsl(268 30% 18%));
-    --gradient-dark: linear-gradient(135deg, hsl(268 80% 5%), hsl(268 90% 3%));
+    --gradient-primary: linear-gradient(135deg, hsl(268 100% 65%), hsl(316 90% 65%));
+    --gradient-secondary: linear-gradient(180deg, hsl(268 45% 15%), hsl(268 55% 18%));
+    --gradient-dark: linear-gradient(135deg, hsl(268 60% 8%), hsl(268 70% 5%));
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
