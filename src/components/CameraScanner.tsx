@@ -90,13 +90,13 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
 
   if (error) {
     return (
-      <Card className="bg-slate-800/50 border-slate-700">
+      <Card className="glass-card danger-glow">
         <CardContent className="p-6 text-center">
-          <div className="text-red-400 mb-4">
+          <div className="text-destructive mb-4">
             <Camera className="w-12 h-12 mx-auto mb-2" />
             <p>{error}</p>
           </div>
-          <Button onClick={handleClose} variant="outline" className="bg-slate-700 border-slate-600">
+          <Button onClick={handleClose} variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
             Close
           </Button>
         </CardContent>
@@ -105,12 +105,12 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   }
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 overflow-hidden">
+    <Card className="glass-card purple-glow overflow-hidden">
       <CardContent className="p-0 relative">
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 bg-red-600 hover:bg-red-700 text-white rounded-full p-2"
+          className="absolute top-4 right-4 z-10 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
         >
           <X className="w-5 h-5" />
         </button>
@@ -118,9 +118,9 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         {/* Camera feed */}
         <div className="relative bg-black aspect-video">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-              <div className="text-center text-white">
-                <Camera className="w-12 h-12 mx-auto mb-2 animate-pulse" />
+            <div className="absolute inset-0 flex items-center justify-center gradient-dark-bg">
+              <div className="text-center text-primary-foreground">
+                <Camera className="w-12 h-12 mx-auto mb-2 animate-pulse text-primary" />
                 <p>Starting camera...</p>
               </div>
             </div>
@@ -138,27 +138,27 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           {/* Scanning overlay */}
           <div className="absolute inset-0 pointer-events-none">
             {/* Scanning frame */}
-            <div className="absolute inset-4 border-2 border-red-400 rounded-lg">
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-red-400 rounded-tl-lg"></div>
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-red-400 rounded-tr-lg"></div>
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-red-400 rounded-bl-lg"></div>
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-red-400 rounded-br-lg"></div>
+            <div className="absolute inset-4 border-2 border-primary rounded-lg animate-pulse">
+              <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
+              <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-primary rounded-bl-lg"></div>
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-primary rounded-br-lg"></div>
             </div>
             
             {/* Center crosshair */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="w-8 h-8 border-2 border-red-400 rounded-full bg-red-400/20"></div>
+              <div className="w-8 h-8 border-2 border-accent rounded-full bg-accent/20 animate-death-pulse"></div>
             </div>
           </div>
         </div>
 
         {/* Control buttons */}
-        <div className="p-4 bg-slate-900/90">
+        <div className="p-4 gradient-dark-bg">
           <div className="flex justify-center gap-4">
             <Button
               onClick={() => captureImage(true)}
               disabled={isLoading}
-              className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl"
+              className="gradient-bg text-primary-foreground px-6 py-3 rounded-xl hover:scale-105 transition-all duration-200 purple-glow"
             >
               <Scan className="w-5 h-5 mr-2" />
               Death Scan
@@ -168,14 +168,14 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
               onClick={() => captureImage(false)}
               disabled={isLoading}
               variant="outline"
-              className="bg-slate-700 border-slate-600 text-white px-6 py-3 rounded-xl"
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-xl transition-all duration-200"
             >
               <Camera className="w-5 h-5 mr-2" />
               Take Photo
             </Button>
           </div>
           
-          <p className="text-center text-xs text-gray-400 mt-3">
+          <p className="text-center text-xs text-muted-foreground mt-3">
             Point camera at food, drink, or object to analyze death potential
           </p>
         </div>

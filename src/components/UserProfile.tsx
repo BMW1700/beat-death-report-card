@@ -17,33 +17,33 @@ export const UserProfile = ({ userData, setUserData }: UserProfileProps) => {
   };
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+    <Card className="glass-card accent-glow">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <User className="w-5 h-5 text-purple-400" />
+        <CardTitle className="text-card-foreground flex items-center gap-2">
+          <User className="w-5 h-5 text-primary" />
           Your Death Profile
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="weight" className="text-gray-300">Weight *</Label>
+            <Label htmlFor="weight" className="text-card-foreground">Weight *</Label>
             <Input
               id="weight"
               type="number"
               placeholder="Enter weight"
               value={userData.weight}
               onChange={(e) => updateUserData("weight", e.target.value)}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400"
+              className="bg-input border-border text-card-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div>
-            <Label htmlFor="weightUnit" className="text-gray-300">Unit</Label>
+            <Label htmlFor="weightUnit" className="text-card-foreground">Unit</Label>
             <Select value={userData.weightUnit} onValueChange={(value: "lbs" | "kg") => updateUserData("weightUnit", value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+              <SelectTrigger className="bg-input border-border text-card-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-600">
+              <SelectContent>
                 <SelectItem value="lbs">lbs</SelectItem>
                 <SelectItem value="kg">kg</SelectItem>
               </SelectContent>
@@ -53,23 +53,23 @@ export const UserProfile = ({ userData, setUserData }: UserProfileProps) => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="age" className="text-gray-300">Age</Label>
+            <Label htmlFor="age" className="text-card-foreground">Age</Label>
             <Input
               id="age"
               type="number"
               placeholder="Age (optional)"
               value={userData.age}
               onChange={(e) => updateUserData("age", e.target.value)}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400"
+              className="bg-input border-border text-card-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div>
-            <Label htmlFor="gender" className="text-gray-300">Gender</Label>
+            <Label htmlFor="gender" className="text-card-foreground">Gender</Label>
             <Select value={userData.gender} onValueChange={(value) => updateUserData("gender", value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+              <SelectTrigger className="bg-input border-border text-card-foreground">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-600">
+              <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
@@ -80,13 +80,13 @@ export const UserProfile = ({ userData, setUserData }: UserProfileProps) => {
         </div>
 
         <div>
-          <Label htmlFor="allergies" className="text-gray-300">Known Allergies</Label>
+          <Label htmlFor="allergies" className="text-card-foreground">Known Allergies</Label>
           <Input
             id="allergies"
             placeholder="e.g., peanuts, shellfish, or 'none'"
             value={userData.allergies}
             onChange={(e) => updateUserData("allergies", e.target.value)}
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400"
+            className="bg-input border-border text-card-foreground placeholder:text-muted-foreground"
           />
         </div>
       </CardContent>

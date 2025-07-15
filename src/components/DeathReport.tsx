@@ -25,19 +25,19 @@ interface DeathReportProps {
 export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProps) => {
   if (isAnalyzing) {
     return (
-      <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+      <Card className="glass-card purple-glow">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-green-400" />
+          <CardTitle className="text-card-foreground flex items-center gap-2">
+            <FileText className="w-5 h-5 text-success" />
             Death Scanner Report
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
-          <p className="text-gray-300 text-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+          <p className="text-card-foreground text-center">
             Consulting the Grim Reaper's database...
             <br />
-            <span className="text-sm text-gray-400">Analyzing death potential</span>
+            <span className="text-sm text-muted-foreground">Analyzing death potential</span>
           </p>
         </CardContent>
       </Card>
@@ -46,16 +46,16 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
 
   if (!analysis) {
     return (
-      <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+      <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-green-400" />
+          <CardTitle className="text-card-foreground flex items-center gap-2">
+            <FileText className="w-5 h-5 text-success" />
             Death Scanner Report
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <Skull className="w-16 h-16 text-gray-600 mb-4" />
-          <p className="text-gray-400 text-center">
+          <Skull className="w-16 h-16 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground text-center">
             No death analysis yet.
             <br />
             <span className="text-sm">Upload an image or enter a scenario to scan for death potential.</span>
@@ -139,10 +139,10 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
   ];
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+    <Card className="glass-card danger-glow">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <FileText className="w-5 h-5 text-green-400" />
+        <CardTitle className="text-card-foreground flex items-center gap-2">
+          <FileText className="w-5 h-5 text-success" />
           Death Scanner Report
         </CardTitle>
       </CardHeader>
@@ -154,7 +154,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
               <Flame className={`w-6 h-6 ${getKillRatingColor(analysis.killRating)}`} />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-medium">Kill Rating:</span>
+                  <span className="text-card-foreground font-medium">Kill Rating:</span>
                   <Badge variant="outline" className={`${getKillRatingColor(analysis.killRating)} border-current`}>
                     {analysis.killRating}/5
                   </Badge>
@@ -171,7 +171,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
           <div key={index} className="space-y-2">
             <div className="flex items-center gap-2">
               <item.icon className={`w-4 h-4 ${item.color}`} />
-              <span className="font-medium text-gray-300">{item.label}:</span>
+              <span className="font-medium text-card-foreground">{item.label}:</span>
             </div>
             <p className={`pl-6 ${item.color} text-sm leading-relaxed`}>
               {item.value}

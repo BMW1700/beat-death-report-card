@@ -87,17 +87,17 @@ export const DeathAnalyzer = ({
   }
 
   return (
-    <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+    <Card className="glass-card success-glow">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Calculator className="w-5 h-5 text-red-400" />
+        <CardTitle className="text-card-foreground flex items-center gap-2">
+          <Calculator className="w-5 h-5 text-destructive" />
           Death Scanner & Analysis
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Image/Camera Section */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2 text-sm text-card-foreground">
             <Camera className="w-4 h-4" />
             <span>Scan Image for Death Potential</span>
           </div>
@@ -107,11 +107,11 @@ export const DeathAnalyzer = ({
               <img 
                 src={imagePreview} 
                 alt="Death analysis target" 
-                className="w-full max-h-48 object-cover rounded-lg border border-slate-600"
+                className="w-full max-h-48 object-cover rounded-lg border border-border"
               />
               <button
                 onClick={removeImage}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
+                className="absolute top-2 right-2 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-1 transition-all duration-200 hover:scale-105"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -123,7 +123,7 @@ export const DeathAnalyzer = ({
                 <Button
                   onClick={() => setShowCamera(true)}
                   variant="outline"
-                  className="bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:text-white h-20 flex flex-col items-center justify-center gap-2"
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground h-20 flex flex-col items-center justify-center gap-2 transition-all duration-200 hover:scale-105"
                 >
                   <Camera className="w-6 h-6" />
                   <span className="text-xs">Live Camera</span>
@@ -132,7 +132,7 @@ export const DeathAnalyzer = ({
                 <Button
                   onClick={() => uploadInputRef.current?.click()}
                   variant="outline"
-                  className="bg-slate-700/50 border-slate-600 text-gray-300 hover:bg-slate-600/50 hover:text-white h-20 flex flex-col items-center justify-center gap-2"
+                  className="border-accent text-accent hover:bg-accent hover:text-accent-foreground h-20 flex flex-col items-center justify-center gap-2 transition-all duration-200 hover:scale-105"
                 >
                   <Image className="w-6 h-6" />
                   <span className="text-xs">Upload Image</span>
@@ -140,10 +140,10 @@ export const DeathAnalyzer = ({
               </div>
 
               {/* Alternative drag and drop area */}
-              <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-700/30 hover:bg-slate-600/30 transition-colors">
+              <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer bg-card/30 hover:bg-card/50 transition-colors">
                 <div className="flex flex-col items-center justify-center">
-                  <Upload className="w-6 h-6 mb-1 text-gray-400" />
-                  <p className="text-xs text-gray-400">
+                  <Upload className="w-6 h-6 mb-1 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
                     Or drag and drop here
                   </p>
                 </div>
@@ -169,14 +169,14 @@ export const DeathAnalyzer = ({
 
         {/* Text Scenario Section */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2 text-sm text-card-foreground">
             <span>OR describe your deadly scenario:</span>
           </div>
           <Textarea
             placeholder="Describe your deadly scenario... (e.g., '9 Tylenol pills', 'locked in a walk-in freezer', 'spider bite')"
             value={scenario}
             onChange={(e) => setScenario(e.target.value)}
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400 min-h-[100px]"
+            className="bg-input border-border text-card-foreground placeholder:text-muted-foreground min-h-[100px]"
             disabled={!!uploadedImage}
           />
         </div>
@@ -187,7 +187,7 @@ export const DeathAnalyzer = ({
               key={index}
               onClick={() => setScenario(example)}
               disabled={!!uploadedImage}
-              className="text-xs bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600 rounded px-2 py-1 text-gray-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-xs bg-card/50 hover:bg-primary/20 border border-border rounded px-2 py-1 text-card-foreground hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {example}
             </button>
@@ -198,7 +198,7 @@ export const DeathAnalyzer = ({
           <Button
             onClick={handleAnalyze}
             disabled={!canAnalyzeWithInput || isAnalyzing}
-            className="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-medium"
+            className="w-full gradient-bg text-primary-foreground font-medium hover:scale-105 transition-all duration-200 purple-glow"
           >
             {isAnalyzing ? (
               <>
@@ -215,7 +215,7 @@ export const DeathAnalyzer = ({
         </div>
 
         {!canAnalyzeWithInput && (
-          <p className="text-sm text-yellow-400 text-center">
+          <p className="text-sm text-warning text-center">
             Please enter your weight and upload an image or enter a scenario to analyze
           </p>
         )}

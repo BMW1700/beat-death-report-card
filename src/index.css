@@ -4,42 +4,47 @@
 
 @layer base {
   :root {
-    /* BeatDeath App Design System - Light Mode */
-    --background: 240 10% 95%;
-    --foreground: 260 20% 15%;
+    /* BeatDeath App Design System - Light Mode with Enhanced Purple */
+    --background: 268 30% 96%;
+    --foreground: 268 25% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 260 20% 15%;
+    --card: 268 50% 98%;
+    --card-foreground: 268 25% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 260 20% 15%;
+    --popover: 268 50% 98%;
+    --popover-foreground: 268 25% 15%;
 
-    /* Purple-themed primary colors */
-    --primary: 268 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 268 100% 80%;
+    /* Enhanced Purple Theme */
+    --primary: 268 100% 65%;
+    --primary-foreground: 268 50% 98%;
+    --primary-glow: 268 100% 85%;
 
-    --secondary: 260 10% 90%;
-    --secondary-foreground: 260 20% 15%;
+    --secondary: 268 20% 88%;
+    --secondary-foreground: 268 25% 15%;
 
-    --muted: 260 10% 92%;
-    --muted-foreground: 260 15% 45%;
+    --muted: 268 15% 90%;
+    --muted-foreground: 268 20% 45%;
 
-    --accent: 316 70% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 316 80% 65%;
+    --accent-foreground: 268 50% 98%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 65% 45%;
+    --success: 120 70% 50%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 90% 55%;
+    --warning: 45 95% 60%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 260 20% 82%;
-    --input: 260 20% 85%;
-    --ring: 268 100% 50%;
+    --border: 268 25% 80%;
+    --input: 268 20% 85%;
+    --ring: 268 100% 65%;
+
+    /* Purple Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(268 100% 65%), hsl(316 80% 65%));
+    --gradient-secondary: linear-gradient(180deg, hsl(268 50% 98%), hsl(268 20% 88%));
+    --gradient-dark: linear-gradient(135deg, hsl(268 50% 20%), hsl(268 80% 10%));
 
     --radius: 0.75rem;
 
@@ -61,42 +66,47 @@
   }
 
   .dark {
-    /* BeatDeath App Dark Mode - Premium Death Theme */
-    --background: 265 30% 8%;
-    --foreground: 280 15% 95%;
+    /* BeatDeath App Dark Mode - Enhanced Purple Death Theme */
+    --background: 268 60% 8%;
+    --foreground: 268 30% 95%;
 
-    --card: 265 25% 12%;
-    --card-foreground: 280 15% 95%;
+    --card: 268 50% 12%;
+    --card-foreground: 268 30% 95%;
 
-    --popover: 265 25% 10%;
-    --popover-foreground: 280 15% 95%;
+    --popover: 268 50% 10%;
+    --popover-foreground: 268 30% 95%;
 
-    /* Enhanced purple theme for dark mode */
-    --primary: 268 100% 70%;
-    --primary-foreground: 265 30% 8%;
-    --primary-glow: 268 100% 85%;
+    /* Enhanced Purple Theme for Dark Mode */
+    --primary: 268 100% 75%;
+    --primary-foreground: 268 60% 8%;
+    --primary-glow: 268 100% 90%;
 
-    --secondary: 265 25% 18%;
-    --secondary-foreground: 280 15% 95%;
+    --secondary: 268 30% 18%;
+    --secondary-foreground: 268 30% 95%;
 
-    --muted: 265 20% 15%;
-    --muted-foreground: 270 10% 65%;
+    --muted: 268 25% 15%;
+    --muted-foreground: 268 15% 65%;
 
-    --accent: 316 80% 65%;
-    --accent-foreground: 265 30% 8%;
+    --accent: 316 90% 70%;
+    --accent-foreground: 268 60% 8%;
 
-    --destructive: 0 85% 60%;
+    --destructive: 0 90% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 120 70% 50%;
+    --success: 120 75% 55%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 95% 60%;
+    --warning: 45 100% 65%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 265 20% 22%;
-    --input: 265 20% 18%;
-    --ring: 268 100% 70%;
+    --border: 268 25% 22%;
+    --input: 268 25% 18%;
+    --ring: 268 100% 75%;
+
+    /* Dark Purple Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(268 100% 75%), hsl(316 90% 70%));
+    --gradient-secondary: linear-gradient(180deg, hsl(268 50% 12%), hsl(268 30% 18%));
+    --gradient-dark: linear-gradient(135deg, hsl(268 80% 5%), hsl(268 90% 3%));
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -116,6 +126,8 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background: var(--gradient-secondary);
+    min-height: 100vh;
   }
 
   /* Smooth scrolling for all pages */
@@ -149,19 +161,42 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    background: var(--gradient-primary);
+    @apply bg-clip-text text-transparent;
+  }
+
+  .gradient-bg {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-secondary-bg {
+    background: var(--gradient-secondary);
+  }
+
+  .gradient-dark-bg {
+    background: var(--gradient-dark);
   }
 
   .glass-card {
-    @apply backdrop-blur-xl bg-card/80 border border-border/50 shadow-xl rounded-lg;
+    @apply backdrop-blur-xl bg-card/90 border border-primary/20 shadow-2xl rounded-lg;
+    background: linear-gradient(135deg, hsl(var(--card) / 0.95), hsl(var(--card) / 0.85));
+    box-shadow: 0 8px 32px hsl(var(--primary) / 0.15), 0 4px 16px hsl(var(--primary) / 0.1);
+  }
+
+  .purple-glow {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.4), 0 0 60px hsl(var(--primary) / 0.2);
   }
 
   .danger-glow {
-    box-shadow: 0 0 20px hsl(var(--destructive) / 0.3);
+    box-shadow: 0 0 25px hsl(var(--destructive) / 0.4), 0 0 50px hsl(var(--destructive) / 0.2);
   }
 
   .success-glow {
-    box-shadow: 0 0 20px hsl(var(--success) / 0.3);
+    box-shadow: 0 0 25px hsl(var(--success) / 0.4), 0 0 50px hsl(var(--success) / 0.2);
+  }
+
+  .accent-glow {
+    box-shadow: 0 0 25px hsl(var(--accent) / 0.4), 0 0 50px hsl(var(--accent) / 0.2);
   }
 }
 

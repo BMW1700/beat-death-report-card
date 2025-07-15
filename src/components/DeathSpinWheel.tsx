@@ -64,10 +64,10 @@ export const DeathSpinWheel = () => {
   };
 
   return (
-    <Card className="bg-slate-800/60 border-purple-700 shadow-lg animate-fade-in">
+    <Card className="glass-card purple-glow animate-fade-in">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white font-bold">
-          <Zap className="text-yellow-400 w-6 h-6 animate-pulse" />
+        <CardTitle className="flex items-center gap-2 text-card-foreground font-bold">
+          <Zap className="text-warning w-6 h-6 animate-pulse" />
           Death Predictor Spin Wheel
         </CardTitle>
       </CardHeader>
@@ -75,21 +75,21 @@ export const DeathSpinWheel = () => {
         <div className="flex flex-col items-center min-h-[80px] w-full py-2">
           {spinning ? (
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="w-10 h-10 text-purple-400 animate-spin" />
-              <span className="text-sm text-gray-300">Spinning your fate…</span>
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <span className="text-sm text-muted-foreground">Spinning your fate…</span>
             </div>
           ) : resultIdx === null ? (
-            <span className="text-gray-300 font-medium">Spin the wheel for a truly *unique* death scenario!</span>
+            <span className="text-muted-foreground font-medium">Spin the wheel for a truly *unique* death scenario!</span>
           ) : (
             <div className="text-center">
-              <div className="text-xl font-bold text-yellow-400 mb-2">{deathOptions[resultIdx].label}</div>
-              <div className="text-sm text-gray-200">{deathOptions[resultIdx].description}</div>
+              <div className="text-xl font-bold text-accent mb-2">{deathOptions[resultIdx].label}</div>
+              <div className="text-sm text-card-foreground">{deathOptions[resultIdx].description}</div>
             </div>
           )}
         </div>
         <Button
           onClick={spin}
-          className="bg-gradient-to-tr from-purple-700 to-red-500 font-bold text-white hover:from-purple-800 hover:to-red-600 shadow-lg"
+          className="gradient-bg font-bold text-primary-foreground hover:scale-105 shadow-xl purple-glow transition-all duration-200"
           disabled={spinning}
         >
           <RefreshCcw className="mr-2" />

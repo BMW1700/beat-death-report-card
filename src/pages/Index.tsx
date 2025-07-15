@@ -196,7 +196,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-16 transition-colors duration-300">
+    <div className="min-h-screen gradient-secondary-bg pt-16 transition-colors duration-300">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12 animate-fade-in">
