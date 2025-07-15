@@ -1,8 +1,9 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Camera, X, Scan, Zap } from "lucide-react";
+import { Camera, X, Scan, Zap, Brain, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { initializeImageAnalysis } from "@/utils/imageAnalysis";
 
 interface CameraScannerProps {
   onCapture: (imageFile: File) => void;
@@ -16,15 +17,32 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [aiReady, setAiReady] = useState(false);
+  const [isInitializingAi, setIsInitializingAi] = useState(false);
 
   useEffect(() => {
     startCamera();
+    initializeAI();
     return () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
+  
+  const initializeAI = async () => {
+    if (!aiReady && !isInitializingAi) {
+      setIsInitializingAi(true);
+      try {
+        const success = await initializeImageAnalysis();
+        setAiReady(success);
+      } catch (error) {
+        console.error('Failed to initialize AI:', error);
+      } finally {
+        setIsInitializingAi(false);
+      }
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -149,6 +167,28 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <div className="w-8 h-8 border-2 border-accent rounded-full bg-accent/20 animate-death-pulse"></div>
             </div>
+            
+            {/* AI Status Indicator */}
+            <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-border">
+              <div className="flex items-center gap-2 text-xs">
+                {isInitializingAi ? (
+                  <>
+                    <Brain className="w-3 h-3 animate-pulse text-warning" />
+                    <span className="text-warning">Initializing AI...</span>
+                  </>
+                ) : aiReady ? (
+                  <>
+                    <Brain className="w-3 h-3 text-success" />
+                    <span className="text-success">AI Ready</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-3 h-3 text-warning" />
+                    <span className="text-warning">AI Offline</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -157,11 +197,20 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           <div className="flex justify-center gap-4">
             <Button
               onClick={() => captureImage(true)}
-              disabled={isLoading}
-              className="gradient-bg text-primary-foreground px-6 py-3 rounded-xl hover:scale-105 transition-all duration-200 purple-glow"
+              disabled={isLoading || !aiReady}
+              className="gradient-bg text-primary-foreground px-6 py-3 rounded-xl hover:scale-105 transition-all duration-200 purple-glow disabled:opacity-50"
             >
-              <Scan className="w-5 h-5 mr-2" />
-              Death Scan
+              {aiReady ? (
+                <>
+                  <Brain className="w-5 h-5 mr-2" />
+                  AI Death Scan
+                </>
+              ) : (
+                <>
+                  <Scan className="w-5 h-5 mr-2" />
+                  Death Scan
+                </>
+              )}
             </Button>
             
             <Button
@@ -176,8 +225,25 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           </div>
           
           <p className="text-center text-xs text-muted-foreground mt-3">
-            Point camera at food, drink, or object to analyze death potential
+            {aiReady 
+              ? "AI-powered analysis: Point camera at food, drink, or object to analyze death potential"
+              : "Point camera at food, drink, or object to analyze death potential"
+            }
           </p>
+          
+          {!aiReady && !isInitializingAi && (
+            <div className="text-center mt-2">
+              <Button
+                onClick={initializeAI}
+                variant="outline"
+                size="sm"
+                className="text-xs border-warning text-warning hover:bg-warning hover:text-warning-foreground"
+              >
+                <Brain className="w-3 h-3 mr-1" />
+                Enable AI Analysis
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Hidden canvas for image capture */}

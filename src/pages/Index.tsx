@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Skull, Calculator, AlertTriangle } from "lucide-react";
 import { DeathAnalyzer } from "@/components/DeathAnalyzer";
+import { analyzeImageForToxicity, generateDeathAnalysisReport } from "@/utils/imageAnalysis";
+import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
 import { ShareDeathReport } from "@/components/ShareDeathReport";
@@ -160,12 +162,6 @@ const Index = () => {
     };
   };
 
-  const analyzeImageWithAI = async (imageFile: File): Promise<string> => {
-    // This would integrate with an AI vision service like OpenAI GPT-4 Vision
-    // For now, return a mock description
-    return "bottle of household bleach cleaner";
-  };
-
   const handleAnalyze = async (imageFile?: File) => {
     if ((!scenario.trim() && !imageFile) || !userData.weight) {
       return;
@@ -177,19 +173,53 @@ const Index = () => {
       let itemToAnalyze = scenario;
       
       if (imageFile) {
-        // Simulate AI image analysis
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        itemToAnalyze = await analyzeImageWithAI(imageFile);
+        // Use AI image analysis for real toxicity detection
+        toast.info("🧠 AI analyzing image for death potential...", {
+          description: "Using advanced AI to detect toxic substances"
+        });
+        
+        const aiAnalysis = await analyzeImageForToxicity(imageFile);
+        const weight = parseFloat(userData.weight);
+        const weightInKg = userData.weightUnit === "kg" ? weight : weight * 0.453592;
+        
+        const reportData = generateDeathAnalysisReport(aiAnalysis, weightInKg, scenario);
+        
+        // Convert AI analysis to our format
+        const mockAnalysis: DeathAnalysis = {
+          item: `AI Detected: ${aiAnalysis.detectedItems[0]?.label || 'Unknown Object'}`,
+          allergyRisk: userData.allergies ? "Check detected substances against your known allergies" : "No allergies specified",
+          killRating: Math.min(5, Math.ceil(reportData.deathScore / 20)),
+          killRatingText: reportData.deathScore >= 90 ? "Horrible MF, you're already dead" :
+                         reportData.deathScore >= 70 ? "Big yikes, could get ugly" :
+                         reportData.deathScore >= 50 ? "Uh oh, not great" :
+                         reportData.deathScore >= 30 ? "Meh, low-key risky" : "No Problemo",
+          lethalDose: aiAnalysis.detectedItems[0]?.lethalDose || "Variable based on substance",
+          timeToDeath: reportData.timeToImpact,
+          mechanism: aiAnalysis.detectedItems[0]?.reason || "Various potential pathways",
+          survival: reportData.survivalTips.join(". "),
+          finalWords: reportData.finalWords
+        };
+        
+        setAnalysis(mockAnalysis);
+        
+        toast.success("🎯 AI analysis complete!", {
+          description: `Detected: ${aiAnalysis.detectedItems[0]?.label} - Death Score: ${reportData.deathScore}%`
+        });
+        
+      } else {
+        // Fallback to scenario-based analysis
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const mockAnalysis = getAnalysisForScenario(itemToAnalyze, userData);
+        setAnalysis(mockAnalysis);
+        
+        toast.success("Death analysis complete! 💀");
       }
-      
-      // Simulate analysis delay for dramatic effect
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const mockAnalysis = getAnalysisForScenario(itemToAnalyze, userData);
-      setAnalysis(mockAnalysis);
       
     } catch (error) {
       console.error("Analysis failed:", error);
+      toast.error("Analysis failed", {
+        description: "Please try again or use text description instead"
+      });
     } finally {
       setIsAnalyzing(false);
     }
