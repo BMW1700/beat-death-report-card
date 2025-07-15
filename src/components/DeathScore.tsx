@@ -12,11 +12,11 @@ export const DeathScore = ({ initialScore = 100 }: { initialScore?: number }) =>
   }, []);
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-purple-900/20 rounded">
-      <Award className="w-6 h-6 text-purple-400" />
-      <span className="text-white font-bold">Death Score:</span>
-      <span className="text-lg text-purple-300">{score}</span>
-      <span className="text-xs text-gray-400 ml-2">(XP for surviving!)</span>
+    <div className="flex items-center gap-3 p-3 bg-card/30 rounded-lg border border-primary/20 purple-glow">
+      <Award className="w-6 h-6 text-primary" />
+      <span className="text-foreground font-bold">Death Score:</span>
+      <span className="text-lg text-primary gradient-text font-bold">{score}</span>
+      <span className="text-xs text-muted-foreground ml-2">(XP for surviving!)</span>
     </div>
   );
 };

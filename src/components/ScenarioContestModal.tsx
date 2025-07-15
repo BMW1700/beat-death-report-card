@@ -41,38 +41,38 @@ export function ScenarioContestModal({ open, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed top-0 left-0 z-50 w-full h-full flex items-center justify-center bg-black/60">
-      <div className="bg-slate-900 border border-yellow-500 rounded-2xl p-6 max-w-md w-full relative shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="glass-card purple-glow p-6 max-w-md w-full mx-4 relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-white"
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Close"
         >
           ×
         </button>
-        <h2 className="text-xl font-bold flex items-center gap-2 text-yellow-300 mb-3">
+        <h2 className="text-xl font-bold flex items-center gap-2 text-warning mb-4">
           <Award className="w-5 h-5" /> Scenario Contest
         </h2>
-        <div>
+        <div className="mb-4">
           <input
-            className="w-full p-2 rounded bg-slate-800 border border-slate-700 text-white mb-2"
+            className="w-full p-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground mb-3 focus:ring-2 focus:ring-primary"
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Describe your wildest death scenario"
           />
-          <Button className="w-full mb-4" disabled={!input || input.length < 8} onClick={handleSubmit}>
+          <Button className="w-full gradient-bg hover:scale-105 transition-transform" disabled={!input || input.length < 8} onClick={handleSubmit}>
             Submit
           </Button>
         </div>
-        {submitted && <div className="text-green-300 mb-2">Your scenario was submitted!</div>}
-        <div className="text-white/80 font-semibold mb-2">Vote on scenarios:</div>
-        <div className="max-h-52 overflow-y-auto space-y-2">
+        {submitted && <div className="text-success mb-3 p-2 bg-success/20 rounded-lg border border-success/30">Your scenario was submitted!</div>}
+        <div className="text-foreground font-semibold mb-3">Vote on scenarios:</div>
+        <div className="max-h-52 overflow-y-auto space-y-3">
           {submissions
             .sort((a, b) => b.votes - a.votes)
             .map(sub => (
-              <div key={sub.id} className="bg-slate-800 rounded-lg flex items-center px-3 py-2">
-                <span className="flex-1">{sub.scenario}</span>
-                <span className="mx-2 text-yellow-400">{sub.votes} votes</span>
+              <div key={sub.id} className="bg-card/30 rounded-lg flex items-center px-3 py-3 border border-border">
+                <span className="flex-1 text-foreground">{sub.scenario}</span>
+                <span className="mx-3 text-warning font-bold">{sub.votes} votes</span>
                 <Button
                   size="sm"
                   variant={voted[sub.id] ? "outline" : "secondary"}

@@ -116,7 +116,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         </button>
 
         {/* Camera feed */}
-        <div className="relative bg-black aspect-video">
+        <div className="relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center gradient-dark-bg">
               <div className="text-center text-primary-foreground">

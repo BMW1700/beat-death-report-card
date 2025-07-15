@@ -34,29 +34,29 @@ export function DeathDuelModal({ open, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed top-0 left-0 z-50 w-full h-full flex items-center justify-center bg-black/60">
-      <div className="bg-slate-900 border border-purple-600 rounded-2xl p-6 max-w-md w-full relative shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="glass-card purple-glow p-6 max-w-md w-full mx-4 relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-white"
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Close"
         >
           ×
         </button>
-        <h2 className="text-xl font-bold flex items-center gap-2 text-red-400 mb-3">
+        <h2 className="text-xl font-bold flex items-center gap-2 text-destructive mb-4">
           <Sword className="w-5 h-5" /> Death Duel
         </h2>
         {!submitted ? (
           <>
             <input
-              className="w-full p-2 rounded bg-slate-800 border border-slate-700 text-white mb-2"
+              className="w-full p-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground mb-3 focus:ring-2 focus:ring-primary"
               value={item}
               onChange={e => setItem(e.target.value)}
               placeholder="Item or scenario (e.g., 10 Tylenol pills)"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-3 mb-4">
               <input
-                className="flex-1 p-2 rounded bg-slate-800 border border-slate-700 text-white mb-2"
+                className="flex-1 p-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary"
                 value={user1Weight}
                 onChange={e => setUser1Weight(e.target.value)}
                 placeholder="Your weight (kg)"
@@ -64,7 +64,7 @@ export function DeathDuelModal({ open, onClose }) {
                 min="1"
               />
               <input
-                className="flex-1 p-2 rounded bg-slate-800 border border-slate-700 text-white mb-2"
+                className="flex-1 p-3 rounded-lg bg-input border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary"
                 value={user2Weight}
                 onChange={e => setUser2Weight(e.target.value)}
                 placeholder="Friend's weight (kg)"
@@ -72,29 +72,29 @@ export function DeathDuelModal({ open, onClose }) {
                 min="1"
               />
             </div>
-            <Button className="w-full mt-2" onClick={handleDuel}>
+            <Button className="w-full gradient-bg hover:scale-105 transition-transform" onClick={handleDuel}>
               Duel!
             </Button>
           </>
         ) : (
-          <div className="text-center space-y-3">
-            <div>
-              <span className="font-bold text-green-400">You: </span>
-              <span className="text-lg">{result.user1} / 5 kill rating</span>
+          <div className="text-center space-y-4">
+            <div className="p-3 rounded-lg bg-card/30">
+              <span className="font-bold text-success">You: </span>
+              <span className="text-lg text-foreground">{result.user1} / 5 kill rating</span>
             </div>
-            <div>
-              <span className="font-bold text-blue-400">Friend: </span>
-              <span className="text-lg">{result.user2} / 5 kill rating</span>
+            <div className="p-3 rounded-lg bg-card/30">
+              <span className="font-bold text-accent">Friend: </span>
+              <span className="text-lg text-foreground">{result.user2} / 5 kill rating</span>
             </div>
-            <div className="mt-2">
+            <div className="mt-4 p-3 rounded-lg bg-card/50">
               {result.user1 > result.user2
-                ? <span className="text-green-400 font-bold">Congrats, you survived longer! 🏆</span>
+                ? <span className="text-success font-bold">Congrats, you survived longer! 🏆</span>
                 : result.user2 > result.user1
-                ? <span className="text-blue-400 font-bold">Your friend wins—tough luck! 😵</span>
-                : <span className="text-yellow-400 font-bold">It's a tie. Both of you... questionable.</span>
+                ? <span className="text-accent font-bold">Your friend wins—tough luck! 😵</span>
+                : <span className="text-warning font-bold">It's a tie. Both of you... questionable.</span>
               }
             </div>
-            <Button variant="outline" onClick={() => { setSubmitted(false); setResult(null); }}>
+            <Button variant="outline" className="w-full" onClick={() => { setSubmitted(false); setResult(null); }}>
               Duel Again
             </Button>
           </div>

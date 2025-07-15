@@ -66,15 +66,15 @@ export const ImmortalModeCopilot = () => {
   };
 
   return (
-    <Card className="bg-slate-800/60 border-green-600 shadow-md animate-fade-in">
+    <Card className="glass-card success-glow animate-fade-in">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-green-300">
+        <CardTitle className="flex items-center gap-2 text-success">
           <ShieldCheck className="w-6 h-6" />
           Immortal Mode Copilot
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-3 pr-2">
+        <div className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 pr-2">
           {chat.map((m, i) => (
             <div
               key={i}
@@ -83,9 +83,9 @@ export const ImmortalModeCopilot = () => {
               <div
                 className={`rounded-lg px-3 py-2 max-w-[75%] ${
                   m.from === "ai"
-                    ? "bg-green-900 text-green-100"
-                    : "bg-purple-900 text-purple-100"
-                } text-sm shadow`}
+                    ? "bg-success/20 text-success border border-success/30"
+                    : "bg-primary/20 text-primary border border-primary/30"
+                } text-sm shadow-lg`}
               >
                 {m.from === "ai" ? <Bot className="inline w-4 h-4 mr-1" /> : <Skull className="inline w-4 h-4 mr-1" />}
                 {m.text}
@@ -94,7 +94,7 @@ export const ImmortalModeCopilot = () => {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="rounded-lg px-3 py-2 bg-green-900 text-green-100 text-sm shadow">
+              <div className="rounded-lg px-3 py-2 bg-success/20 text-success border border-success/30 text-sm shadow-lg">
                 <Bot className="inline w-4 h-4 mr-1 animate-pulse" />
                 Thinking…
               </div>
@@ -106,11 +106,11 @@ export const ImmortalModeCopilot = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Could I survive..."
-            className="bg-slate-700 border-slate-600 text-white"
+            className="bg-input border-border text-foreground placeholder:text-muted-foreground"
             onKeyDown={(e) => e.key === "Enter" && send()}
             disabled={loading}
           />
-          <Button onClick={send} className="bg-green-700 hover:bg-green-800" disabled={loading || !input.trim()}>
+          <Button onClick={send} className="bg-success hover:bg-success/80" disabled={loading || !input.trim()}>
             Send
           </Button>
         </div>

@@ -23,11 +23,11 @@ export const ShareDeathReport = ({ deathReport }: ShareDeathReportProps) => {
   return (
     <Card className="glass-card">
       <CardContent className="p-4 flex flex-col items-center">
-        <Button onClick={handleShare} className="bg-gradient-to-r from-red-500 to-purple-600 text-white flex items-center">
+        <Button onClick={handleShare} className="gradient-bg hover:scale-105 transition-transform flex items-center">
           <Share className="w-4 h-4 mr-2" />
           Share Your Death Report
         </Button>
-        <span className="text-xs text-gray-300 mt-2">Go viral! Share your results and tag #BeatDeath</span>
+        <span className="text-xs text-muted-foreground mt-2">Go viral! Share your results and tag #BeatDeath</span>
       </CardContent>
     </Card>
   );
