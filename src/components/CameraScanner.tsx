@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Camera, X, Scan, Zap, Brain, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { initializeImageAnalysis } from "@/utils/imageAnalysis";
+import { barcodeScanner } from '@/utils/barcodeScanner';
+import { lookupProductByBarcode } from '@/utils/apiServices';
 
 interface CameraScannerProps {
   onCapture: (imageFile: File) => void;
@@ -19,6 +21,8 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   const [error, setError] = useState<string | null>(null);
   const [aiReady, setAiReady] = useState(false);
   const [isInitializingAi, setIsInitializingAi] = useState(false);
+  const [barcodeMode, setBarcodeMode] = useState(false);
+  const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
 
   useEffect(() => {
     startCamera();
@@ -103,7 +107,43 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
+    if (barcodeMode) {
+      barcodeScanner.stopScanning();
+    }
     onClose();
+  };
+
+  const startBarcodeScanning = async () => {
+    if (!videoRef.current) return;
+    
+    setBarcodeMode(true);
+    setScannedBarcode(null);
+    
+    try {
+      await barcodeScanner.startScanning(
+        videoRef.current,
+        async (barcode) => {
+          setScannedBarcode(barcode);
+          const productInfo = await lookupProductByBarcode(barcode);
+          if (productInfo) {
+            console.log('Product found:', productInfo);
+            // You can handle product info here
+          }
+        },
+        (error) => {
+          console.error('Barcode scanning error:', error);
+          setError('Failed to scan barcode');
+        }
+      );
+    } catch (err) {
+      setError('Failed to start barcode scanning');
+    }
+  };
+
+  const stopBarcodeScanning = () => {
+    barcodeScanner.stopScanning();
+    setBarcodeMode(false);
+    setScannedBarcode(null);
   };
 
   if (error) {
@@ -188,6 +228,12 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
                   </>
                 )}
               </div>
+              {barcodeMode && (
+                <div className="mt-2 text-xs text-blue-400">
+                  Barcode Scanning Active
+                  {scannedBarcode && <div className="text-green-400">Found: {scannedBarcode}</div>}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -222,6 +268,24 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
               <Camera className="w-5 h-5 mr-2" />
               Take Photo
             </Button>
+
+            {!barcodeMode ? (
+              <Button 
+                onClick={startBarcodeScanning}
+                variant="outline"
+                className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white px-4 py-3 rounded-xl"
+              >
+                Scan Barcode
+              </Button>
+            ) : (
+              <Button 
+                onClick={stopBarcodeScanning}
+                variant="outline"
+                className="border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-white px-4 py-3 rounded-xl"
+              >
+                Stop Barcode
+              </Button>
+            )}
           </div>
           
           <p className="text-center text-xs text-muted-foreground mt-3">

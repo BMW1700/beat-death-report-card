@@ -1,4 +1,5 @@
 import { pipeline, env } from '@huggingface/transformers';
+import { searchFDADrugs, searchUSDAFood, searchPubChem, speakWarning, lookupProductByBarcode } from './apiServices';
 
 // Configure transformers.js to use browser cache and download models
 env.allowLocalModels = false;
@@ -99,7 +100,10 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     toxicityLevel: number;
     reason: string;
     lethalDose: string;
-    category: 'food' | 'object' | 'unknown';
+    category: 'food' | 'object' | 'unknown' | 'medication';
+    usdaInfo?: any;
+    chemicalInfo?: any;
+    fdaInfo?: any;
   }>;
   overallRisk: number;
   recommendations: string[];
@@ -126,7 +130,7 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     const detectedItems: any[] = [];
     let maxRisk = 0;
     
-    // Process food classification results
+    // Process food classification results with API enhancement
     for (const result of foodResults.slice(0, 3)) {
       const foodName = result.label.toLowerCase();
       const confidence = result.score;
@@ -135,13 +139,18 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
       for (const [food, data] of Object.entries(FOOD_TOXICITY_DB)) {
         if (foodName.includes(food) || food.includes(foodName)) {
           const adjustedToxicity = data.toxicityLevel * confidence;
+          
+          // Enhance with USDA data
+          const usdaData = await searchUSDAFood(result.label);
+          
           detectedItems.push({
             label: result.label,
             confidence: confidence,
             toxicityLevel: adjustedToxicity,
             reason: data.reason,
             lethalDose: data.lethalDose,
-            category: 'food' as const
+            category: 'food' as const,
+            usdaInfo: usdaData[0] || null
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -149,7 +158,7 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
       }
     }
     
-    // Process general classification results
+    // Process general classification results with API enhancement
     for (const result of generalResults.slice(0, 3)) {
       const objectName = result.label.toLowerCase();
       const confidence = result.score;
@@ -160,16 +169,39 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
             objectName.includes(object.replace('_', ' ')) || 
             object.replace('_', ' ').includes(objectName)) {
           const adjustedToxicity = data.toxicityLevel * confidence;
+          
+          // Enhance with PubChem data for chemicals
+          const pubchemData = await searchPubChem(result.label);
+          
           detectedItems.push({
             label: result.label,
             confidence: confidence,
             toxicityLevel: adjustedToxicity,
             reason: data.reason,
             lethalDose: data.lethalDose,
-            category: 'object' as const
+            category: 'object' as const,
+            chemicalInfo: pubchemData
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
+        }
+      }
+
+      // Check if it might be a medication
+      if (result.label.includes('pill') || result.label.includes('tablet') || 
+          result.label.includes('capsule') || result.label.includes('medicine')) {
+        const fdaData = await searchFDADrugs(result.label);
+        if (fdaData.length > 0) {
+          detectedItems.push({
+            label: result.label,
+            confidence: confidence,
+            toxicityLevel: 80, // High risk for unidentified pills
+            reason: 'Unknown medication - potential overdose risk',
+            lethalDose: 'Varies by medication',
+            category: 'medication' as const,
+            fdaInfo: fdaData[0]
+          });
+          maxRisk = Math.max(maxRisk, 80);
         }
       }
     }
@@ -186,6 +218,13 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
         category: 'unknown' as const
       });
       maxRisk = 10;
+    }
+
+    // Speak warning for high-risk items
+    if (maxRisk >= 80) {
+      speakWarning(`DANGER! High risk item detected. Do not consume or touch.`, true);
+    } else if (maxRisk >= 60) {
+      speakWarning(`Warning: Potentially dangerous item detected. Exercise caution.`);
     }
     
     // Generate recommendations
