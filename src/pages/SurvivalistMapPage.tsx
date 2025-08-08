@@ -131,14 +131,64 @@ const SurvivalistMapPage = () => {
       center: [20, 0],
       zoom: 2,
       worldCopyJump: true,
-      maxBounds: [[-90, -180], [90, 180]]
+      maxBounds: [[-90, -180], [90, 180]],
+      zoomControl: false, // We'll add custom zoom controls
+      attributionControl: false
     });
 
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
+    // Add better OpenStreetMap tiles (CartoDB Positron - same style as many modern maps)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CartoDB',
+      maxZoom: 19,
+      subdomains: 'abcd'
     }).addTo(map.current);
+
+    // Add zoom control with custom position
+    L.control.zoom({
+      position: 'bottomright'
+    }).addTo(map.current);
+
+    // Add scale control
+    L.control.scale({
+      position: 'bottomleft'
+    }).addTo(map.current);
+
+    // Try to get user's location
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          if (map.current) {
+            // Add user location marker
+            const userIcon = L.divIcon({
+              html: `<div style="
+                width: 20px;
+                height: 20px;
+                background: #3b82f6;
+                border: 3px solid white;
+                border-radius: 50%;
+                box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+                animation: pulse 2s infinite;
+              "></div>`,
+              className: 'user-location-marker',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            });
+
+            L.marker([latitude, longitude], { icon: userIcon })
+              .addTo(map.current)
+              .bindPopup('📍 Your Location')
+              .openPopup();
+
+            // Center map on user location
+            map.current.setView([latitude, longitude], 10);
+          }
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+        }
+      );
+    }
 
     // Add click handler for adding pins
     map.current.on('click', (e) => {
@@ -148,6 +198,41 @@ const SurvivalistMapPage = () => {
           lat: e.latlng.lat,
           lng: e.latlng.lng
         }));
+        
+        // Visual feedback - add temporary marker
+        const tempIcon = L.divIcon({
+          html: `<div style="
+            width: 25px;
+            height: 25px;
+            background: #f59e0b;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: bounce 0.5s ease-in-out;
+          ">📍</div>`,
+          className: 'temp-pin-marker',
+          iconSize: [25, 25],
+          iconAnchor: [12.5, 12.5]
+        });
+
+        // Remove any existing temp markers
+        map.current.eachLayer((layer) => {
+          if (layer instanceof L.Marker && layer.options.icon?.options.className === 'temp-pin-marker') {
+            map.current?.removeLayer(layer);
+          }
+        });
+
+        L.marker([e.latlng.lat, e.latlng.lng], { icon: tempIcon })
+          .addTo(map.current)
+          .bindPopup('📌 New pin location - fill out the form to save!')
+          .openPopup();
+
+        toast.success("📍 Pin placed!", {
+          description: "Fill out the form to save this location"
+        });
       }
     });
 
@@ -216,8 +301,8 @@ const SurvivalistMapPage = () => {
   }, [survivalPins]);
 
   const handleAddPin = () => {
-    if (!newPin.title || !newPin.description) {
-      toast.error("Please fill in all fields");
+    if (!newPin.title || !newPin.description || !newPin.lat || !newPin.lng) {
+      toast.error("Please fill in all fields and click on the map to place pin");
       return;
     }
 
@@ -232,6 +317,15 @@ const SurvivalistMapPage = () => {
     setSurvivalPins(prev => [...prev, pin]);
     setNewPin({ title: '', description: '', type: 'shelter', lat: 0, lng: 0 });
     setShowAddPin(false);
+
+    // Remove temp markers
+    if (map.current) {
+      map.current.eachLayer((layer) => {
+        if (layer instanceof L.Marker && layer.options.icon?.options.className === 'temp-pin-marker') {
+          map.current?.removeLayer(layer);
+        }
+      });
+    }
     
     toast.success("🗺️ Survival location added!", {
       description: "Your pin has been added to the global survival map!"
@@ -255,8 +349,34 @@ const SurvivalistMapPage = () => {
         </Card>
       </div>
 
-      {/* Controls */}
+        {/* Controls */}
       <div className="fixed top-20 right-4 z-[1000] space-y-2">
+        {/* Find My Location Button */}
+        <Card className="glass-card border-primary/20">
+          <CardContent className="p-2">
+            <Button
+              onClick={() => {
+                if ('geolocation' in navigator && map.current) {
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      const { latitude, longitude } = position.coords;
+                      map.current?.setView([latitude, longitude], 15);
+                      toast.success("📍 Found your location!");
+                    },
+                    () => {
+                      toast.error("Unable to find your location");
+                    }
+                  );
+                }
+              }}
+              size="sm"
+              className="w-full gradient-bg"
+            >
+              <MapPin className="w-4 h-4 mr-1" />
+              Find Me
+            </Button>
+          </CardContent>
+        </Card>
         <Card className="glass-card border-primary/20">
           <CardContent className="p-4">
             <div className="text-center mb-3">
@@ -350,6 +470,7 @@ const SurvivalistMapPage = () => {
       <div className="h-screen">
         <div ref={mapContainer} className="absolute inset-0" />
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent to-background/5" />
+        
       </div>
 
       {/* Info Panel */}

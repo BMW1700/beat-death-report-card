@@ -220,3 +220,24 @@
     transform: scale(1.05);
   }
 }
+
+/* Map animations */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce {
+  0% { transform: scale(0.5); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.user-location-marker div {
+  animation: pulse 2s infinite;
+}
+
+.temp-pin-marker div {
+  animation: bounce 0.5s ease-in-out;
+}
