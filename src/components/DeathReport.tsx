@@ -14,7 +14,7 @@ import {
   Flame,
   Target
 } from "lucide-react";
-import { DeathAnalysis, UserData } from "@/pages/Index";
+import { DeathAnalysis, UserData } from "@/types";
 
 interface DeathReportProps {
   analysis: DeathAnalysis | null;

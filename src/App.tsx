@@ -10,6 +10,7 @@ import ApiPlatformPage from "./pages/ApiPlatformPage";
 import LiveEventsPage from "./pages/LiveEventsPage";
 import WellnessPage from "./pages/WellnessPage";
 import SciencePage from "./pages/SciencePage";
+import DeathScannerPage from "./pages/DeathScannerPage";
 import { MainNavBar } from "@/components/MainNavBar";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
         <div className="pt-16">
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/death-scanner" element={<DeathScannerPage />} />
             <Route path="/api-platform" element={<ApiPlatformPage />} />
             <Route path="/live-events" element={<LiveEventsPage />} />
             <Route path="/wellness" element={<WellnessPage />} />

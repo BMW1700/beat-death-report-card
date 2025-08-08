@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User } from "lucide-react";
-import { UserData } from "@/pages/Index";
+import { UserData } from "@/types";
 
 interface UserProfileProps {
   userData: UserData;

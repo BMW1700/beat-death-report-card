@@ -1,12 +1,17 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Share, Star, Bell, Settings } from "lucide-react";
+import { Home, Skull, Share, Star, Bell, Settings } from "lucide-react";
 
 const navItems = [
   {
     path: "/",
     icon: <Home className="w-6 h-6" />,
     label: "Dashboard",
+  },
+  {
+    path: "/death-scanner",
+    icon: <Skull className="w-6 h-6" />,
+    label: "Death Scanner",
   },
   {
     path: "/api-platform",
