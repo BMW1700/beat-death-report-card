@@ -19,9 +19,9 @@ const navItems = [
     label: "API Platform",
   },
   {
-    path: "/live-events",
+    path: "/survival-map",
     icon: <Star className="w-6 h-6" />,
-    label: "Live Events",
+    label: "Survival Map",
   },
   {
     path: "/wellness",

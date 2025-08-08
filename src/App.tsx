@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ApiPlatformPage from "./pages/ApiPlatformPage";
-import LiveEventsPage from "./pages/LiveEventsPage";
+import SurvivalistMapPage from "./pages/SurvivalistMapPage";
 import WellnessPage from "./pages/WellnessPage";
 import SciencePage from "./pages/SciencePage";
 import DeathScannerPage from "./pages/DeathScannerPage";
@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/death-scanner" element={<DeathScannerPage />} />
             <Route path="/api-platform" element={<ApiPlatformPage />} />
-            <Route path="/live-events" element={<LiveEventsPage />} />
+            <Route path="/survival-map" element={<SurvivalistMapPage />} />
             <Route path="/wellness" element={<WellnessPage />} />
             <Route path="/science" element={<SciencePage />} />
             <Route path="*" element={<NotFound />} />
