@@ -3,33 +3,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skull, AlertTriangle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ChallengeFriend } from "@/components/ChallengeFriend";
 import { TrendingDeaths } from "@/components/TrendingDeaths";
 import { DeathScore } from "@/components/DeathScore";
 import { Achievements } from "@/components/Achievements";
 import { Leaderboard } from "@/components/Leaderboard";
-import { ItemHistory } from "@/components/ItemHistory";
 import { DailyDeathFact } from "@/components/DailyDeathFact";
 import { UserStories } from "@/components/UserStories";
-
-import { GlobalDeathMap } from "@/components/GlobalDeathMap";
 import { DeathTrendsDashboard } from "@/components/DeathTrendsDashboard";
-import { WhatIfSimulator } from "@/components/WhatIfSimulator";
-import { RiskProfile } from "@/components/RiskProfile";
 import { DeathDuel } from "@/components/DeathDuel";
-import { ScenarioContest } from "@/components/ScenarioContest";
-import { ExpertQA } from "@/components/ExpertQA";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { PremiumUpsell } from "@/components/PremiumUpsell";
 import { InAppPurchases } from "@/components/InAppPurchases";
-import { AffiliateOffers } from "@/components/AffiliateOffers";
-import { ScanHistoryAnalytics } from "@/components/ScanHistoryAnalytics";
-import { LocalizedFacts } from "@/components/LocalizedFacts";
-import { RegionalTrending } from "@/components/RegionalTrending";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { GlobalMarketingBanner } from "@/components/GlobalMarketingBanner";
 import { DeathSpinWheel } from "@/components/DeathSpinWheel";
 import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
+
+// Viral Components - Phase 4 Implementation
+import { ViralChallengeHub } from "@/components/viral/ViralChallengeHub";
+import { SocialMediaIntegration } from "@/components/viral/SocialMediaIntegration";
+import { LiveDeathFeed } from "@/components/viral/LiveDeathFeed";
+import { CollaborativeDeathMap } from "@/components/viral/CollaborativeDeathMap";
 
 
 const Index = () => {
@@ -70,98 +62,80 @@ const Index = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {/* Left Column - Features */}
+          {/* Left Column - VIRAL PHASE 4: Core Engagement */}
           <div className="space-y-6 animate-slide-in-right">
-            {/* PHASE 3: PERSONALIZATION */}
+            {/* VIRAL PHASE 4.1: LIVE ENGAGEMENT */}
+            <ViralChallengeHub />
+            
+            {/* VIRAL PHASE 4.2: SOCIAL INTEGRATION */}
+            <SocialMediaIntegration />
+            
+            {/* Core Features - Optimized for Virality */}
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathSpinWheel />
             </div>
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DailyDeathFact />
             </div>
-            {/* PHASE 2: PROGRESSION */}
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathScore />
             </div>
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <Achievements />
             </div>
-            <div className="glass-card danger-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <ChallengeFriend />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <GlobalDeathMap />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <WhatIfSimulator />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <RiskProfile />
-            </div>
           </div>
 
-          {/* Center Column - Trending, Analytics */}
+          {/* Center Column - VIRAL PHASE 4: Real-Time Social Feed */}
           <div className="space-y-6 animate-fade-in delay-150">
+            {/* VIRAL PHASE 4.3: LIVE SOCIAL FEED */}
+            <LiveDeathFeed />
+            
+            {/* Analytics & Trending - Optimized for Viral Discovery */}
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <TrendingDeaths />
             </div>
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <ItemHistory />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathTrendsDashboard />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <ScanHistoryAnalytics />
             </div>
             <div className="glass-card border-accent/30 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <PremiumUpsell />
             </div>
           </div>
 
-          {/* Right Column - Leaderboard, User Stories, Community */}
+          {/* Right Column - VIRAL PHASE 4: Global Community & Monetization */}
           <div className="space-y-6 animate-slide-in-right delay-300">
+            {/* VIRAL PHASE 4.4: COLLABORATIVE WORLD MAP */}
+            <CollaborativeDeathMap />
+            
+            {/* Core AI & Premium Features */}
             <div className="glass-card shadow-2xl border-success/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
               <ImmortalModeCopilot />
             </div>
+            
+            {/* Community & Competition */}
             <div className="glass-card shadow-xl border-warning/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <Leaderboard />
             </div>
             <div className="glass-card shadow-lg border-accent/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <UserStories />
             </div>
-            <div className="glass-card p-4 border-primary/30 transition-all duration-300 hover:shadow-lg">
-              <div className="text-sm text-card-foreground">Refer a friend with your invite code: <code className="bg-primary/20 px-2 py-1 rounded text-primary font-mono">BD-{Math.floor(Math.random()*9999)}</code></div>
-              <div className="text-sm text-muted-foreground mt-2">Stay tuned for Scan-off Battles and Creator Mode!</div>
+            
+            {/* Viral Referral System */}
+            <div className="glass-card p-4 border-primary/30 transition-all duration-300 hover:shadow-lg danger-glow">
+              <div className="text-sm text-card-foreground font-bold">🔥 VIRAL REFERRAL CODE 🔥</div>
+              <div className="text-lg font-mono bg-primary/20 px-3 py-2 rounded mt-2 text-primary text-center">BD-{Math.floor(Math.random()*9999)}</div>
+              <div className="text-xs text-muted-foreground mt-2 text-center">Share & earn viral badges! 10M users coming!</div>
             </div>
-            {/* Enhanced Community Features */}
+            
+            {/* Essential Community Features Only */}
             <div className="glass-card danger-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathDuel />
             </div>
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <ScenarioContest />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <ExpertQA />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <CommunityLeaderboard />
             </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <LocalizedFacts />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <RegionalTrending />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <LanguageSwitcher />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <GlobalMarketingBanner />
-            </div>
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <AffiliateOffers />
-            </div>
+            
+            {/* Monetization */}
             <div className="glass-card border-success/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <InAppPurchases />
             </div>

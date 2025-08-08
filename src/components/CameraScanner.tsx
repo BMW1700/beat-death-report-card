@@ -286,7 +286,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
               <Button 
                 onClick={stopBarcodeScanning}
                 variant="outline"
-                className="border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-white px-4 py-3 rounded-xl"
+                className="border-warning text-warning hover:bg-warning hover:text-warning-foreground px-4 py-3 rounded-xl"
               >
                 Stop Barcode
               </Button>

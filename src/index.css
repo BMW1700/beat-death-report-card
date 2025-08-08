@@ -198,6 +198,10 @@
   .accent-glow {
     box-shadow: 0 0 25px hsl(var(--accent) / 0.4), 0 0 50px hsl(var(--accent) / 0.2);
   }
+
+  .warning-glow {
+    box-shadow: 0 0 25px hsl(var(--warning) / 0.4), 0 0 50px hsl(var(--warning) / 0.2);
+  }
 }
 
 @layer utilities {

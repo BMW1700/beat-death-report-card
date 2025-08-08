@@ -67,23 +67,23 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
 
   const getKillRatingColor = (rating: number) => {
     switch (rating) {
-      case 1: return "text-green-400";
-      case 2: return "text-yellow-400";
-      case 3: return "text-orange-400";
-      case 4: return "text-red-400";
-      case 5: return "text-red-600";
-      default: return "text-gray-400";
+      case 1: return "text-success";
+      case 2: return "text-warning";
+      case 3: return "text-accent";
+      case 4: return "text-destructive";
+      case 5: return "text-destructive";
+      default: return "text-muted-foreground";
     }
   };
 
   const getKillRatingBg = (rating: number) => {
     switch (rating) {
-      case 1: return "bg-green-900/30 border-green-600/30";
-      case 2: return "bg-yellow-900/30 border-yellow-600/30";
-      case 3: return "bg-orange-900/30 border-orange-600/30";
-      case 4: return "bg-red-900/30 border-red-600/30";
-      case 5: return "bg-red-900/50 border-red-500/50";
-      default: return "bg-gray-900/30 border-gray-600/30";
+      case 1: return "bg-success/20 border-success/30";
+      case 2: return "bg-warning/20 border-warning/30";
+      case 3: return "bg-accent/20 border-accent/30";
+      case 4: return "bg-destructive/20 border-destructive/30";
+      case 5: return "bg-destructive/30 border-destructive/50";
+      default: return "bg-muted/20 border-muted/30";
     }
   };
 
@@ -179,12 +179,12 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
           </div>
         ))}
         
-        <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+        <div className="mt-6 p-4 bg-warning/20 border border-warning/30 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-yellow-400" />
-            <span className="text-yellow-400 font-medium text-sm">Disclaimer</span>
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            <span className="text-warning font-medium text-sm">Disclaimer</span>
           </div>
-          <p className="text-yellow-300 text-xs">
+          <p className="text-warning-foreground text-xs">
             ⚠️ Not medical advice. For entertainment only.
           </p>
         </div>
