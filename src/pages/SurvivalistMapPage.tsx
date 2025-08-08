@@ -32,11 +32,11 @@ interface SurvivalPin {
 }
 
 const PIN_TYPES = {
-  shelter: { icon: Home, color: '#10b981', label: 'Safe Shelter' },
-  hiking: { icon: Mountain, color: '#f59e0b', label: 'Hiking/Exercise' },
-  water: { icon: Globe, color: '#3b82f6', label: 'Water Source' },
-  medical: { icon: Plus, color: '#ef4444', label: 'Medical Facility' },
-  bunker: { icon: Shield, color: '#8b5cf6', label: 'Bunker/Fortress' }
+  shelter: { icon: Home, color: 'hsl(142 71% 45%)', label: 'Safe Shelter' }, // emerald-600
+  hiking: { icon: Mountain, color: 'hsl(38 92% 50%)', label: 'Hiking/Exercise' }, // amber-500
+  water: { icon: Globe, color: 'hsl(217 91% 60%)', label: 'Water Source' }, // blue-500
+  medical: { icon: Plus, color: 'hsl(0 84% 60%)', label: 'Medical Facility' }, // red-500
+  bunker: { icon: Shield, color: 'hsl(262 83% 58%)', label: 'Bunker/Fortress' } // purple-500
 };
 
 // Fix for default markers in Leaflet
@@ -164,11 +164,10 @@ const SurvivalistMapPage = () => {
               html: `<div style="
                 width: 20px;
                 height: 20px;
-                background: #3b82f6;
+                background: hsl(217 91% 60%);
                 border: 3px solid white;
                 border-radius: 50%;
-                box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
-                animation: pulse 2s infinite;
+                box-shadow: 0 0 10px hsla(217, 91%, 60%, 0.6);
               "></div>`,
               className: 'user-location-marker',
               iconSize: [20, 20],
@@ -204,14 +203,13 @@ const SurvivalistMapPage = () => {
           html: `<div style="
             width: 25px;
             height: 25px;
-            background: #f59e0b;
+            background: hsl(38 92% 50%);
             border: 2px solid white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            animation: bounce 0.5s ease-in-out;
           ">📍</div>`,
           className: 'temp-pin-marker',
           iconSize: [25, 25],
