@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,11 +39,18 @@ const PIN_TYPES = {
   bunker: { icon: Shield, color: '#8b5cf6', label: 'Bunker/Fortress' }
 };
 
+// Fix for default markers in Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
 const SurvivalistMapPage = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [showTokenInput, setShowTokenInput] = useState(true);
+  const map = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const [survivalPins, setSurvivalPins] = useState<SurvivalPin[]>([]);
   const [showAddPin, setShowAddPin] = useState(false);
   const [newPin, setNewPin] = useState({
@@ -116,96 +123,97 @@ const SurvivalistMapPage = () => {
     ]);
   }, []);
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      projection: 'globe',
+    map.current = L.map(mapContainer.current, {
+      center: [20, 0],
       zoom: 2,
-      center: [0, 20],
-      pitch: 0,
+      worldCopyJump: true,
+      maxBounds: [[-90, -180], [90, 180]]
     });
 
-    // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'top-right'
-    );
-
-    // Add atmosphere
-    map.current.on('style.load', () => {
-      map.current?.setFog({
-        color: 'rgb(30, 30, 40)',
-        'high-color': 'rgb(50, 50, 60)',
-        'horizon-blend': 0.1,
-      });
-    });
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 18,
+    }).addTo(map.current);
 
     // Add click handler for adding pins
     map.current.on('click', (e) => {
       if (showAddPin) {
         setNewPin(prev => ({
           ...prev,
-          lat: e.lngLat.lat,
-          lng: e.lngLat.lng
+          lat: e.latlng.lat,
+          lng: e.latlng.lng
         }));
       }
     });
 
-    setShowTokenInput(false);
-  };
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, [showAddPin]);
 
   // Add pins to map
   useEffect(() => {
     if (!map.current) return;
 
     // Clear existing markers
-    const existingMarkers = document.querySelectorAll('.survival-marker');
-    existingMarkers.forEach(marker => marker.remove());
+    markersRef.current.forEach(marker => {
+      map.current?.removeLayer(marker);
+    });
+    markersRef.current = [];
 
     survivalPins.forEach(pin => {
-      const el = document.createElement('div');
-      el.className = 'survival-marker';
-      el.style.cssText = `
-        width: 30px;
-        height: 30px;
-        background: ${PIN_TYPES[pin.type].color};
-        border: 2px solid white;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      if (!map.current) return;
+
+      // Create custom icon
+      const iconHtml = `
+        <div style="
+          width: 30px;
+          height: 30px;
+          background: ${PIN_TYPES[pin.type].color};
+          border: 2px solid white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          cursor: pointer;
+        ">
+          <div style="color: white; font-size: 14px;">📍</div>
+        </div>
       `;
 
-      const Icon = PIN_TYPES[pin.type].icon;
-      el.innerHTML = `<svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`;
+      const customIcon = L.divIcon({
+        html: iconHtml,
+        className: 'custom-div-icon',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
 
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div class="p-2">
-          <h3 class="font-bold text-sm">${pin.title}</h3>
-          <p class="text-xs text-gray-600 mb-2">${pin.description}</p>
-          <div class="flex items-center justify-between text-xs">
-            <span class="px-2 py-1 bg-gray-100 rounded">${PIN_TYPES[pin.type].label}</span>
-            <span class="text-green-600">👍 ${pin.votes}</span>
+      const marker = L.marker([pin.lat, pin.lng], { icon: customIcon })
+        .addTo(map.current)
+        .bindPopup(`
+          <div class="p-2 min-w-[200px]">
+            <h3 class="font-bold text-sm mb-1">${pin.title}</h3>
+            <p class="text-xs text-gray-600 mb-2">${pin.description}</p>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="px-2 py-1 bg-gray-100 rounded text-black">${PIN_TYPES[pin.type].label}</span>
+              <span class="text-green-600">👍 ${pin.votes}</span>
+            </div>
+            <div class="text-xs text-gray-500">by ${pin.addedBy}</div>
           </div>
-          <div class="text-xs text-gray-500 mt-1">by ${pin.addedBy}</div>
-        </div>
-      `);
+        `);
 
-      new mapboxgl.Marker(el)
-        .setLngLat([pin.lng, pin.lat])
-        .setPopup(popup)
-        .addTo(map.current!);
+      markersRef.current.push(marker);
     });
-  }, [survivalPins, map.current]);
+  }, [survivalPins]);
 
   const handleAddPin = () => {
     if (!newPin.title || !newPin.description) {
@@ -230,49 +238,10 @@ const SurvivalistMapPage = () => {
     });
   };
 
-  if (showTokenInput) {
-    return (
-      <div className="min-h-screen pt-16 gradient-secondary-bg flex items-center justify-center">
-        <Card className="glass-card border-primary/20 p-8 max-w-md w-full mx-4">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl gradient-text flex items-center justify-center gap-2">
-              <Globe className="w-6 h-6" />
-              Global Survivalist Map
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm text-center">
-              Enter your Mapbox public token to view the interactive survival map
-            </p>
-            <Input
-              placeholder="Mapbox Public Token (pk.)"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              className="font-mono text-xs"
-            />
-            <Button 
-              onClick={initializeMap}
-              disabled={!mapboxToken.startsWith('pk.')}
-              className="w-full gradient-bg"
-            >
-              Load Survival Map
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Get your token at{' '}
-              <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                mapbox.com
-              </a>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen pt-16 gradient-secondary-bg">
       {/* Live Death Counter */}
-      <div className="fixed top-20 left-4 z-10">
+      <div className="fixed top-20 left-4 z-[1000]">
         <Card className="glass-card border-destructive/30 destructive-glow">
           <CardContent className="p-4">
             <div className="text-center">
@@ -287,7 +256,7 @@ const SurvivalistMapPage = () => {
       </div>
 
       {/* Controls */}
-      <div className="fixed top-20 right-4 z-10 space-y-2">
+      <div className="fixed top-20 right-4 z-[1000] space-y-2">
         <Card className="glass-card border-primary/20">
           <CardContent className="p-4">
             <div className="text-center mb-3">
@@ -384,7 +353,7 @@ const SurvivalistMapPage = () => {
       </div>
 
       {/* Info Panel */}
-      <div className="fixed bottom-4 left-4 right-4 md:left-auto md:w-80 z-10">
+      <div className="fixed bottom-4 left-4 right-4 md:left-auto md:w-80 z-[1000]">
         <Card className="glass-card border-success/30 success-glow">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-success flex items-center gap-2">
