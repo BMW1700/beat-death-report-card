@@ -136,11 +136,11 @@ const SurvivalistMapPage = () => {
       attributionControl: false
     });
 
-    // Add better OpenStreetMap tiles (CartoDB Positron - same style as many modern maps)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CartoDB',
+    // Add colorful OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
       maxZoom: 19,
-      subdomains: 'abcd'
+      subdomains: ['a', 'b', 'c']
     }).addTo(map.current);
 
     // Add zoom control with custom position
