@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Skull, Calculator, AlertTriangle } from "lucide-react";
 import { DeathAnalyzer } from "@/components/DeathAnalyzer";
-import { analyzeImageForToxicity, generateDeathAnalysisReport } from "@/utils/imageAnalysis";
+import { analyzeImageForToxicity, generateDeathAnalysisReport, inferHazardMechanism } from "@/utils/imageAnalysis";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
@@ -197,7 +197,7 @@ const Index = () => {
                          reportData.deathScore >= 30 ? "Meh, low-key risky" : "No Problemo",
           lethalDose: aiAnalysis.detectedItems[0]?.lethalDose || "Variable based on substance",
           timeToDeath: reportData.timeToImpact,
-          mechanism: aiAnalysis.detectedItems[0]?.reason || "Various potential pathways",
+          mechanism: (() => { const r = aiAnalysis.detectedItems[0]?.reason || ""; return (!r || r.toLowerCase().includes("unknown")) ? inferHazardMechanism(aiAnalysis.detectedItems[0]?.label || scenario || "item") : r; })(),
           survival: reportData.survivalTips.join(". "),
           finalWords: reportData.finalWords
         };

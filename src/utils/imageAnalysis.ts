@@ -50,6 +50,31 @@ const OBJECT_TOXICITY_DB = {
   'rat_poison': { toxicityLevel: 99, reason: 'Anticoagulants or neurotoxins', lethalDose: '5-20g' },
 };
 
+// Heuristic hazard inference for any detected label
+export const inferHazardMechanism = (rawLabel: string): string => {
+  const label = (rawLabel || '').toLowerCase();
+  const rules: Array<[RegExp, string]> = [
+    [/phone|cell(ular)?|smartphone/, 'Primary risks are lithium‑ion battery burns or explosion, chemical injury if the battery leaks, electrical shock from damaged chargers, and distraction-related accidents.'],
+    [/battery|button\s*battery|lithium/, 'If swallowed, causes rapid tissue necrosis and perforation; leaking contents cause severe chemical burns and heavy‑metal poisoning.'],
+    [/charger|power\s*cord|cable|wire/, 'Risk of electrocution from damaged insulation and strangulation/asphyxiation from cords.'],
+    [/plastic\s*bag/, 'Asphyxiation/suffocation by blocking airflow over mouth and nose.'],
+    [/coin|marble|bead|lego|small\s*object/, 'Airway obstruction (choking), or bowel obstruction if swallowed.'],
+    [/magnet/, 'Multiple magnets can clamp intestinal walls together after ingestion, leading to perforation, sepsis, and death.'],
+    [/detergent|pod|bleach|cleaner|ammonia/, 'Caustic burns to mouth, esophagus, and stomach; inhalation can cause airway injury. Mixing bleach with ammonia releases chlorine gas.'],
+    [/alcohol|ethanol|hand\s*sanitizer|methanol|isopropyl/, 'Central nervous system depression leading to respiratory failure; methanol can cause blindness and metabolic acidosis.'],
+    [/caffeine|coffee|energy\s*drink|pre\s*workout|tea/, 'Caffeine toxicity triggers dangerous cardiac arrhythmias, seizures, and cardiovascular collapse.'],
+    [/mushroom|toadstool/, 'Certain species contain amatoxins that cause fulminant hepatic failure after a deceptive symptom‑free period.'],
+    [/plant|leaf|berry|seed|pit|stone\s*fruit|cherry|apple\s*seed/, 'Some plants/pits contain cyanogenic glycosides or alkaloids causing cardiac or neurologic collapse.'],
+    [/knife|blade|scissor|razor|glass|shard/, 'Traumatic laceration and hemorrhage leading to shock.'],
+    [/water/, 'Drowning or water intoxication (hyponatremia) if consumed in extreme volumes.'],
+    [/spray|insecticide|pesticide|rat\s*poison|rodenticide/, 'Neurotoxic or anticoagulant effects leading to seizures or fatal bleeding.'],
+  ];
+  for (const [pattern, text] of rules) {
+    if (pattern.test(label)) return text;
+  }
+  return 'Unlikely inherently toxic; primary dangers are choking/asphyxiation, blunt trauma, burns, electrical shock, or chemical exposure depending on use.';
+};
+
 export const initializeImageAnalysis = async () => {
   try {
     console.log('Initializing AI image analysis...');
@@ -218,8 +243,8 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
         label: topResult.label,
         confidence: topResult.score,
         toxicityLevel: 10, // Low default toxicity
-        reason: 'Unknown toxicity - consult medical professional if concerned',
-        lethalDose: 'Unknown',
+        reason: inferHazardMechanism(topResult.label),
+        lethalDose: 'Exposure-dependent; see mechanism',
         category: 'unknown' as const
       });
       maxRisk = 10;
@@ -295,8 +320,8 @@ const analyzeImageManually = async (imageFile: File) => {
       label: 'Unknown Item',
       confidence: 0.5,
       toxicityLevel: 50,
-      reason: 'AI analysis unavailable - exercise caution with unknown items',
-      lethalDose: 'Unknown - consult medical professional',
+      reason: inferHazardMechanism(filename),
+      lethalDose: 'Exposure-dependent; see mechanism',
       category: 'unknown' as const
     });
     maxRisk = 50;
