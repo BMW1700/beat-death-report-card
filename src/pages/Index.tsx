@@ -163,7 +163,7 @@ const Index = () => {
   };
 
   const handleAnalyze = async (imageFile?: File) => {
-    if ((!scenario.trim() && !imageFile) || !userData.weight) {
+    if (!scenario.trim() && !imageFile) {
       return;
     }
     
@@ -179,8 +179,10 @@ const Index = () => {
         });
         
         const aiAnalysis = await analyzeImageForToxicity(imageFile);
-        const weight = parseFloat(userData.weight);
-        const weightInKg = userData.weightUnit === "kg" ? weight : weight * 0.453592;
+        const weightVal = parseFloat(userData.weight);
+        const weightInKg = isNaN(weightVal)
+          ? 70 // default if user didn't provide weight
+          : (userData.weightUnit === "kg" ? weightVal : weightVal * 0.453592);
         
         const reportData = generateDeathAnalysisReport(aiAnalysis, weightInKg, scenario);
         
