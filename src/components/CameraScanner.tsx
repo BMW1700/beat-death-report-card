@@ -62,6 +62,11 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        try {
+          await videoRef.current.play();
+        } catch (e) {
+          // Autoplay policies may block play; video has autoPlay attribute as fallback
+        }
       }
       setIsLoading(false);
     } catch (err) {
@@ -243,7 +248,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           <div className="flex justify-center gap-4">
             <Button
               onClick={() => captureImage(true)}
-              disabled={isLoading || !aiReady}
+              disabled={isLoading}
               className="gradient-bg text-primary-foreground px-6 py-3 rounded-xl hover:scale-105 transition-all duration-200 purple-glow disabled:opacity-50"
             >
               {aiReady ? (

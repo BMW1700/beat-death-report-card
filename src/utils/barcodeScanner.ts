@@ -19,7 +19,9 @@ export class BarcodeScanner {
       this.isScanning = true;
       
       const devices = await this.codeReader.listVideoInputDevices();
-      const deviceId = devices[0]?.deviceId;
+      // Prefer back/environment camera when available
+      const preferredDevice = devices.find(d => /back|rear|environment/i.test(d.label || '')) || devices[0];
+      const deviceId = preferredDevice?.deviceId;
 
       if (!deviceId) {
         throw new Error('No camera device found');
