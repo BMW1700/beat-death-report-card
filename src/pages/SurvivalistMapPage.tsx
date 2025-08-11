@@ -15,8 +15,16 @@ import {
   Users, 
   Plus,
   X,
-  AlertTriangle
+  AlertTriangle,
+  MapPinned,
+  Route,
+  Landmark,
+  Eye,
+  Star,
+  Trash2,
+  MessageCircle
 } from "lucide-react";
+import { DeathChatQA } from "@/components/DeathChatQA";
 import { toast } from "sonner";
 
 interface SurvivalPin {
@@ -25,18 +33,23 @@ interface SurvivalPin {
   lng: number;
   title: string;
   description: string;
-  type: 'shelter' | 'hiking' | 'water' | 'medical' | 'bunker';
+  type: 'shelter' | 'hiking' | 'water' | 'medical' | 'bunker' | 'treasure' | 'trail' | 'landmark' | 'hidden' | 'cool';
   votes: number;
   addedBy: string;
   addedAt: Date;
 }
 
 const PIN_TYPES = {
-  shelter: { icon: Home, color: 'hsl(142 71% 45%)', label: 'Safe Shelter' }, // emerald-600
-  hiking: { icon: Mountain, color: 'hsl(38 92% 50%)', label: 'Hiking/Exercise' }, // amber-500
-  water: { icon: Globe, color: 'hsl(217 91% 60%)', label: 'Water Source' }, // blue-500
-  medical: { icon: Plus, color: 'hsl(0 84% 60%)', label: 'Medical Facility' }, // red-500
-  bunker: { icon: Shield, color: 'hsl(262 83% 58%)', label: 'Bunker/Fortress' } // purple-500
+  shelter: { icon: Home, color: 'hsl(142 71% 45%)', label: 'Safe Shelter' },
+  hiking: { icon: Mountain, color: 'hsl(38 92% 50%)', label: 'Hiking/Exercise' },
+  water: { icon: Globe, color: 'hsl(217 91% 60%)', label: 'Water Source' },
+  medical: { icon: Plus, color: 'hsl(0 84% 60%)', label: 'Medical Facility' },
+  bunker: { icon: Shield, color: 'hsl(262 83% 58%)', label: 'Bunker/Fortress' },
+  treasure: { icon: MapPinned, color: 'hsl(45 100% 51%)', label: 'Hidden Treasure' },
+  trail: { icon: Route, color: 'hsl(120 60% 50%)', label: 'Cool Trail' },
+  landmark: { icon: Landmark, color: 'hsl(280 60% 50%)', label: 'Landmark' },
+  hidden: { icon: Eye, color: 'hsl(15 78% 54%)', label: 'Hidden Spot' },
+  cool: { icon: Star, color: 'hsl(300 76% 72%)', label: 'Cool Spot' }
 };
 
 // Fix for default markers in Leaflet
@@ -61,6 +74,8 @@ const SurvivalistMapPage = () => {
     lng: 0
   });
   const [liveDeathCount, setLiveDeathCount] = useState(0);
+  const [showChat, setShowChat] = useState(false);
+  const [currentUser] = useState('Anonymous'); // In real app, this would come from auth
 
   // Simulate live death count
   useEffect(() => {
@@ -242,6 +257,14 @@ const SurvivalistMapPage = () => {
     };
   }, [showAddPin]);
 
+  // Add global delete function for popup buttons
+  useEffect(() => {
+    (window as any).deletePin = handleDeletePin;
+    return () => {
+      delete (window as any).deletePin;
+    };
+  }, []);
+
   // Add pins to map
   useEffect(() => {
     if (!map.current) return;
@@ -280,17 +303,24 @@ const SurvivalistMapPage = () => {
         iconAnchor: [15, 15]
       });
 
+      const deleteButton = pin.addedBy === currentUser ? 
+        `<button onclick="window.deletePin('${pin.id}')" class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 ml-2">🗑️ Delete</button>` : 
+        '';
+      
       const marker = L.marker([pin.lat, pin.lng], { icon: customIcon })
         .addTo(map.current)
         .bindPopup(`
           <div class="p-2 min-w-[200px]">
             <h3 class="font-bold text-sm mb-1">${pin.title}</h3>
             <p class="text-xs text-gray-600 mb-2">${pin.description}</p>
-            <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex items-center justify-between text-xs mb-2">
               <span class="px-2 py-1 bg-gray-100 rounded text-black">${PIN_TYPES[pin.type].label}</span>
               <span class="text-green-600">👍 ${pin.votes}</span>
             </div>
-            <div class="text-xs text-gray-500">by ${pin.addedBy}</div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500">by ${pin.addedBy}</span>
+              ${deleteButton}
+            </div>
           </div>
         `);
 
@@ -308,7 +338,7 @@ const SurvivalistMapPage = () => {
       id: Date.now().toString(),
       ...newPin,
       votes: 1,
-      addedBy: 'Anonymous',
+      addedBy: currentUser,
       addedAt: new Date()
     };
 
@@ -328,6 +358,11 @@ const SurvivalistMapPage = () => {
     toast.success("🗺️ Survival location added!", {
       description: "Your pin has been added to the global survival map!"
     });
+  };
+
+  const handleDeletePin = (pinId: string) => {
+    setSurvivalPins(prev => prev.filter(pin => pin.id !== pinId));
+    toast.success("🗑️ Pin deleted!");
   };
 
   return (
@@ -471,8 +506,37 @@ const SurvivalistMapPage = () => {
         
       </div>
 
+      {/* Chat Toggle Button */}
+      <div className="fixed bottom-4 left-4 z-[1000]">
+        <Button
+          onClick={() => setShowChat(!showChat)}
+          className="gradient-bg"
+          size="sm"
+        >
+          <MessageCircle className="w-4 h-4 mr-1" />
+          {showChat ? 'Hide Chat' : 'Survivalist Chat'}
+        </Button>
+      </div>
+
+      {/* Survivalist Chat */}
+      {showChat && (
+        <div className="fixed bottom-16 left-4 w-80 z-[1000]">
+          <Card className="glass-card border-primary/30 primary-glow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-primary flex items-center gap-2">
+                <MessageCircle className="w-4 h-4" />
+                Survivalist Network Chat
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DeathChatQA />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Info Panel */}
-      <div className="fixed bottom-4 left-4 right-4 md:left-auto md:w-80 z-[1000]">
+      <div className="fixed bottom-4 right-4 md:w-80 z-[1000]">
         <Card className="glass-card border-success/30 success-glow">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-success flex items-center gap-2">
