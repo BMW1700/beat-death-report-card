@@ -14,6 +14,8 @@ import { DeathDuel } from "@/components/DeathDuel";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
 import { PremiumUpsell } from "@/components/PremiumUpsell";
 import { InAppPurchases } from "@/components/InAppPurchases";
+import { ViralSharingHub } from "@/components/ViralSharingHub";
+import { WildernessScanner } from "@/components/WildernessScanner";
 import { DeathSpinWheel } from "@/components/DeathSpinWheel";
 import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
 
@@ -67,8 +69,11 @@ const Index = () => {
             {/* VIRAL PHASE 4.1: LIVE ENGAGEMENT */}
             <ViralChallengeHub />
             
-            {/* VIRAL PHASE 4.2: SOCIAL INTEGRATION */}
-            <SocialMediaIntegration />
+            {/* VIRAL PHASE 4.2: VIRAL SHARING HUB */}
+            <ViralSharingHub />
+            
+            {/* SURVIVALIST FEATURES */}
+            <WildernessScanner />
             
             {/* Core Features - Optimized for Virality */}
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
@@ -97,7 +102,7 @@ const Index = () => {
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathTrendsDashboard />
             </div>
-            <div className="glass-card border-accent/30 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+            <div className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <PremiumUpsell />
             </div>
           </div>
