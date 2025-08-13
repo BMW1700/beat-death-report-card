@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { DeathChatQA } from "@/components/DeathChatQA";
 import { CommunityPhotoRecognition } from "@/components/CommunityPhotoRecognition";
+import { addCommunityTrainingData } from "@/utils/imageAnalysis";
 import { toast } from "sonner";
 
 interface SurvivalPin {
@@ -535,7 +536,17 @@ const SurvivalistMapPage = () => {
             </CardContent>
           </Card>
           
-          <CommunityPhotoRecognition />
+            <CommunityPhotoRecognition 
+              onItemAdded={(item) => {
+                // Add to AI training database if it has death analysis
+                if (item.deathAnalysis) {
+                  addCommunityTrainingData(item);
+                  toast.success("🧠 AI training data added! Future scans will recognize this item.", {
+                    description: "Your contribution helps the AI learn!"
+                  });
+                }
+              }}
+            />
         </div>
       )}
 

@@ -12,9 +12,14 @@ import {
   Search,
   ImageIcon,
   Users,
-  Database
+  Database,
+  Brain,
+  Skull,
+  Clock,
+  AlertTriangle
 } from "lucide-react";
 import { toast } from "sonner";
+import { DeathAnalysis } from "@/types";
 
 interface CommunityItem {
   id: string;
@@ -27,6 +32,16 @@ interface CommunityItem {
   votes: number;
   dangerLevel?: 'safe' | 'caution' | 'danger';
   survivalUse?: string;
+  // Death analysis training data
+  deathAnalysis?: {
+    killRating: number;
+    lethalDose: string;
+    timeToDeath: string;
+    mechanism: string;
+    survival: string;
+    finalWords: string;
+    allergyRisk: string;
+  };
 }
 
 interface CommunityPhotoRecognitionProps {
@@ -41,8 +56,17 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
     description: '',
     category: 'object' as CommunityItem['category'],
     dangerLevel: 'safe' as CommunityItem['dangerLevel'],
-    survivalUse: ''
+    survivalUse: '',
+    // Death analysis fields
+    killRating: 0,
+    lethalDose: '',
+    timeToDeath: '',
+    mechanism: '',
+    survival: '',
+    finalWords: '',
+    allergyRisk: 'none'
   });
+  const [showDeathAnalysis, setShowDeathAnalysis] = useState(false);
   const [communityItems, setCommunityItems] = useState<CommunityItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,7 +150,16 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
       survivalUse: newItem.survivalUse,
       addedBy: 'Anonymous', // In real app, get from auth
       addedAt: new Date(),
-      votes: 1
+      votes: 1,
+      deathAnalysis: showDeathAnalysis ? {
+        killRating: newItem.killRating,
+        lethalDose: newItem.lethalDose,
+        timeToDeath: newItem.timeToDeath,
+        mechanism: newItem.mechanism,
+        survival: newItem.survival,
+        finalWords: newItem.finalWords,
+        allergyRisk: newItem.allergyRisk
+      } : undefined
     };
 
     setCommunityItems(prev => [item, ...prev]);
@@ -139,12 +172,20 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
       description: '',
       category: 'object',
       dangerLevel: 'safe',
-      survivalUse: ''
+      survivalUse: '',
+      killRating: 0,
+      lethalDose: '',
+      timeToDeath: '',
+      mechanism: '',
+      survival: '',
+      finalWords: '',
+      allergyRisk: 'none'
     });
     setShowAddForm(false);
+    setShowDeathAnalysis(false);
     
     toast.success("🎉 Item added to community database!", {
-      description: "Other survivalists can now benefit from your knowledge!"
+      description: showDeathAnalysis ? "AI training data included!" : "Other survivalists can now benefit from your knowledge!"
     });
   };
 
@@ -289,13 +330,113 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
                   onChange={(e) => setNewItem(prev => ({ ...prev, survivalUse: e.target.value }))}
                 />
                 
+                {/* Death Analysis Training Toggle */}
+                <div className="flex items-center justify-between p-3 border rounded-lg border-primary/20 bg-primary/5">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">Add Death Analysis for AI Training</span>
+                  </div>
+                  <Button
+                    onClick={() => setShowDeathAnalysis(!showDeathAnalysis)}
+                    variant={showDeathAnalysis ? "default" : "outline"}
+                    size="sm"
+                  >
+                    {showDeathAnalysis ? "Hide" : "Show"}
+                  </Button>
+                </div>
+                
+                {/* Death Analysis Form */}
+                {showDeathAnalysis && (
+                  <div className="space-y-3 p-3 border rounded-lg border-destructive/20 bg-destructive/5">
+                    <div className="flex items-center gap-2 text-destructive">
+                      <Skull className="w-4 h-4" />
+                      <span className="text-sm font-semibold">Death Analysis Training Data</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-muted-foreground">Kill Rating (0-100)</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={newItem.killRating}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, killRating: parseInt(e.target.value) || 0 }))}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground">Allergy Risk</label>
+                        <select
+                          value={newItem.allergyRisk}
+                          onChange={(e) => setNewItem(prev => ({ ...prev, allergyRisk: e.target.value }))}
+                          className="w-full p-2 text-sm rounded bg-background border border-border"
+                        >
+                          <option value="none">None</option>
+                          <option value="low">Low</option>
+                          <option value="moderate">Moderate</option>
+                          <option value="high">High</option>
+                          <option value="severe">Severe</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-muted-foreground">Lethal Dose</label>
+                      <Input
+                        placeholder="e.g., 50mg per kg body weight"
+                        value={newItem.lethalDose}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, lethalDose: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-muted-foreground">Time to Death</label>
+                      <Input
+                        placeholder="e.g., 2-4 hours"
+                        value={newItem.timeToDeath}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, timeToDeath: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-muted-foreground">Death Mechanism</label>
+                      <Textarea
+                        placeholder="How this item causes death..."
+                        value={newItem.mechanism}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, mechanism: e.target.value }))}
+                        rows={2}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-muted-foreground">Survival Tips</label>
+                      <Textarea
+                        placeholder="How to survive exposure..."
+                        value={newItem.survival}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, survival: e.target.value }))}
+                        rows={2}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-muted-foreground">Final Words</label>
+                      <Input
+                        placeholder="Dramatic last words..."
+                        value={newItem.finalWords}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, finalWords: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                )}
+                
                 <Button
                   onClick={handleSubmitItem}
                   className="w-full gradient-bg"
                   disabled={!newItem.name || !newItem.description}
                 >
                   <Check className="w-4 h-4 mr-1" />
-                  Add to Database
+                  {showDeathAnalysis ? "Add Training Data" : "Add to Database"}
                 </Button>
               </div>
             </div>
@@ -369,12 +510,24 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
                       >
                         {item.dangerLevel}
                       </Badge>
+                      {item.deathAnalysis && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Brain className="w-3 h-3 mr-1" />
+                          AI
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{item.description}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{item.category}</span>
                       <span>•</span>
                       <span>👍 {item.votes}</span>
+                      {item.deathAnalysis && (
+                        <>
+                          <span>•</span>
+                          <span className="text-destructive">💀 {item.deathAnalysis.killRating}/100</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

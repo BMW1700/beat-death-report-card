@@ -126,6 +126,65 @@ export const initializeImageAnalysis = async () => {
   }
 };
 
+// Community database for user-contributed training data
+let communityDatabase: Array<{
+  id: string;
+  imageUrl: string;
+  name: string;
+  description: string;
+  category: 'food' | 'object' | 'tool' | 'plant' | 'other';
+  deathAnalysis?: {
+    killRating: number;
+    lethalDose: string;
+    timeToDeath: string;
+    mechanism: string;
+    survival: string;
+    finalWords: string;
+    allergyRisk: string;
+  };
+}> = [];
+
+// Function to add community item for training
+export const addCommunityTrainingData = (item: any) => {
+  communityDatabase.push(item);
+  console.log('Added community training data:', item.name);
+};
+
+// Function to check community database first
+const checkCommunityDatabase = async (imageFile: File, classificationResults: any[]) => {
+  // Simple image similarity check based on classification results
+  for (const communityItem of communityDatabase) {
+    for (const result of classificationResults) {
+      const itemName = result.label.toLowerCase();
+      const communityName = communityItem.name.toLowerCase();
+      
+      // Check for matches (including partial matches and variations)
+      if (itemName.includes(communityName) || 
+          communityName.includes(itemName) ||
+          itemName.replace(/[^a-z]/g, '').includes(communityName.replace(/[^a-z]/g, '')) ||
+          communityName.replace(/[^a-z]/g, '').includes(itemName.replace(/[^a-z]/g, ''))) {
+        
+        if (communityItem.deathAnalysis) {
+          return {
+            label: communityItem.name,
+            confidence: result.score * 0.9, // Slightly lower confidence for community data
+            toxicityLevel: communityItem.deathAnalysis.killRating,
+            reason: communityItem.deathAnalysis.mechanism,
+            lethalDose: communityItem.deathAnalysis.lethalDose,
+            category: communityItem.category as 'food' | 'object' | 'unknown' | 'medication',
+            timeToDeath: communityItem.deathAnalysis.timeToDeath,
+            survival: communityItem.deathAnalysis.survival,
+            finalWords: communityItem.deathAnalysis.finalWords,
+            allergyRisk: communityItem.deathAnalysis.allergyRisk,
+            source: 'community'
+          };
+        }
+      }
+    }
+  }
+  return null;
+};
+
 export const analyzeImageForToxicity = async (imageFile: File): Promise<{
   detectedItems: Array<{
     label: string;
@@ -137,6 +196,11 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     usdaInfo?: any;
     chemicalInfo?: any;
     fdaInfo?: any;
+    timeToDeath?: string;
+    survival?: string;
+    finalWords?: string;
+    allergyRisk?: string;
+    source?: string;
   }>;
   overallRisk: number;
   recommendations: string[];
@@ -161,8 +225,18 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     
     console.log('AI Classification results:', classificationResults);
     
+    // Check community database first for user-contributed training data
+    const communityMatch = await checkCommunityDatabase(imageFile, classificationResults);
+    
     const detectedItems: any[] = [];
     let maxRisk = 0;
+    
+    // If we found a community match, prioritize it
+    if (communityMatch) {
+      detectedItems.push(communityMatch);
+      maxRisk = Math.max(maxRisk, communityMatch.toxicityLevel);
+      console.log('Found community match:', communityMatch.label);
+    }
     
     // Process AI classification results
     for (const result of classificationResults.slice(0, 5)) {
