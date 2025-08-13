@@ -10,7 +10,8 @@ import { CommunityTrainingModal } from "./CommunityTrainingModal";
 interface DeathAnalyzerProps {
   scenario: string;
   setScenario: (scenario: string) => void;
-  onAnalyze: (imageFile?: File, communityData?: any) => void;
+  onAnalyze: () => Promise<void>;
+  onImageUpload?: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   isAnalyzing: boolean;
   canAnalyze: boolean;
   needsCommunityTraining?: boolean;
@@ -21,6 +22,7 @@ export const DeathAnalyzer = ({
   scenario, 
   setScenario, 
   onAnalyze, 
+  onImageUpload,
   isAnalyzing, 
   canAnalyze,
   needsCommunityTraining = false,
@@ -67,7 +69,7 @@ export const DeathAnalyzer = ({
   };
 
   const handleAnalyze = () => {
-    onAnalyze(uploadedImage || undefined);
+    onAnalyze();
   };
 
   const handleCommunityTraining = () => {
@@ -79,7 +81,7 @@ export const DeathAnalyzer = ({
 
   const handleTrainingComplete = (trainingData: any) => {
     // Use the community training data for analysis
-    onAnalyze(uploadedImage || undefined, trainingData);
+    onAnalyze();
     setShowTrainingModal(false);
   };
 
@@ -90,7 +92,7 @@ export const DeathAnalyzer = ({
   const handleCameraScan = (file: File) => {
     handleFileSelect(file);
     // Immediately trigger analysis for scan
-    setTimeout(() => onAnalyze(file), 100);
+    setTimeout(() => onAnalyze(), 100);
   };
 
   const canAnalyzeWithInput = (canAnalyze && scenario.trim()) || uploadedImage;
@@ -171,7 +173,7 @@ export const DeathAnalyzer = ({
                   type="file" 
                   className="hidden" 
                   accept="image/*"
-                  onChange={handleUpload}
+                  onChange={onImageUpload}
                 />
               </label>
             </div>
@@ -183,7 +185,7 @@ export const DeathAnalyzer = ({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={handleUpload}
+            onChange={onImageUpload}
           />
         </div>
 
