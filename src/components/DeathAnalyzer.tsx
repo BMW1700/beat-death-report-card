@@ -5,13 +5,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, Calculator, Loader2, Camera, X, Image } from "lucide-react";
 import { useState, useRef } from "react";
 import { CameraScanner } from "./CameraScanner";
+import { CommunityTrainingModal } from "./CommunityTrainingModal";
 
 interface DeathAnalyzerProps {
   scenario: string;
   setScenario: (scenario: string) => void;
-  onAnalyze: (imageFile?: File) => void;
+  onAnalyze: (imageFile?: File, communityData?: any) => void;
   isAnalyzing: boolean;
   canAnalyze: boolean;
+  needsCommunityTraining?: boolean;
+  onCommunityTraining?: (imageFile: File, aiLabels: string[]) => void;
 }
 
 export const DeathAnalyzer = ({ 
@@ -19,11 +22,15 @@ export const DeathAnalyzer = ({
   setScenario, 
   onAnalyze, 
   isAnalyzing, 
-  canAnalyze 
+  canAnalyze,
+  needsCommunityTraining = false,
+  onCommunityTraining
 }: DeathAnalyzerProps) => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [showTrainingModal, setShowTrainingModal] = useState(false);
+  const [aiDetectedLabels, setAiDetectedLabels] = useState<string[]>([]);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const exampleScenarios = [
@@ -61,6 +68,19 @@ export const DeathAnalyzer = ({
 
   const handleAnalyze = () => {
     onAnalyze(uploadedImage || undefined);
+  };
+
+  const handleCommunityTraining = () => {
+    if (uploadedImage && onCommunityTraining) {
+      onCommunityTraining(uploadedImage, aiDetectedLabels);
+      setShowTrainingModal(true);
+    }
+  };
+
+  const handleTrainingComplete = (trainingData: any) => {
+    // Use the community training data for analysis
+    onAnalyze(uploadedImage || undefined, trainingData);
+    setShowTrainingModal(false);
   };
 
   const handleCameraCapture = (file: File) => {
@@ -212,6 +232,17 @@ export const DeathAnalyzer = ({
               </>
             )}
           </Button>
+          
+          {needsCommunityTraining && uploadedImage && (
+            <Button
+              onClick={handleCommunityTraining}
+              variant="outline"
+              className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Help Train AI on This Item
+            </Button>
+          )}
         </div>
 
         {!canAnalyzeWithInput && (
@@ -220,6 +251,14 @@ export const DeathAnalyzer = ({
           </p>
         )}
       </CardContent>
+      
+      <CommunityTrainingModal
+        isOpen={showTrainingModal}
+        onClose={() => setShowTrainingModal(false)}
+        imageFile={uploadedImage}
+        aiDetectedLabels={aiDetectedLabels}
+        onTrainingComplete={handleTrainingComplete}
+      />
     </Card>
   );
 };

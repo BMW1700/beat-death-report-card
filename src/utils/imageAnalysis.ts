@@ -201,6 +201,8 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     finalWords?: string;
     allergyRisk?: string;
     source?: string;
+    needsTraining?: boolean;
+    allClassificationResults?: any[];
   }>;
   overallRisk: number;
   recommendations: string[];
@@ -310,18 +312,27 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
       }
     }
     
-    // If no toxic items found, add the most confident classifications as unknown
+// If no toxic items found, add the most confident classifications as unknown
     if (detectedItems.length === 0) {
       const topResult = classificationResults[0];
+      const confidence = topResult.score;
+      
+      // Check if this is truly unknown (low confidence) and needs community training
+      const needsTraining = confidence < 0.6 || topResult.label.toLowerCase().includes('unknown') || 
+                           topResult.label.toLowerCase().includes('other') ||
+                           !topResult.label || topResult.label.length < 3;
+      
       detectedItems.push({
-        label: topResult.label,
-        confidence: topResult.score,
-        toxicityLevel: 10, // Low default toxicity
-        reason: inferHazardMechanism(topResult.label),
+        label: topResult.label || 'Unknown Item',
+        confidence: confidence,
+        toxicityLevel: needsTraining ? 5 : 10, // Very low for unknown items
+        reason: inferHazardMechanism(topResult.label || ''),
         lethalDose: 'Exposure-dependent; see mechanism',
-        category: 'unknown' as const
+        category: 'unknown' as const,
+        needsTraining: needsTraining,
+        allClassificationResults: classificationResults.slice(0, 5) // Include top 5 for training reference
       });
-      maxRisk = 10;
+      maxRisk = needsTraining ? 5 : 10;
     }
 
     // Speak warning for high-risk items

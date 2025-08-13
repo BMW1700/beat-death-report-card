@@ -22,6 +22,8 @@ const DeathScannerPage = () => {
   const [scenario, setScenario] = useState("");
   const [analysis, setAnalysis] = useState<DeathAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
+  const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
 
   // Death analysis database for different scenarios
   const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
@@ -112,7 +114,11 @@ const DeathScannerPage = () => {
     };
   };
 
-  const handleAnalyze = async (imageFile?: File) => {
+  const handleCommunityTraining = (imageFile: File, aiLabels: string[]) => {
+    setCurrentAiLabels(aiLabels);
+  };
+
+  const handleAnalyze = async (imageFile?: File, communityData?: any) => {
     if (!scenario.trim() && !imageFile) {
       return;
     }
@@ -128,41 +134,82 @@ const DeathScannerPage = () => {
           description: "Using advanced AI to detect toxic substances"
         });
         
-        const aiAnalysis = await analyzeImageForToxicity(imageFile);
-        const weightVal = parseFloat(userData.weight);
-        const weightInKg = isNaN(weightVal)
-          ? 70 // default if user didn't provide weight
-          : (userData.weightUnit === "kg" ? weightVal : weightVal * 0.453592);
+        let mockAnalysis: DeathAnalysis;
         
-        const reportData = generateDeathAnalysisReport(aiAnalysis, weightInKg, scenario);
-        
-        // Convert AI analysis to our format
-        const mockAnalysis: DeathAnalysis = {
-          item: `AI Detected: ${aiAnalysis.detectedItems[0]?.label || 'Unknown Object'}`,
-          allergyRisk: userData.allergies ? "Check detected substances against your known allergies" : "No allergies specified",
-          killRating: Math.min(5, Math.ceil(reportData.deathScore / 20)),
-          killRatingText: reportData.deathScore >= 90 ? "Horrible MF, you're already dead" :
-                         reportData.deathScore >= 70 ? "Big yikes, could get ugly" :
-                         reportData.deathScore >= 50 ? "Uh oh, not great" :
-                         reportData.deathScore >= 30 ? "Meh, low-key risky" : "No Problemo",
-          lethalDose: aiAnalysis.detectedItems[0]?.lethalDose || "Variable based on substance",
-          timeToDeath: reportData.timeToImpact,
-          mechanism: (() => { const r = aiAnalysis.detectedItems[0]?.reason || ""; return (!r || r.toLowerCase().includes("unknown")) ? inferHazardMechanism(aiAnalysis.detectedItems[0]?.label || scenario || "item") : r; })(),
-          survival: reportData.survivalTips.join(". "),
-          finalWords: reportData.finalWords
-        };
-        
-        setAnalysis(mockAnalysis);
-        
-        toast.success("🎯 AI analysis complete!", {
-          description: `Detected: ${aiAnalysis.detectedItems[0]?.label} - Death Score: ${reportData.deathScore}%`
-        });
+        // If we have community training data, use it
+        if (communityData) {
+          mockAnalysis = {
+            item: `Community Trained: ${communityData.name}`,
+            allergyRisk: communityData.deathAnalysis.allergyRisk || "No allergy information provided",
+            killRating: communityData.deathAnalysis.killRating,
+            killRatingText: communityData.deathAnalysis.killRatingText,
+            lethalDose: communityData.deathAnalysis.lethalDose,
+            timeToDeath: communityData.deathAnalysis.timeToDeath,
+            mechanism: communityData.deathAnalysis.mechanism,
+            survival: communityData.deathAnalysis.survival,
+            finalWords: communityData.deathAnalysis.finalWords
+          };
+          
+          setAnalysis(mockAnalysis);
+          setNeedsCommunityTraining(false);
+          
+          toast.success("✅ Community training applied!", {
+            description: `Analysis based on community data for ${communityData.name}`
+          });
+        } else {
+          // Regular AI analysis
+          const aiAnalysis = await analyzeImageForToxicity(imageFile);
+          const weightVal = parseFloat(userData.weight);
+          const weightInKg = isNaN(weightVal)
+            ? 70 // default if user didn't provide weight
+            : (userData.weightUnit === "kg" ? weightVal : weightVal * 0.453592);
+          
+          const reportData = generateDeathAnalysisReport(aiAnalysis, weightInKg, scenario);
+          const topItem = aiAnalysis.detectedItems[0];
+          
+          // Check if we need community training
+          const needsTraining = topItem?.needsTraining || false;
+          setNeedsCommunityTraining(needsTraining);
+          
+          if (needsTraining && topItem?.allClassificationResults) {
+            setCurrentAiLabels(topItem.allClassificationResults.map(r => r.label));
+          }
+          
+          // Convert AI analysis to our format
+          mockAnalysis = {
+            item: `${needsTraining ? 'Unknown Item: ' : 'AI Detected: '}${topItem?.label || 'Unknown Object'}`,
+            allergyRisk: userData.allergies ? "Check detected substances against your known allergies" : "No allergies specified",
+            killRating: Math.min(5, Math.ceil(reportData.deathScore / 20)),
+            killRatingText: reportData.deathScore >= 90 ? "Horrible MF, you're already dead" :
+                           reportData.deathScore >= 70 ? "Big yikes, could get ugly" :
+                           reportData.deathScore >= 50 ? "Uh oh, not great" :
+                           reportData.deathScore >= 30 ? "Meh, low-key risky" : "No Problemo",
+            lethalDose: topItem?.lethalDose || "Variable based on substance",
+            timeToDeath: reportData.timeToImpact,
+            mechanism: (() => { const r = topItem?.reason || ""; return (!r || r.toLowerCase().includes("unknown")) ? inferHazardMechanism(topItem?.label || scenario || "item") : r; })(),
+            survival: reportData.survivalTips.join(". "),
+            finalWords: reportData.finalWords
+          };
+          
+          setAnalysis(mockAnalysis);
+          
+          if (needsTraining) {
+            toast.info("🤖 AI needs help!", {
+              description: `Unknown item detected. Help train the AI by providing details.`
+            });
+          } else {
+            toast.success("🎯 AI analysis complete!", {
+              description: `Detected: ${topItem?.label} - Death Score: ${reportData.deathScore}%`
+            });
+          }
+        }
         
       } else {
         // Fallback to scenario-based analysis
         await new Promise(resolve => setTimeout(resolve, 1500));
         const mockAnalysis = getAnalysisForScenario(itemToAnalyze, userData);
         setAnalysis(mockAnalysis);
+        setNeedsCommunityTraining(false);
         
         toast.success("Death analysis complete! 💀");
       }
@@ -222,6 +269,8 @@ const DeathScannerPage = () => {
                 onAnalyze={handleAnalyze}
                 isAnalyzing={isAnalyzing}
                 canAnalyze={true}
+                needsCommunityTraining={needsCommunityTraining}
+                onCommunityTraining={handleCommunityTraining}
               />
             </div>
           </div>
