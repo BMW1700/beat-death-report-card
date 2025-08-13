@@ -55,10 +55,14 @@ export const DeathAnalyzer = ({
     setShowCamera(false);
   };
 
-  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       handleFileSelect(file);
+      // Trigger the parent's image upload handler if provided
+      if (onImageUpload) {
+        await onImageUpload(event);
+      }
     }
   };
 
@@ -173,7 +177,7 @@ export const DeathAnalyzer = ({
                   type="file" 
                   className="hidden" 
                   accept="image/*"
-                  onChange={onImageUpload}
+                  onChange={handleUpload}
                 />
               </label>
             </div>
@@ -185,7 +189,7 @@ export const DeathAnalyzer = ({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={onImageUpload}
+            onChange={handleUpload}
           />
         </div>
 
