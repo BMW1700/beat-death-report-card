@@ -24,11 +24,12 @@ export const analyzeImage = async (file: File): Promise<DetectedItem> => {
     const imageData = await imageToBase64(file);
     
     // Call our Supabase edge function for AI analysis
-    const response = await fetch('/api/functions/v1/ai-image-analysis', {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const response = await fetch(`${supabaseUrl}/functions/v1/ai-image-analysis`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || ''}`,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`,
       },
       body: JSON.stringify({
         imageData: imageData
