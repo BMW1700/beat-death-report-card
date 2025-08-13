@@ -77,19 +77,54 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.play();
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error("Camera not supported on this device/browser");
+        return;
       }
-      setIsCamera(true);
-      toast.success("📸 Camera started! Position the object and click capture.");
+
+      // Request camera permission with fallback options
+      let constraints = { video: { facingMode: 'environment' } };
+      
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          await videoRef.current.play();
+        }
+        setIsCamera(true);
+        toast.success("📸 Camera started! Position the object and click capture.");
+      } catch (envError) {
+        console.log('Environment camera failed, trying any camera...', envError);
+        // Fallback to any available camera
+        try {
+          const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setStream(mediaStream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = mediaStream;
+            await videoRef.current.play();
+          }
+          setIsCamera(true);
+          toast.success("📸 Camera started! Position the object and click capture.");
+        } catch (fallbackError) {
+          console.error('All camera attempts failed:', fallbackError);
+          throw fallbackError;
+        }
+      }
     } catch (error) {
-      toast.error("Unable to access camera");
       console.error('Camera error:', error);
+      let errorMessage = "Unable to access camera";
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Camera permission denied. Please allow camera access and try again.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No camera found on this device.";
+      } else if (error.name === 'NotSupportedError') {
+        errorMessage = "Camera not supported in this browser.";
+      }
+      
+      toast.error(errorMessage);
     }
   };
 
@@ -102,22 +137,39 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
   };
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      const context = canvas.getContext('2d');
+    if (!videoRef.current || !canvasRef.current) {
+      toast.error("Camera not ready. Please try again.");
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    const context = canvas.getContext('2d');
+    
+    if (!context) {
+      toast.error("Unable to capture photo. Please try again.");
+      return;
+    }
+
+    // Wait for video to be ready
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+      toast.error("Camera still loading. Please wait and try again.");
+      return;
+    }
+    
+    try {
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      context.drawImage(video, 0, 0);
       
-      if (context) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
-        
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        setCapturedImage(imageDataUrl);
-        stopCamera();
-        setShowAddForm(true);
-        toast.success("📸 Photo captured! Now add details about this item.");
-      }
+      const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      setCapturedImage(imageDataUrl);
+      stopCamera();
+      setShowAddForm(true);
+      toast.success("📸 Photo captured! Now add details about this item.");
+    } catch (error) {
+      console.error('Capture error:', error);
+      toast.error("Failed to capture photo. Please try again.");
     }
   };
 
@@ -455,6 +507,16 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
                 autoPlay
                 playsInline
                 muted
+                onLoadedMetadata={() => {
+                  console.log('Video metadata loaded');
+                  if (videoRef.current) {
+                    console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+                  }
+                }}
+                onError={(e) => {
+                  console.error('Video error:', e);
+                  toast.error("Camera failed to load. Please try again.");
+                }}
               />
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
                 <Button
