@@ -126,7 +126,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
     },
     {
       icon: Shield,
-      label: "Survival Tip",
+      label: "🆘 Survival Guide",
       value: analysis.survival,
       color: "text-green-400"
     },
@@ -167,17 +167,31 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
           </div>
         )}
 
-        {reportItems.map((item, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <item.icon className={`w-4 h-4 ${item.color}`} />
-              <span className="font-medium text-card-foreground">{item.label}:</span>
+        {reportItems.map((item, index) => {
+          // Special styling for survival guide
+          const isSurvival = item.label.includes("Survival Guide");
+          
+          return (
+            <div key={index} className={`space-y-2 ${isSurvival ? 'p-4 bg-success/10 border border-success/30 rounded-lg' : ''}`}>
+              <div className="flex items-center gap-2">
+                <item.icon className={`w-4 h-4 ${item.color} ${isSurvival ? 'animate-pulse' : ''}`} />
+                <span className={`font-medium text-card-foreground ${isSurvival ? 'text-success' : ''}`}>
+                  {item.label}:
+                </span>
+              </div>
+              <p className={`pl-6 ${item.color} text-sm leading-relaxed ${isSurvival ? 'font-medium whitespace-pre-line' : ''}`}>
+                {item.value}
+              </p>
+              {isSurvival && (
+                <div className="pl-6 mt-2">
+                  <Badge variant="outline" className="text-xs text-success border-success/50">
+                    Emergency: Call 911 or Poison Control (1-800-222-1222)
+                  </Badge>
+                </div>
+              )}
             </div>
-            <p className={`pl-6 ${item.color} text-sm leading-relaxed`}>
-              {item.value}
-            </p>
-          </div>
-        ))}
+          );
+        })}
         
         <div className="mt-6 p-4 bg-warning/20 border border-warning/30 rounded-lg">
           <div className="flex items-center gap-2 mb-2">

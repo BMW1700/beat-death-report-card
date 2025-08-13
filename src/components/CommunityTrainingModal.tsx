@@ -49,8 +49,8 @@ export const CommunityTrainingModal = ({
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.category) {
-      toast.error("Please fill in the item name and category");
+    if (!formData.name || !formData.category || !formData.survival.trim()) {
+      toast.error("Please fill in the item name, category, and survival tips (required fields)");
       return;
     }
 
@@ -297,14 +297,18 @@ export const CommunityTrainingModal = ({
             </div>
             
             <div>
-              <Label htmlFor="survival">Survival Tips</Label>
+              <Label htmlFor="survival">Survival Tips *</Label>
               <Textarea
                 id="survival"
                 value={formData.survival}
                 onChange={(e) => setFormData(prev => ({ ...prev, survival: e.target.value }))}
-                placeholder="What to do if exposed? (e.g., call poison control, induce vomiting...)"
-                className="bg-input border-border"
+                placeholder="REQUIRED: Step-by-step survival instructions. Include: 1) Immediate actions (first 5 min), 2) When to call 911/Poison Control, 3) What NOT to do, 4) Specific treatments/antidotes if known"
+                className="bg-input border-border min-h-[120px]"
+                required
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Be specific! Include emergency numbers, immediate actions, and what to avoid. This could save lives.
+              </p>
             </div>
             
             <div>

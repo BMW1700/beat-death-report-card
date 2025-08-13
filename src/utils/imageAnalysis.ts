@@ -12,42 +12,252 @@ let generalClassifier: any = null;
 // Food safety database - toxic foods and danger levels
 const FOOD_TOXICITY_DB = {
   // Highly toxic foods
-  'chocolate': { toxicityLevel: 85, reason: 'Contains theobromine which can be fatal in large amounts', lethalDose: '150-300mg per kg body weight' },
-  'mushroom': { toxicityLevel: 95, reason: 'Many wild mushrooms are deadly poisonous', lethalDose: 'Single bite of wrong species' },
-  'cherry': { toxicityLevel: 60, reason: 'Cherry pits contain cyanide', lethalDose: '1-2 crushed pits per kg body weight' },
-  'apple': { toxicityLevel: 40, reason: 'Apple seeds contain amygdalin (releases cyanide)', lethalDose: '200+ apple seeds' },
-  'almond': { toxicityLevel: 70, reason: 'Bitter almonds contain high cyanide levels', lethalDose: '50-100 bitter almonds' },
-  'potato': { toxicityLevel: 55, reason: 'Green potatoes contain solanine', lethalDose: '2-5mg per kg body weight' },
-  'tomato': { toxicityLevel: 35, reason: 'Green tomatoes and leaves contain solanine', lethalDose: '400-500mg solanine' },
-  'rhubarb': { toxicityLevel: 80, reason: 'Leaves contain oxalic acid', lethalDose: '11 pounds of leaves' },
-  'nutmeg': { toxicityLevel: 75, reason: 'Contains myristicin - hallucinogenic and toxic', lethalDose: '5-10 grams' },
-  'coffee': { toxicityLevel: 65, reason: 'Caffeine overdose', lethalDose: '10 grams caffeine (150 cups)' },
+  'chocolate': { 
+    toxicityLevel: 85, 
+    reason: 'Contains theobromine which can be fatal in large amounts', 
+    lethalDose: '150-300mg per kg body weight',
+    survival: 'IMMEDIATE: Induce vomiting if conscious. Call Poison Control (1-800-222-1222). Drink fluids to dilute. Seek emergency care immediately. DO NOT wait for symptoms.',
+    timeToDeath: '2-12 hours depending on amount',
+    finalWords: 'Death by chocolate was not supposed to be literal...'
+  },
+  'mushroom': { 
+    toxicityLevel: 95, 
+    reason: 'Many wild mushrooms are deadly poisonous', 
+    lethalDose: 'Single bite of wrong species',
+    survival: 'CRITICAL: Call 911 immediately. Save mushroom sample for identification. Induce vomiting only if instructed by medical professional. Time is life.',
+    timeToDeath: '6-16 hours (deceptive symptom-free period)',
+    finalWords: 'Fungi were supposed to be fun guys...'
+  },
+  'cherry': { 
+    toxicityLevel: 60, 
+    reason: 'Cherry pits contain cyanide', 
+    lethalDose: '1-2 crushed pits per kg body weight',
+    survival: 'If pits were chewed: Induce vomiting immediately. Call Poison Control. Administer oxygen if available. Seek emergency care for cyanide antidote kit.',
+    timeToDeath: '15 minutes to 2 hours',
+    finalWords: 'Life was the pits anyway...'
+  },
+  'apple': { 
+    toxicityLevel: 40, 
+    reason: 'Apple seeds contain amygdalin (releases cyanide)', 
+    lethalDose: '200+ apple seeds',
+    survival: 'Only dangerous if seeds are chewed/crushed. If large amount consumed: Induce vomiting, drink milk, call Poison Control. Monitor breathing.',
+    timeToDeath: '30 minutes to 3 hours',
+    finalWords: 'An apple a day keeps everyone away... permanently'
+  },
+  'almond': { 
+    toxicityLevel: 70, 
+    reason: 'Bitter almonds contain high cyanide levels', 
+    lethalDose: '50-100 bitter almonds',
+    survival: 'IMMEDIATE: Induce vomiting. Call 911. Give oxygen if available. Do NOT drink alcohol. Prepare for cyanide antidote treatment.',
+    timeToDeath: '15 minutes to 1 hour',
+    finalWords: 'Nuts about dying today...'
+  },
+  'potato': { 
+    toxicityLevel: 55, 
+    reason: 'Green potatoes contain solanine', 
+    lethalDose: '2-5mg per kg body weight',
+    survival: 'Remove green parts before eating. If consumed: Induce vomiting, drink lots of water, seek medical attention for IV fluids and monitoring.',
+    timeToDeath: '8-24 hours',
+    finalWords: 'This spud\'s for you... literally'
+  },
+  'tomato': { 
+    toxicityLevel: 35, 
+    reason: 'Green tomatoes and leaves contain solanine', 
+    lethalDose: '400-500mg solanine',
+    survival: 'Usually mild. Drink milk or water to dilute. Rest and monitor symptoms. Seek care if severe GI distress develops.',
+    timeToDeath: 'Rarely fatal',
+    finalWords: 'Say it ain\'t so, mato...'
+  },
+  'rhubarb': { 
+    toxicityLevel: 80, 
+    reason: 'Leaves contain oxalic acid', 
+    lethalDose: '11 pounds of leaves',
+    survival: 'If leaves consumed: Drink calcium-rich liquids (milk). Induce vomiting. Call Poison Control. Monitor for kidney damage.',
+    timeToDeath: '6-12 hours',
+    finalWords: 'Rhubarb and die...'
+  },
+  'nutmeg': { 
+    toxicityLevel: 75, 
+    reason: 'Contains myristicin - hallucinogenic and toxic', 
+    lethalDose: '5-10 grams',
+    survival: 'Call Poison Control immediately. Do NOT induce vomiting. Keep person calm and hydrated. Monitor for seizures. Seek emergency care.',
+    timeToDeath: '3-8 hours',
+    finalWords: 'Spice is not always nice...'
+  },
+  'coffee': { 
+    toxicityLevel: 65, 
+    reason: 'Caffeine overdose', 
+    lethalDose: '10 grams caffeine (150 cups)',
+    survival: 'Stop caffeine intake. Drink water to flush system. Seek medical care for heart monitoring. May need activated charcoal or IV fluids.',
+    timeToDeath: '6-12 hours',
+    finalWords: 'Death before decaf was taken too literally...'
+  },
   
   // Common foods with moderate toxicity
-  'onion': { toxicityLevel: 30, reason: 'Can cause hemolytic anemia in large amounts', lethalDose: '5g per kg body weight' },
-  'garlic': { toxicityLevel: 25, reason: 'Can cause gastrointestinal upset in large amounts', lethalDose: '15-30 cloves at once' },
-  'spinach': { toxicityLevel: 45, reason: 'High oxalate content can cause kidney stones', lethalDose: '11kg in one sitting' },
-  'tuna': { toxicityLevel: 50, reason: 'Mercury poisoning from overconsumption', lethalDose: '7+ cans daily for weeks' },
-  'water': { toxicityLevel: 15, reason: 'Water intoxication (hyponatremia)', lethalDose: '6 liters in 3 hours' },
-  'salt': { toxicityLevel: 90, reason: 'Sodium poisoning', lethalDose: '1 gram per kg body weight' },
-  'sugar': { toxicityLevel: 35, reason: 'Hyperglycemic shock in massive doses', lethalDose: '13.5 grams per kg body weight' },
-  'honey': { toxicityLevel: 40, reason: 'Botulism risk, sugar overdose', lethalDose: '40kg honey consumption' },
-  'avocado': { toxicityLevel: 20, reason: 'Persin toxicity (mostly for animals)', lethalDose: 'Very high for humans' },
-  'banana': { toxicityLevel: 25, reason: 'Potassium overdose', lethalDose: '400+ bananas at once' },
+  'onion': { 
+    toxicityLevel: 30, 
+    reason: 'Can cause hemolytic anemia in large amounts', 
+    lethalDose: '5g per kg body weight',
+    survival: 'Usually not dangerous to humans. If severe symptoms: Seek medical evaluation for blood count monitoring.',
+    timeToDeath: 'Days to weeks',
+    finalWords: 'This really made me cry...'
+  },
+  'garlic': { 
+    toxicityLevel: 25, 
+    reason: 'Can cause gastrointestinal upset in large amounts', 
+    lethalDose: '15-30 cloves at once',
+    survival: 'Drink milk to neutralize. Rest and stay hydrated. Usually resolves within 24 hours without intervention.',
+    timeToDeath: 'Rarely fatal',
+    finalWords: 'Guess I\'ll never ward off vampires again...'
+  },
+  'spinach': { 
+    toxicityLevel: 45, 
+    reason: 'High oxalate content can cause kidney stones', 
+    lethalDose: '11kg in one sitting',
+    survival: 'Drink lots of water. Take calcium supplements to bind oxalates. Monitor kidney function. Unlikely to be fatal.',
+    timeToDeath: 'Rarely fatal',
+    finalWords: 'Popeye lied to me...'
+  },
+  'tuna': { 
+    toxicityLevel: 50, 
+    reason: 'Mercury poisoning from overconsumption', 
+    lethalDose: '7+ cans daily for weeks',
+    survival: 'Stop tuna consumption. Increase water intake. Chelation therapy may be needed. Monitor neurological symptoms.',
+    timeToDeath: 'Months to years',
+    finalWords: 'Should have stuck to chicken of the sea...'
+  },
+  'water': { 
+    toxicityLevel: 15, 
+    reason: 'Water intoxication (hyponatremia)', 
+    lethalDose: '6 liters in 3 hours',
+    survival: 'STOP drinking water. Seek immediate medical care for IV saline solution. May need hospitalization for electrolyte monitoring.',
+    timeToDeath: '2-6 hours',
+    finalWords: 'Too much of a good thing...'
+  },
+  'salt': { 
+    toxicityLevel: 90, 
+    reason: 'Sodium poisoning', 
+    lethalDose: '1 gram per kg body weight',
+    survival: 'IMMEDIATELY drink large amounts of water to dilute. Call 911. May need IV fluids and kidney dialysis. Monitor brain swelling.',
+    timeToDeath: '1-6 hours',
+    finalWords: 'Worth my salt, apparently...'
+  },
+  'sugar': { 
+    toxicityLevel: 35, 
+    reason: 'Hyperglycemic shock in massive doses', 
+    lethalDose: '13.5 grams per kg body weight',
+    survival: 'Seek immediate medical care for blood sugar monitoring. May need insulin therapy and IV fluids. Monitor for diabetic coma.',
+    timeToDeath: '6-24 hours',
+    finalWords: 'Sugar crash was too literal...'
+  },
+  'honey': { 
+    toxicityLevel: 40, 
+    reason: 'Botulism risk, sugar overdose', 
+    lethalDose: '40kg honey consumption',
+    survival: 'For botulism: Seek immediate emergency care for antitoxin. Support breathing. For sugar overdose: Monitor blood glucose.',
+    timeToDeath: '24-72 hours for botulism',
+    finalWords: 'Bee-n nice knowing you...'
+  },
+  'avocado': { 
+    toxicityLevel: 20, 
+    reason: 'Persin toxicity (mostly for animals)', 
+    lethalDose: 'Very high for humans',
+    survival: 'Generally safe for humans. If allergic reaction: Antihistamines and epinephrine if severe. Monitor breathing.',
+    timeToDeath: 'Rarely fatal to humans',
+    finalWords: 'Guac and awe...'
+  },
+  'banana': { 
+    toxicityLevel: 25, 
+    reason: 'Potassium overdose', 
+    lethalDose: '400+ bananas at once',
+    survival: 'Monitor heart rhythm. Seek medical care for EKG monitoring. May need treatments to remove excess potassium from blood.',
+    timeToDeath: '2-6 hours',
+    finalWords: 'This is bananas...'
+  },
 };
 
 const OBJECT_TOXICITY_DB = {
   // Household items
-  'battery': { toxicityLevel: 95, reason: 'Battery acid and heavy metals', lethalDose: 'Single button battery' },
-  'bleach': { toxicityLevel: 99, reason: 'Caustic burns and chlorine poisoning', lethalDose: '200-300ml' },
-  'detergent': { toxicityLevel: 85, reason: 'Corrosive chemicals', lethalDose: '30-50ml concentrated' },
-  'medicine': { toxicityLevel: 80, reason: 'Drug overdose', lethalDose: 'Varies by medication' },
-  'perfume': { toxicityLevel: 70, reason: 'Alcohol poisoning and toxic chemicals', lethalDose: '100-200ml' },
-  'nail_polish': { toxicityLevel: 75, reason: 'Acetone and toxic solvents', lethalDose: '100ml' },
-  'paint': { toxicityLevel: 85, reason: 'Heavy metals and volatile organic compounds', lethalDose: '50-100ml' },
-  'cleaning_product': { toxicityLevel: 90, reason: 'Various toxic chemicals', lethalDose: '50-200ml' },
-  'insecticide': { toxicityLevel: 95, reason: 'Neurotoxins', lethalDose: '10-50ml' },
-  'rat_poison': { toxicityLevel: 99, reason: 'Anticoagulants or neurotoxins', lethalDose: '5-20g' },
+  'battery': { 
+    toxicityLevel: 95, 
+    reason: 'Battery acid and heavy metals', 
+    lethalDose: 'Single button battery',
+    survival: 'CRITICAL: Call 911 immediately. Do NOT induce vomiting. Give water or milk if conscious. X-ray needed to locate battery. Emergency surgery may be required.',
+    timeToDeath: '2-6 hours for perforation',
+    finalWords: 'Energizer bunny stops here...'
+  },
+  'bleach': { 
+    toxicityLevel: 99, 
+    reason: 'Caustic burns and chlorine poisoning', 
+    lethalDose: '200-300ml',
+    survival: 'NEVER induce vomiting. Rinse mouth with water. Drink milk or water to dilute. Call 911. Protect airway. Do NOT mix with other chemicals.',
+    timeToDeath: '30 minutes to 2 hours',
+    finalWords: 'Guess I really cleaned up...'
+  },
+  'detergent': { 
+    toxicityLevel: 85, 
+    reason: 'Corrosive chemicals', 
+    lethalDose: '30-50ml concentrated',
+    survival: 'Rinse mouth thoroughly. Do NOT induce vomiting. Drink water or milk. Call Poison Control. Monitor breathing for foam buildup.',
+    timeToDeath: '1-4 hours',
+    finalWords: 'This really cleaned me out...'
+  },
+  'medicine': { 
+    toxicityLevel: 80, 
+    reason: 'Drug overdose', 
+    lethalDose: 'Varies by medication',
+    survival: 'Identify specific medication. Call Poison Control with pill details. May need activated charcoal or gastric lavage. Monitor vital signs.',
+    timeToDeath: '30 minutes to 24 hours',
+    finalWords: 'The cure became the curse...'
+  },
+  'perfume': { 
+    toxicityLevel: 70, 
+    reason: 'Alcohol poisoning and toxic chemicals', 
+    lethalDose: '100-200ml',
+    survival: 'Induce vomiting if conscious. Call Poison Control. Monitor for alcohol poisoning symptoms. Support breathing and circulation.',
+    timeToDeath: '2-8 hours',
+    finalWords: 'Smell ya later...'
+  },
+  'nail_polish': { 
+    toxicityLevel: 75, 
+    reason: 'Acetone and toxic solvents', 
+    lethalDose: '100ml',
+    survival: 'Fresh air immediately. Do NOT induce vomiting. Call Poison Control. Monitor breathing for solvent inhalation effects.',
+    timeToDeath: '1-6 hours',
+    finalWords: 'Nailed it... to death'
+  },
+  'paint': { 
+    toxicityLevel: 85, 
+    reason: 'Heavy metals and volatile organic compounds', 
+    lethalDose: '50-100ml',
+    survival: 'Move to fresh air. Do NOT induce vomiting. Call Poison Control. May need chelation therapy for heavy metals. Monitor neurological symptoms.',
+    timeToDeath: '2-12 hours',
+    finalWords: 'This really painted me into a corner...'
+  },
+  'cleaning_product': { 
+    toxicityLevel: 90, 
+    reason: 'Various toxic chemicals', 
+    lethalDose: '50-200ml',
+    survival: 'Identify specific product. Call Poison Control with label. Do NOT induce vomiting. Rinse mouth. Protect airway from chemical burns.',
+    timeToDeath: '30 minutes to 6 hours',
+    finalWords: 'Should have stuck to soap and water...'
+  },
+  'insecticide': { 
+    toxicityLevel: 95, 
+    reason: 'Neurotoxins', 
+    lethalDose: '10-50ml',
+    survival: 'IMMEDIATE: Remove contaminated clothing. Call 911. Atropine may be antidote. Support breathing. Monitor for seizures.',
+    timeToDeath: '15 minutes to 2 hours',
+    finalWords: 'Bug spray got the wrong bug...'
+  },
+  'rat_poison': { 
+    toxicityLevel: 99, 
+    reason: 'Anticoagulants or neurotoxins', 
+    lethalDose: '5-20g',
+    survival: 'CRITICAL: Call 911 immediately. Identify poison type. Vitamin K may be antidote for anticoagulants. Monitor for bleeding or seizures.',
+    timeToDeath: '2-24 hours',
+    finalWords: 'Rats... this backfired'
+  },
 };
 
 // Heuristic hazard inference for any detected label
@@ -262,7 +472,11 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
             reason: data.reason,
             lethalDose: data.lethalDose,
             category: 'food' as const,
-            usdaInfo: usdaData[0] || null
+            usdaInfo: usdaData[0] || null,
+            survival: data.survival,
+            timeToDeath: data.timeToDeath,
+            finalWords: data.finalWords,
+            source: 'database'
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -286,7 +500,11 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
             reason: data.reason,
             lethalDose: data.lethalDose,
             category: 'object' as const,
-            chemicalInfo: pubchemData
+            chemicalInfo: pubchemData,
+            survival: data.survival,
+            timeToDeath: data.timeToDeath,
+            finalWords: data.finalWords,
+            source: 'database'
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -342,8 +560,8 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
       speakWarning(`Warning: Potentially dangerous item detected. Exercise caution.`);
     }
     
-    // Generate recommendations
-    const recommendations = generateRecommendations(maxRisk, detectedItems);
+// Generate recommendations with enhanced survival focus
+    const recommendations = generateSurvivalRecommendations(maxRisk, detectedItems);
     
     // Clean up the blob URL
     URL.revokeObjectURL(imageUrl);
@@ -412,7 +630,7 @@ const analyzeImageManually = async (imageFile: File) => {
     maxRisk = 50;
   }
   
-  const recommendations = generateRecommendations(maxRisk, detectedItems);
+  const recommendations = generateSurvivalRecommendations(maxRisk, detectedItems);
   
   return {
     detectedItems: detectedItems.sort((a, b) => b.toxicityLevel - a.toxicityLevel),
@@ -421,41 +639,57 @@ const analyzeImageManually = async (imageFile: File) => {
   };
 };
 
-const generateRecommendations = (riskLevel: number, items: any[]): string[] => {
+// Enhanced survival recommendations generator
+const generateSurvivalRecommendations = (riskLevel: number, items: any[]): string[] => {
   const recommendations: string[] = [];
   
   if (riskLevel >= 90) {
-    recommendations.push('🚨 EXTREME DANGER - DO NOT CONSUME OR HANDLE');
-    recommendations.push('☎️ Contact Poison Control immediately: 1-800-222-1222');
-    recommendations.push('🏥 Seek emergency medical attention if exposure occurred');
+    recommendations.push("🚨 IMMEDIATE ACTION: Call 911 NOW - Do not delay");
+    recommendations.push("☠️ CRITICAL: Do not touch, taste, or inhale this item");
+    recommendations.push("🏥 Emergency Room: Go immediately, even without symptoms");
+    recommendations.push("📞 Poison Control: 1-800-222-1222 (have item info ready)");
+    recommendations.push("⏰ TIME CRITICAL: Minutes count for survival");
   } else if (riskLevel >= 70) {
-    recommendations.push('⚠️ HIGH TOXICITY - Avoid consumption');
-    recommendations.push('🩺 Consult healthcare provider if consumed');
-    recommendations.push('📱 Keep Poison Control number handy: 1-800-222-1222');
+    recommendations.push("⚠️ HIGH ALERT: Prepare for emergency action");
+    recommendations.push("🛡️ Protection: Use gloves/mask if contact needed");
+    recommendations.push("📱 Speed Dial: Program Poison Control (1-800-222-1222)");
+    recommendations.push("🏥 Medical Plan: Know route to nearest emergency room");
+    recommendations.push("👥 Inform Others: Tell household members about danger");
   } else if (riskLevel >= 50) {
-    recommendations.push('⚡ MODERATE RISK - Use extreme caution');
-    recommendations.push('📏 Pay attention to dosage and frequency');
-    recommendations.push('👨‍⚕️ Consult doctor about safe consumption limits');
+    recommendations.push("⚡ CAUTION: Monitor symptoms closely");
+    recommendations.push("🧼 Decontamination: Wash thoroughly after any contact");
+    recommendations.push("📋 Documentation: Keep item label/info accessible");
+    recommendations.push("🩺 Medical Awareness: Inform doctor if symptoms develop");
+    recommendations.push("👶 Child Safety: Keep away from children and pets");
   } else if (riskLevel >= 30) {
-    recommendations.push('🔸 LOW-MODERATE RISK - Generally safe in normal amounts');
-    recommendations.push('⚖️ Monitor portion sizes and frequency');
+    recommendations.push("📋 STANDARD PRECAUTIONS: Follow safety guidelines");
+    recommendations.push("🧽 Quick Cleanup: Address spills/contact immediately");
+    recommendations.push("🔒 Secure Storage: Lock away from vulnerable individuals");
+    recommendations.push("📖 Learn Symptoms: Know what to watch for");
   } else {
-    recommendations.push('✅ RELATIVELY SAFE - Low toxicity risk');
-    recommendations.push('😊 Enjoy in moderation as part of balanced lifestyle');
+    recommendations.push("✅ GENERAL SAFETY: Use common sense precautions");
+    recommendations.push("🏠 Household Rules: Follow normal safety practices");
+    recommendations.push("📚 Stay Informed: Read all product labels and warnings");
+    recommendations.push("🧠 Know Resources: Familiarize with poison control");
   }
   
-  // Add specific recommendations based on detected items
-  const hasFood = items.some(item => item.category === 'food');
-  const hasObject = items.some(item => item.category === 'object');
+  // Add specific survival guidance based on item category
+  items.forEach(item => {
+    if (item.survival) {
+      recommendations.push(`🆘 ${item.label}: ${item.survival.split('.')[0]}.`);
+    }
+    
+    if (item.category === 'food' && item.toxicityLevel > 50) {
+      recommendations.push("🍎 Food Safety: Never consume if uncertain about safety");
+    } else if (item.category === 'medicine' && item.toxicityLevel > 60) {
+      recommendations.push("💊 Medication Alert: Verify dosage with healthcare provider");
+    } else if (item.category === 'object' && item.toxicityLevel > 60) {
+      recommendations.push("🏠 Home Safety: Relocate to secure storage immediately");
+    }
+  });
   
-  if (hasFood) {
-    recommendations.push('🍎 Food Safety: Check for spoilage and proper preparation');
-  }
-  
-  if (hasObject) {
-    recommendations.push('🏠 Household Safety: Keep away from children and pets');
-    recommendations.push('🧤 Use protective equipment when handling');
-  }
+  // Always include emergency contacts
+  recommendations.push("📞 Emergency Contacts: 911, Poison Control (1-800-222-1222)");
   
   return recommendations;
 };
