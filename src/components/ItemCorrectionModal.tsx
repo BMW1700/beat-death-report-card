@@ -10,19 +10,16 @@ import { toast } from "sonner";
 interface ItemCorrectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  aiDetection?: {
+  aiDetection: {
     label: string;
     confidence: number;
   };
-  imageFile?: File | null;
-  onCorrection?: (correction: {
+  imageFile: File | null;
+  onCorrection: (correction: {
     actualItem: string;
     category: string;
     confidence: number;
   }) => void;
-  // New props for enhanced system
-  detectedItem?: any;
-  onSubmit?: (correctionData: any) => void;
 }
 
 export const ItemCorrectionModal = ({
@@ -30,9 +27,7 @@ export const ItemCorrectionModal = ({
   onClose,
   aiDetection,
   imageFile,
-  onCorrection,
-  detectedItem,
-  onSubmit
+  onCorrection
 }: ItemCorrectionModalProps) => {
   const [actualItem, setActualItem] = useState("");
   const [category, setCategory] = useState("");
@@ -43,15 +38,12 @@ export const ItemCorrectionModal = ({
       return;
     }
 
-    const correctionData = {
+    // Submit the correction
+    onCorrection({
       actualItem: actualItem.trim(),
       category,
-      confidence: aiDetection?.confidence || detectedItem?.confidence || 0.5
-    };
-
-    // Call both handlers for backward compatibility
-    onCorrection?.(correctionData);
-    onSubmit?.(correctionData);
+      confidence: aiDetection.confidence
+    });
 
     toast.success("✅ Correction submitted!", {
       description: "Thanks for helping improve AI accuracy!"
@@ -80,11 +72,9 @@ export const ItemCorrectionModal = ({
               <X className="w-4 h-4 text-destructive" />
               <span className="text-sm font-medium text-muted-foreground">AI thinks this is:</span>
             </div>
-            <p className="font-semibold text-foreground">
-              {(aiDetection?.label) || (detectedItem?.itemName) || "Unknown"}
-            </p>
+            <p className="font-semibold text-foreground">{aiDetection.label}</p>
             <p className="text-xs text-muted-foreground">
-              Confidence: {Math.round(((aiDetection?.confidence) || (detectedItem?.confidence) || 0.5) * 100)}%
+              Confidence: {Math.round(aiDetection.confidence * 100)}%
             </p>
           </div>
 

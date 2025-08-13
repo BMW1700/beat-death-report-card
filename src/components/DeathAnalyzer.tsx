@@ -10,8 +10,7 @@ import { CommunityTrainingModal } from "./CommunityTrainingModal";
 interface DeathAnalyzerProps {
   scenario: string;
   setScenario: (scenario: string) => void;
-  onAnalyze: () => Promise<void>;
-  onImageUpload?: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  onAnalyze: (imageFile?: File, communityData?: any) => void;
   isAnalyzing: boolean;
   canAnalyze: boolean;
   needsCommunityTraining?: boolean;
@@ -22,7 +21,6 @@ export const DeathAnalyzer = ({
   scenario, 
   setScenario, 
   onAnalyze, 
-  onImageUpload,
   isAnalyzing, 
   canAnalyze,
   needsCommunityTraining = false,
@@ -55,14 +53,10 @@ export const DeathAnalyzer = ({
     setShowCamera(false);
   };
 
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       handleFileSelect(file);
-      // Trigger the parent's image upload handler if provided
-      if (onImageUpload) {
-        await onImageUpload(event);
-      }
     }
   };
 
@@ -73,7 +67,7 @@ export const DeathAnalyzer = ({
   };
 
   const handleAnalyze = () => {
-    onAnalyze();
+    onAnalyze(uploadedImage || undefined);
   };
 
   const handleCommunityTraining = () => {
@@ -85,7 +79,7 @@ export const DeathAnalyzer = ({
 
   const handleTrainingComplete = (trainingData: any) => {
     // Use the community training data for analysis
-    onAnalyze();
+    onAnalyze(uploadedImage || undefined, trainingData);
     setShowTrainingModal(false);
   };
 
@@ -96,7 +90,7 @@ export const DeathAnalyzer = ({
   const handleCameraScan = (file: File) => {
     handleFileSelect(file);
     // Immediately trigger analysis for scan
-    setTimeout(() => onAnalyze(), 100);
+    setTimeout(() => onAnalyze(file), 100);
   };
 
   const canAnalyzeWithInput = (canAnalyze && scenario.trim()) || uploadedImage;

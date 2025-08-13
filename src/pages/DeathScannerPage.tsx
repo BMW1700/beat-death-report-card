@@ -2,17 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skull, Calculator, AlertTriangle, ArrowLeft } from "lucide-react";
 import { DeathAnalyzer } from "@/components/DeathAnalyzer";
-import { analyzeImage } from "@/utils/imageAnalysis";
+import { analyzeImageForToxicity, generateDeathAnalysisReport, inferHazardMechanism } from "@/utils/imageAnalysis";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
-import { ItemCorrectionModal } from "@/components/ItemCorrectionModal";
-import { AIInsights } from "@/components/AIInsights";
-import { ViralSharingHub } from "@/components/ViralSharingHub";
-import { DetectedItem } from "@/types";
-
+import { ShareDeathReport } from "@/components/ShareDeathReport";
 import { Link } from "react-router-dom";
-import { UserData } from "@/types";
+import { UserData, DeathAnalysis } from "@/types";
 
 const DeathScannerPage = () => {
   const [userData, setUserData] = useState<UserData>({
@@ -24,69 +20,217 @@ const DeathScannerPage = () => {
   });
   
   const [scenario, setScenario] = useState("");
-  const [detectedItem, setDetectedItem] = useState<DetectedItem | null>(null);
+  const [analysis, setAnalysis] = useState<DeathAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
+  const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
+  const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
+  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsAnalyzing(true);
-    setImageFile(file);
-    setDetectedItem(null);
-
-    try {
-      console.log("🔍 Starting POWERFUL AI analysis...");
-      const result = await analyzeImage(file);
-      console.log("🎯 POWERFUL AI analysis result:", result);
-      setDetectedItem(result);
+  // Death analysis database for different scenarios
+  const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
+    const weight = parseFloat(userData.weight);
+    const isKg = userData.weightUnit === "kg";
+    const weightInKg = isKg ? weight : weight * 0.453592;
+    
+    // Convert common scenarios to lowercase for matching
+    const lowerItem = item.toLowerCase();
+    
+    if (lowerItem.includes("tylenol") || lowerItem.includes("acetaminophen")) {
+      const pillCount = parseInt(item.match(/\d+/)?.[0] || "1");
+      const totalMg = pillCount * 500; // Assuming 500mg pills
+      const mgPerKg = totalMg / weightInKg;
       
-      // Show confidence-based notifications
-      if (result.confidence >= 0.9) {
-        toast.success(`✅ High confidence detection: ${result.itemName}`);
-      } else if (result.confidence >= 0.7) {
-        toast.info(`🤔 Moderate confidence: ${result.itemName}`);
-      } else {
-        toast.warning(`⚠️ Low confidence detection - please verify: ${result.itemName}`);
-      }
-      
-    } catch (error) {
-      console.error("Analysis failed:", error);
-      toast.error("Analysis failed. Please try again.");
-    } finally {
-      setIsAnalyzing(false);
+      return {
+        item: `${pillCount} Tylenol pills (${totalMg}mg total)`,
+        allergyRisk: userData.allergies.toLowerCase().includes("acetaminophen") ? "Yes - acetaminophen allergy detected" : "No known acetaminophen allergies",
+        killRating: mgPerKg > 150 ? 5 : mgPerKg > 100 ? 4 : mgPerKg > 75 ? 3 : 2,
+        killRatingText: mgPerKg > 150 ? "Horrible MF, you're already dead" : mgPerKg > 100 ? "Big yikes, could get ugly" : mgPerKg > 75 ? "Uh oh, not great" : "Meh, low-key risky",
+        lethalDose: `~150mg/kg (${Math.round(150 * weightInKg)}mg for your weight)`,
+        timeToDeath: mgPerKg > 150 ? "12-24 hours" : "24-72 hours if untreated",
+        mechanism: "Acute liver failure leading to hepatic encephalopathy and multi-organ failure",
+        survival: "Immediately call poison control and get to ER - N-acetylcysteine can save you if given within 8 hours",
+        finalWords: pillCount > 15 ? "Your liver just filed for unemployment 💀" : "Paracetamol? More like para-see-ya-later 💊"
+      };
     }
+    
+    if (lowerItem.includes("energy drink")) {
+      const drinkCount = parseInt(item.match(/\d+/)?.[0] || "1");
+      const totalCaffeine = drinkCount * 150; // Assuming 150mg per drink
+      const caffeinePerKg = totalCaffeine / weightInKg;
+      
+      return {
+        item: `${drinkCount} energy drinks (~${totalCaffeine}mg caffeine)`,
+        allergyRisk: "No - unless you're allergic to having a pulse",
+        killRating: caffeinePerKg > 150 ? 5 : caffeinePerKg > 100 ? 4 : caffeinePerKg > 50 ? 3 : 1,
+        killRatingText: caffeinePerKg > 150 ? "Horrible MF, you're already dead" : caffeinePerKg > 100 ? "Big yikes, could get ugly" : caffeinePerKg > 50 ? "Uh oh, not great" : "No Problemo",
+        lethalDose: `~150-200mg/kg (${Math.round(150 * weightInKg)}mg for your weight)`,
+        timeToDeath: caffeinePerKg > 150 ? "30 minutes to 2 hours" : "2-6 hours",
+        mechanism: "Cardiac arrhythmia, seizures, and cardiovascular collapse",
+        survival: "Stop drinking them and call 911 if you feel chest pain or irregular heartbeat",
+        finalWords: drinkCount > 10 ? "Your heart is about to break up with you ⚡" : "Redbull gives you wings... to heaven 👼"
+      };
+    }
+    
+    if (lowerItem.includes("quarter") && (lowerItem.includes("swallow") || lowerItem.includes("ate"))) {
+      const quarterCount = parseInt(item.match(/\d+/)?.[0] || "1");
+      
+      return {
+        item: `${quarterCount} swallowed quarters`,
+        allergyRisk: "No - unless you're allergic to poor financial decisions",
+        killRating: quarterCount > 5 ? 4 : quarterCount > 2 ? 3 : 2,
+        killRatingText: quarterCount > 5 ? "Big yikes, could get ugly" : quarterCount > 2 ? "Uh oh, not great" : "Meh, low-key risky",
+        lethalDose: "Multiple coins causing complete bowel obstruction",
+        timeToDeath: "Days to weeks if untreated",
+        mechanism: "Intestinal obstruction leading to perforation, sepsis, and death",
+        survival: "Get to the ER immediately for X-rays and possible emergency surgery",
+        finalWords: quarterCount > 3 ? "Making change has never been this expensive 💰" : "That's not how you invest in quarters 🪙"
+      };
+    }
+    
+    if (lowerItem.includes("freezer") || lowerItem.includes("locked") || lowerItem.includes("cold")) {
+      return {
+        item: "Locked in a walk-in freezer",
+        allergyRisk: "No - but your body is about to be allergic to functioning",
+        killRating: 5,
+        killRatingText: "Horrible MF, you're already dead",
+        lethalDose: "Core body temperature below 90°F (32°C)",
+        timeToDeath: "30 minutes to 3 hours depending on clothing",
+        mechanism: "Severe hypothermia causing cardiac arrhythmia and respiratory failure",
+        survival: "Bang on the door, stay moving, conserve body heat, and pray someone finds you",
+        finalWords: "Chilling out has never been this literal ❄️"
+      };
+    }
+    
+    // Default analysis for unknown items
+    return {
+      item: item,
+      allergyRisk: userData.allergies && userData.allergies.toLowerCase() !== "none" ? "Possible - check your known allergies" : "Unknown - depends on the substance",
+      killRating: 3,
+      killRatingText: "Uh oh, not great",
+      lethalDose: "Variable based on substance and exposure method",
+      timeToDeath: "Highly variable - could be minutes to days",
+      mechanism: "Multiple potential pathways depending on the substance",
+      survival: "Avoid direct contact and seek immediate medical attention if symptoms occur",
+      finalWords: "Death finds a way, but so does Google... maybe try that first? 🤔"
+    };
   };
 
-  const handleCorrection = (correctionData: any) => {
-    console.log('Item correction received:', correctionData);
+  const handleCommunityTraining = (imageFile: File, aiLabels: string[]) => {
+    setCurrentAiLabels(aiLabels);
+  };
+
+  const handleCorrection = (correction: any) => {
+    console.log('Item correction received:', correction);
     toast.success("🔧 Correction submitted!", {
-      description: `AI will learn that this is actually ${correctionData.actualItem}`
+      description: `AI will learn that this is actually ${correction.actualItem}`
     });
-    setIsCorrectionModalOpen(false);
   };
 
-  const handleAnalyze = async () => {
-    if (!scenario.trim()) {
-      toast.warning("Please describe a deadly scenario or upload an image");
+  const handleAnalyze = async (imageFile?: File, communityData?: any) => {
+    if (!scenario.trim() && !imageFile) {
       return;
     }
     
     setIsAnalyzing(true);
     
     try {
-      // Simulate analysis for text scenarios
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let itemToAnalyze = scenario;
       
-      toast.success("Text scenario analysis complete! 💀", {
-        description: "For more accurate results, try uploading an image"
-      });
+      if (imageFile) {
+        // Store the current image file for correction purposes
+        setCurrentImageFile(imageFile);
+        
+        // Use AI image analysis for real toxicity detection
+        toast.info("🧠 AI analyzing image for death potential...", {
+          description: "Using advanced AI to detect toxic substances"
+        });
+        
+        let mockAnalysis: DeathAnalysis;
+        
+        // If we have community training data, use it
+        if (communityData) {
+          mockAnalysis = {
+            item: `Community Trained: ${communityData.name}`,
+            allergyRisk: communityData.deathAnalysis.allergyRisk || "No allergy information provided",
+            killRating: communityData.deathAnalysis.killRating,
+            killRatingText: communityData.deathAnalysis.killRatingText,
+            lethalDose: communityData.deathAnalysis.lethalDose,
+            timeToDeath: communityData.deathAnalysis.timeToDeath,
+            mechanism: communityData.deathAnalysis.mechanism,
+            survival: communityData.deathAnalysis.survival,
+            finalWords: communityData.deathAnalysis.finalWords
+          };
+          
+          setAnalysis(mockAnalysis);
+          setNeedsCommunityTraining(false);
+          
+          toast.success("✅ Community training applied!", {
+            description: `Analysis based on community data for ${communityData.name}`
+          });
+        } else {
+          // Regular AI analysis
+          const aiAnalysis = await analyzeImageForToxicity(imageFile);
+          const weightVal = parseFloat(userData.weight);
+          const weightInKg = isNaN(weightVal)
+            ? 70 // default if user didn't provide weight
+            : (userData.weightUnit === "kg" ? weightVal : weightVal * 0.453592);
+          
+          const reportData = generateDeathAnalysisReport(aiAnalysis, weightInKg, scenario);
+          const topItem = aiAnalysis.detectedItems[0];
+          
+          // Check if we need community training
+          const needsTraining = topItem?.needsTraining || false;
+          setNeedsCommunityTraining(needsTraining);
+          
+          if (needsTraining && topItem?.allClassificationResults) {
+            setCurrentAiLabels(topItem.allClassificationResults.map(r => r.label));
+          }
+          
+          // Convert AI analysis to our format
+          mockAnalysis = {
+            item: `${needsTraining ? 'Unknown Item: ' : 'AI Detected: '}${topItem?.label || 'Unknown Object'}`,
+            allergyRisk: userData.allergies ? "Check detected substances against your known allergies" : "No allergies specified",
+            killRating: Math.min(5, Math.ceil(reportData.deathScore / 20)),
+            killRatingText: reportData.deathScore >= 90 ? "Horrible MF, you're already dead" :
+                           reportData.deathScore >= 70 ? "Big yikes, could get ugly" :
+                           reportData.deathScore >= 50 ? "Uh oh, not great" :
+                           reportData.deathScore >= 30 ? "Meh, low-key risky" : "No Problemo",
+            lethalDose: topItem?.lethalDose || "Variable based on substance",
+            timeToDeath: reportData.timeToImpact,
+            mechanism: (() => { const r = topItem?.reason || ""; return (!r || r.toLowerCase().includes("unknown")) ? inferHazardMechanism(topItem?.label || scenario || "item") : r; })(),
+            survival: reportData.survivalTips.join(". "),
+            finalWords: reportData.finalWords,
+            detectedItems: aiAnalysis.detectedItems
+          };
+          
+          setAnalysis(mockAnalysis);
+          
+          if (needsTraining) {
+            toast.info("🤖 AI needs help!", {
+              description: `Unknown item detected. Help train the AI by providing details.`
+            });
+          } else {
+            toast.success("🎯 AI analysis complete!", {
+              description: `Detected: ${topItem?.label} - Death Score: ${reportData.deathScore}%`
+            });
+          }
+        }
+        
+      } else {
+        // Fallback to scenario-based analysis
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const mockAnalysis = getAnalysisForScenario(itemToAnalyze, userData);
+        setAnalysis(mockAnalysis);
+        setNeedsCommunityTraining(false);
+        
+        toast.success("Death analysis complete! 💀");
+      }
       
     } catch (error) {
       console.error("Analysis failed:", error);
-      toast.error("Analysis failed. Please try again.");
+      toast.error("Analysis failed", {
+        description: "Please try again or use text description instead"
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -135,53 +279,33 @@ const DeathScannerPage = () => {
                 scenario={scenario} 
                 setScenario={setScenario} 
                 onAnalyze={handleAnalyze}
-                onImageUpload={handleImageUpload}
                 isAnalyzing={isAnalyzing}
                 canAnalyze={true}
+                needsCommunityTraining={needsCommunityTraining}
+                onCommunityTraining={handleCommunityTraining}
               />
             </div>
           </div>
 
           {/* Right Column - Results */}
           <div className="space-y-6 animate-slide-in-left delay-300">
-            {detectedItem && (
-              <>
-                {/* Results Grid */}
-                <div className="grid gap-6">
-                  {/* Main Results */}
-                  <DeathReport 
-                    detectedItem={detectedItem} 
-                    imageFile={imageFile}
-                    onCorrection={() => setIsCorrectionModalOpen(true)}
-                  />
-                  
-                  {/* AI Insights */}
-                  <AIInsights 
-                    confidence={detectedItem.confidence}
-                    analysisMethod={detectedItem.analysisMethod}
-                    itemName={detectedItem.itemName}
-                  />
-                  
-                  {/* Viral Sharing */}
-                  <ViralSharingHub scanResult={{
-                    itemName: detectedItem.itemName,
-                    deathRating: detectedItem.deathRating,
-                    survivalTips: detectedItem.survivalTips
-                  }} />
-                </div>
-              </>
+            <div className="glass-card shadow-2xl border-primary/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
+              <DeathReport 
+                analysis={analysis} 
+                userData={userData} 
+                isAnalyzing={isAnalyzing}
+                imageFile={currentImageFile}
+                onCorrectionSubmitted={handleCorrection}
+              />
+            </div>
+            
+            {analysis && (
+              <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+                <ShareDeathReport deathReport={`${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"`} />
+              </div>
             )}
           </div>
         </div>
-
-        {/* Item Correction Modal */}
-        <ItemCorrectionModal
-          isOpen={isCorrectionModalOpen}
-          onClose={() => setIsCorrectionModalOpen(false)}
-          onSubmit={handleCorrection}
-          detectedItem={detectedItem}
-          imageFile={imageFile}
-        />
       </div>
     </div>
   );

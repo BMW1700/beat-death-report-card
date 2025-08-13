@@ -16,23 +16,20 @@ import {
   Edit3,
   CheckCircle
 } from "lucide-react";
-import { DeathAnalysis, UserData, DetectedItem } from "@/types";
+import { DeathAnalysis, UserData } from "@/types";
 import { ItemCorrectionModal } from "@/components/ItemCorrectionModal";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface DeathReportProps {
-  analysis?: DeathAnalysis | null;
-  userData?: UserData;
-  isAnalyzing?: boolean;
+  analysis: DeathAnalysis | null;
+  userData: UserData;
+  isAnalyzing: boolean;
   imageFile?: File | null;
   onCorrectionSubmitted?: (correction: any) => void;
-  // New props for enhanced AI system
-  detectedItem?: DetectedItem | null;
-  onCorrection?: () => void;
 }
 
-export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorrectionSubmitted, detectedItem: detectedItemProp, onCorrection }: DeathReportProps) => {
+export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorrectionSubmitted }: DeathReportProps) => {
   const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
@@ -47,8 +44,6 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
     setCorrectionModalOpen(false);
     setSelectedItem(null);
   };
-
-  // Handle both legacy analysis and new detectedItem system
   if (isAnalyzing) {
     return (
       <Card className="glass-card purple-glow">
@@ -70,136 +65,6 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
     );
   }
 
-  // Handle new DetectedItem system
-  if (detectedItemProp) {
-    return (
-      <Card className="glass-card danger-glow">
-        <CardHeader>
-          <CardTitle className="text-card-foreground flex items-center gap-2">
-            <FileText className="w-5 h-5 text-success" />
-            Death Scanner Report
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Death Rating */}
-          <div className="p-4 rounded-lg border bg-destructive/10 border-destructive/30">
-            <div className="flex items-center gap-3">
-              <Skull className="w-6 h-6 text-destructive" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-card-foreground font-medium">Death Rating:</span>
-                  <Badge variant="outline" className="text-destructive border-destructive">
-                    {detectedItemProp.deathRating}/10
-                  </Badge>
-                </div>
-                <p className="text-sm text-destructive mt-1">
-                  {detectedItemProp.deathRating >= 8 ? "Extremely Dangerous" :
-                   detectedItemProp.deathRating >= 6 ? "High Risk" :
-                   detectedItemProp.deathRating >= 4 ? "Moderate Risk" :
-                   detectedItemProp.deathRating >= 2 ? "Low Risk" : "Minimal Risk"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Item Name and Correction */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-primary" />
-              <span className="font-medium text-card-foreground">Detected Item:</span>
-              {detectedItemProp.allowCorrection && onCorrection && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onCorrection}
-                  className="ml-auto text-xs h-6 px-2 hover:bg-warning/20 border-warning/30"
-                >
-                  <Edit3 className="w-3 h-3 mr-1" />
-                  AI Wrong?
-                </Button>
-              )}
-            </div>
-            <p className="pl-6 text-primary text-sm font-semibold">
-              {detectedItemProp.itemName}
-            </p>
-            <div className="pl-6">
-              <Badge 
-                variant="outline" 
-                className={`text-xs ${
-                  detectedItemProp.confidence > 0.8 ? 'text-success border-success/50' : 
-                  detectedItemProp.confidence > 0.6 ? 'text-warning border-warning/50' : 
-                  'text-destructive border-destructive/50'
-                }`}
-              >
-                {detectedItemProp.allowCorrection ? '⚠️ ' : '✓ '}AI Confidence: {Math.round(detectedItemProp.confidence * 100)}%
-              </Badge>
-            </div>
-          </div>
-
-          {/* Risk Factors */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-warning" />
-              <span className="font-medium text-card-foreground">Risk Factors:</span>
-            </div>
-            <div className="pl-6 space-y-1">
-              {detectedItemProp.riskFactors.map((risk, index) => (
-                <p key={index} className="text-warning text-sm">• {risk}</p>
-              ))}
-            </div>
-          </div>
-
-          {/* Immediate Action */}
-          <div className="space-y-2 p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-destructive animate-pulse" />
-              <span className="font-medium text-destructive">Immediate Action:</span>
-            </div>
-            <p className="pl-6 text-destructive text-sm font-medium">
-              {detectedItemProp.immediateAction}
-            </p>
-          </div>
-
-          {/* Survival Tips */}
-          <div className="space-y-2 p-4 bg-success/10 border border-success/30 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-success animate-pulse" />
-              <span className="font-medium text-success">Survival Tips:</span>
-            </div>
-            <div className="pl-6 space-y-1">
-              {detectedItemProp.survivalTips.map((tip, index) => (
-                <p key={index} className="text-success text-sm">• {tip}</p>
-              ))}
-            </div>
-          </div>
-
-          {/* Fun Fact */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-purple-400" />
-              <span className="font-medium text-card-foreground">Dark Humor:</span>
-            </div>
-            <p className="pl-6 text-purple-400 text-sm italic">
-              {detectedItemProp.funFact}
-            </p>
-          </div>
-
-          {/* Disclaimer */}
-          <div className="mt-6 p-4 bg-warning/20 border border-warning/30 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-4 h-4 text-warning" />
-              <span className="text-warning font-medium text-sm">Disclaimer</span>
-            </div>
-            <p className="text-warning-foreground text-xs">
-              ⚠️ Not medical advice. For entertainment only.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Legacy system for analysis
   if (!analysis) {
     return (
       <Card className="glass-card">
@@ -242,8 +107,6 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
       default: return "bg-muted/20 border-muted/30";
     }
   };
-  
-  // Legacy analysis system continues here...
 
   // Check if the first detected item allows correction
   const detectedItem = analysis.detectedItems?.[0];
@@ -252,14 +115,16 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
   const reportItems = [
     {
       icon: Target,
-      label: "Item/Scenario", 
+      label: "Item/Scenario",
       value: analysis.item,
-      color: "text-blue-400"
+      color: "text-blue-400",
+      canCorrect: canCorrect,
+      detectedItem: detectedItem
     },
     {
       icon: User,
-      label: "Your Profile", 
-      value: `Weight ${userData?.weight || 'N/A'} ${userData?.weightUnit || ''}${userData?.age ? `, Age ${userData.age}` : ''}${userData?.gender ? `, Gender ${userData.gender}` : ''}`,
+      label: "Your Profile",
+      value: `Weight ${userData.weight} ${userData.weightUnit}${userData.age ? `, Age ${userData.age}` : ''}${userData.gender ? `, Gender ${userData.gender}` : ''}`,
       color: "text-green-400"
     },
     {
@@ -333,7 +198,6 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
           // Special styling for survival guide
           const isSurvival = item.label.includes("Survival Guide");
           const isItemScenario = item.label.includes("Item/Scenario");
-          const itemData = item as any; // Type assertion for extra properties
           
           return (
             <div key={index} className={`space-y-2 ${isSurvival ? 'p-4 bg-success/10 border border-success/30 rounded-lg' : ''}`}>
@@ -343,11 +207,11 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
                   {item.label}:
                 </span>
                 {/* Show correction button for item detection */}
-                {isItemScenario && itemData.canCorrect && (
+                {isItemScenario && item.canCorrect && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleCorrection(itemData.detectedItem)}
+                    onClick={() => handleCorrection(item.detectedItem)}
                     className="ml-auto text-xs h-6 px-2 hover:bg-warning/20 border-warning/30"
                   >
                     <Edit3 className="w-3 h-3 mr-1" />
@@ -359,17 +223,17 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
                 {item.value}
               </p>
               {/* Show confidence info for correctable items */}
-              {isItemScenario && itemData.detectedItem && (
+              {isItemScenario && item.detectedItem && (
                 <div className="pl-6">
                   <Badge 
                     variant="outline" 
                     className={`text-xs ${
-                      itemData.detectedItem.confidence > 0.8 ? 'text-success border-success/50' : 
-                      itemData.detectedItem.confidence > 0.6 ? 'text-warning border-warning/50' : 
+                      item.detectedItem.confidence > 0.8 ? 'text-success border-success/50' : 
+                      item.detectedItem.confidence > 0.6 ? 'text-warning border-warning/50' : 
                       'text-destructive border-destructive/50'
                     }`}
                   >
-                    {itemData.canCorrect ? '⚠️ ' : '✓ '}AI Confidence: {Math.round(itemData.detectedItem.confidence * 100)}%
+                    {item.canCorrect ? '⚠️ ' : '✓ '}AI Confidence: {Math.round(item.detectedItem.confidence * 100)}%
                   </Badge>
                 </div>
               )}
