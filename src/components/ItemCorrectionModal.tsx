@@ -80,9 +80,11 @@ export const ItemCorrectionModal = ({
               <X className="w-4 h-4 text-destructive" />
               <span className="text-sm font-medium text-muted-foreground">AI thinks this is:</span>
             </div>
-            <p className="font-semibold text-foreground">{aiDetection?.label || detectedItem?.itemName || "Unknown"}</p>
+            <p className="font-semibold text-foreground">
+              {(aiDetection?.label) || (detectedItem?.itemName) || "Unknown"}
+            </p>
             <p className="text-xs text-muted-foreground">
-              Confidence: {Math.round((aiDetection?.confidence || detectedItem?.confidence || 0.5) * 100)}%
+              Confidence: {Math.round(((aiDetection?.confidence) || (detectedItem?.confidence) || 0.5) * 100)}%
             </p>
           </div>
 
