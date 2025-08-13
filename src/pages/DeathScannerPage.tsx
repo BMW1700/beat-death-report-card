@@ -24,6 +24,7 @@ const DeathScannerPage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
   const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
+  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
 
   // Death analysis database for different scenarios
   const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
@@ -118,6 +119,13 @@ const DeathScannerPage = () => {
     setCurrentAiLabels(aiLabels);
   };
 
+  const handleCorrection = (correction: any) => {
+    console.log('Item correction received:', correction);
+    toast.success("🔧 Correction submitted!", {
+      description: `AI will learn that this is actually ${correction.actualItem}`
+    });
+  };
+
   const handleAnalyze = async (imageFile?: File, communityData?: any) => {
     if (!scenario.trim() && !imageFile) {
       return;
@@ -129,6 +137,9 @@ const DeathScannerPage = () => {
       let itemToAnalyze = scenario;
       
       if (imageFile) {
+        // Store the current image file for correction purposes
+        setCurrentImageFile(imageFile);
+        
         // Use AI image analysis for real toxicity detection
         toast.info("🧠 AI analyzing image for death potential...", {
           description: "Using advanced AI to detect toxic substances"
@@ -188,7 +199,8 @@ const DeathScannerPage = () => {
             timeToDeath: reportData.timeToImpact,
             mechanism: (() => { const r = topItem?.reason || ""; return (!r || r.toLowerCase().includes("unknown")) ? inferHazardMechanism(topItem?.label || scenario || "item") : r; })(),
             survival: reportData.survivalTips.join(". "),
-            finalWords: reportData.finalWords
+            finalWords: reportData.finalWords,
+            detectedItems: aiAnalysis.detectedItems
           };
           
           setAnalysis(mockAnalysis);
@@ -278,7 +290,13 @@ const DeathScannerPage = () => {
           {/* Right Column - Results */}
           <div className="space-y-6 animate-slide-in-left delay-300">
             <div className="glass-card shadow-2xl border-primary/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-              <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} />
+              <DeathReport 
+                analysis={analysis} 
+                userData={userData} 
+                isAnalyzing={isAnalyzing}
+                imageFile={currentImageFile}
+                onCorrectionSubmitted={handleCorrection}
+              />
             </div>
             
             {analysis && (

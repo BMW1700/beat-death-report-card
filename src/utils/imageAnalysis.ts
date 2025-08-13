@@ -476,7 +476,8 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
             survival: data.survival,
             timeToDeath: data.timeToDeath,
             finalWords: data.finalWords,
-            source: 'database'
+            source: 'database',
+            allowCorrection: confidence < 0.85 // Allow correction if not very confident
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -504,7 +505,8 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
             survival: data.survival,
             timeToDeath: data.timeToDeath,
             finalWords: data.finalWords,
-            source: 'database'
+            source: 'database',
+            allowCorrection: confidence < 0.85 // Allow correction if not very confident
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -524,7 +526,8 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
           reason: 'Unidentified medication - potential overdose or interaction risk',
           lethalDose: 'Varies by medication - consult medical professional',
           category: 'medication' as const,
-          fdaInfo: fdaData[0] || null
+          fdaInfo: fdaData[0] || null,
+          allowCorrection: confidence < 0.8 // Allow correction for pill misidentifications
         });
         maxRisk = Math.max(maxRisk, 75);
       }
@@ -540,6 +543,9 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
                            topResult.label.toLowerCase().includes('other') ||
                            !topResult.label || topResult.label.length < 3;
       
+      // Determine if user can correct this (low confidence or potential misidentification)
+      const allowCorrection = confidence < 0.75 || needsTraining;
+      
       detectedItems.push({
         label: topResult.label || 'Unknown Item',
         confidence: confidence,
@@ -548,6 +554,7 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
         lethalDose: 'Exposure-dependent; see mechanism',
         category: 'unknown' as const,
         needsTraining: needsTraining,
+        allowCorrection: allowCorrection,
         allClassificationResults: classificationResults.slice(0, 5) // Include top 5 for training reference
       });
       maxRisk = needsTraining ? 5 : 10;

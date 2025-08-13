@@ -6,6 +6,24 @@ export interface UserData {
   gender: string;
 }
 
+export interface DetectedItem {
+  label: string;
+  confidence: number;
+  toxicityLevel: number;
+  reason: string;
+  lethalDose: string;
+  category: string;
+  allowCorrection?: boolean;
+  needsTraining?: boolean;
+  source?: string;
+  survival?: string;
+  timeToDeath?: string;
+  finalWords?: string;
+  usdaInfo?: any;
+  chemicalInfo?: any;
+  fdaInfo?: any;
+}
+
 export interface DeathAnalysis {
   item: string;
   allergyRisk: string;
@@ -16,4 +34,5 @@ export interface DeathAnalysis {
   mechanism: string;
   survival: string;
   finalWords: string;
+  detectedItems?: DetectedItem[];
 }

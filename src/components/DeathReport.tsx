@@ -12,17 +12,38 @@ import {
   MessageSquare,
   Loader2,
   Flame,
-  Target
+  Target,
+  Edit3,
+  CheckCircle
 } from "lucide-react";
 import { DeathAnalysis, UserData } from "@/types";
+import { ItemCorrectionModal } from "@/components/ItemCorrectionModal";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface DeathReportProps {
   analysis: DeathAnalysis | null;
   userData: UserData;
   isAnalyzing: boolean;
+  imageFile?: File | null;
+  onCorrectionSubmitted?: (correction: any) => void;
 }
 
-export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProps) => {
+export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorrectionSubmitted }: DeathReportProps) => {
+  const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  const handleCorrection = (item: any) => {
+    setSelectedItem(item);
+    setCorrectionModalOpen(true);
+  };
+
+  const handleCorrectionSubmit = (correction: any) => {
+    console.log('Correction submitted:', correction);
+    onCorrectionSubmitted?.(correction);
+    setCorrectionModalOpen(false);
+    setSelectedItem(null);
+  };
   if (isAnalyzing) {
     return (
       <Card className="glass-card purple-glow">
@@ -87,12 +108,18 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
     }
   };
 
+  // Check if the first detected item allows correction
+  const detectedItem = analysis.detectedItems?.[0];
+  const canCorrect = detectedItem?.allowCorrection && imageFile;
+
   const reportItems = [
     {
       icon: Target,
       label: "Item/Scenario",
       value: analysis.item,
-      color: "text-blue-400"
+      color: "text-blue-400",
+      canCorrect: canCorrect,
+      detectedItem: detectedItem
     },
     {
       icon: User,
@@ -170,6 +197,7 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
         {reportItems.map((item, index) => {
           // Special styling for survival guide
           const isSurvival = item.label.includes("Survival Guide");
+          const isItemScenario = item.label.includes("Item/Scenario");
           
           return (
             <div key={index} className={`space-y-2 ${isSurvival ? 'p-4 bg-success/10 border border-success/30 rounded-lg' : ''}`}>
@@ -178,10 +206,37 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
                 <span className={`font-medium text-card-foreground ${isSurvival ? 'text-success' : ''}`}>
                   {item.label}:
                 </span>
+                {/* Show correction button for item detection */}
+                {isItemScenario && item.canCorrect && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCorrection(item.detectedItem)}
+                    className="ml-auto text-xs h-6 px-2 hover:bg-warning/20 border-warning/30"
+                  >
+                    <Edit3 className="w-3 h-3 mr-1" />
+                    AI Wrong?
+                  </Button>
+                )}
               </div>
               <p className={`pl-6 ${item.color} text-sm leading-relaxed ${isSurvival ? 'font-medium whitespace-pre-line' : ''}`}>
                 {item.value}
               </p>
+              {/* Show confidence info for correctable items */}
+              {isItemScenario && item.detectedItem && (
+                <div className="pl-6">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs ${
+                      item.detectedItem.confidence > 0.8 ? 'text-success border-success/50' : 
+                      item.detectedItem.confidence > 0.6 ? 'text-warning border-warning/50' : 
+                      'text-destructive border-destructive/50'
+                    }`}
+                  >
+                    {item.canCorrect ? '⚠️ ' : '✓ '}AI Confidence: {Math.round(item.detectedItem.confidence * 100)}%
+                  </Badge>
+                </div>
+              )}
               {isSurvival && (
                 <div className="pl-6 mt-2">
                   <Badge variant="outline" className="text-xs text-success border-success/50">
@@ -203,6 +258,20 @@ export const DeathReport = ({ analysis, userData, isAnalyzing }: DeathReportProp
           </p>
         </div>
       </CardContent>
+
+      {/* Correction Modal */}
+      {selectedItem && (
+        <ItemCorrectionModal
+          isOpen={correctionModalOpen}
+          onClose={() => setCorrectionModalOpen(false)}
+          aiDetection={{
+            label: selectedItem.label,
+            confidence: selectedItem.confidence
+          }}
+          imageFile={imageFile || null}
+          onCorrection={handleCorrectionSubmit}
+        />
+      )}
     </Card>
   );
 };
