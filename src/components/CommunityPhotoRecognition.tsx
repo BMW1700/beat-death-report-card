@@ -83,30 +83,83 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
         return;
       }
 
-      // Request camera permission with fallback options
-      let constraints = { video: { facingMode: 'environment' } };
+      // Stop any existing stream first
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+      }
+
+      // Request camera permission with mobile-optimized constraints
+      const constraints = {
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 }
+        },
+        audio: false
+      };
       
       try {
+        console.log('Requesting camera with environment facing...');
         const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('Camera stream obtained:', mediaStream);
+        
         setStream(mediaStream);
+        setIsCamera(true);
+        
+        // Wait for video element to be ready
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
-          await videoRef.current.play();
+          
+          // Handle video loading
+          videoRef.current.onloadedmetadata = () => {
+            console.log('Video metadata loaded');
+            if (videoRef.current) {
+              videoRef.current.play().then(() => {
+                console.log('Video playing successfully');
+                toast.success("📸 Camera ready! Position the object and click capture.");
+              }).catch(error => {
+                console.error('Video play error:', error);
+                toast.error("Camera failed to start. Please try again.");
+              });
+            }
+          };
         }
-        setIsCamera(true);
-        toast.success("📸 Camera started! Position the object and click capture.");
+        
       } catch (envError) {
         console.log('Environment camera failed, trying any camera...', envError);
         // Fallback to any available camera
         try {
-          const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const fallbackConstraints = {
+            video: {
+              width: { ideal: 1280, max: 1920 },
+              height: { ideal: 720, max: 1080 }
+            },
+            audio: false
+          };
+          
+          const mediaStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+          console.log('Fallback camera stream obtained:', mediaStream);
+          
           setStream(mediaStream);
+          setIsCamera(true);
+          
           if (videoRef.current) {
             videoRef.current.srcObject = mediaStream;
-            await videoRef.current.play();
+            
+            videoRef.current.onloadedmetadata = () => {
+              console.log('Fallback video metadata loaded');
+              if (videoRef.current) {
+                videoRef.current.play().then(() => {
+                  console.log('Fallback video playing successfully');
+                  toast.success("📸 Camera ready! Position the object and click capture.");
+                }).catch(error => {
+                  console.error('Fallback video play error:', error);
+                  toast.error("Camera failed to start. Please try again.");
+                });
+              }
+            };
           }
-          setIsCamera(true);
-          toast.success("📸 Camera started! Position the object and click capture.");
         } catch (fallbackError) {
           console.error('All camera attempts failed:', fallbackError);
           throw fallbackError;
@@ -122,16 +175,26 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
         errorMessage = "No camera found on this device.";
       } else if (error.name === 'NotSupportedError') {
         errorMessage = "Camera not supported in this browser.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Camera is being used by another application.";
       }
       
       toast.error(errorMessage);
+      setIsCamera(false);
     }
   };
 
   const stopCamera = () => {
+    console.log('Stopping camera...');
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach(track => {
+        console.log('Stopping track:', track.kind);
+        track.stop();
+      });
       setStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     setIsCamera(false);
   };
@@ -503,26 +566,49 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
             <div className="relative">
               <video
                 ref={videoRef}
-                className="w-full h-48 object-cover rounded-lg bg-black"
+                className="w-full h-64 object-cover rounded-lg bg-black"
                 autoPlay
                 playsInline
                 muted
-                onLoadedMetadata={() => {
+                controls={false}
+                style={{ 
+                  transform: 'scaleX(-1)', // Mirror the video for better UX
+                  minHeight: '200px'
+                }}
+                onLoadedMetadata={(e) => {
                   console.log('Video metadata loaded');
-                  if (videoRef.current) {
-                    console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
-                  }
+                  const video = e.target as HTMLVideoElement;
+                  console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+                  console.log('Video ready state:', video.readyState);
+                }}
+                onCanPlay={() => {
+                  console.log('Video can play');
+                }}
+                onPlaying={() => {
+                  console.log('Video is playing');
                 }}
                 onError={(e) => {
                   console.error('Video error:', e);
-                  toast.error("Camera failed to load. Please try again.");
+                  toast.error("Camera display failed. Please try again.");
+                }}
+                onLoadStart={() => {
+                  console.log('Video load started');
                 }}
               />
+              {!stream && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                  <div className="text-white text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                    <p className="text-sm">Starting camera...</p>
+                  </div>
+                </div>
+              )}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
                 <Button
                   onClick={capturePhoto}
                   size="sm"
                   className="gradient-bg"
+                  disabled={!stream}
                 >
                   <Camera className="w-4 h-4 mr-1" />
                   Capture
