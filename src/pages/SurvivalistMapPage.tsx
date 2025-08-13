@@ -25,6 +25,7 @@ import {
   MessageCircle
 } from "lucide-react";
 import { DeathChatQA } from "@/components/DeathChatQA";
+import { CommunityPhotoRecognition } from "@/components/CommunityPhotoRecognition";
 import { toast } from "sonner";
 
 interface SurvivalPin {
@@ -33,7 +34,7 @@ interface SurvivalPin {
   lng: number;
   title: string;
   description: string;
-  type: 'shelter' | 'hiking' | 'water' | 'medical' | 'bunker' | 'treasure' | 'trail' | 'landmark' | 'hidden' | 'cool';
+  type: 'shelter' | 'hiking' | 'water' | 'medical' | 'bunker' | 'treasure' | 'trail' | 'landmark' | 'hidden' | 'cool' | 'restroom';
   votes: number;
   addedBy: string;
   addedAt: Date;
@@ -49,7 +50,8 @@ const PIN_TYPES = {
   trail: { icon: Route, color: 'hsl(120 60% 50%)', label: 'Cool Trail' },
   landmark: { icon: Landmark, color: 'hsl(280 60% 50%)', label: 'Landmark' },
   hidden: { icon: Eye, color: 'hsl(15 78% 54%)', label: 'Hidden Spot' },
-  cool: { icon: Star, color: 'hsl(300 76% 72%)', label: 'Cool Spot' }
+  cool: { icon: Star, color: 'hsl(300 76% 72%)', label: 'Cool Spot' },
+  restroom: { icon: Users, color: 'hsl(190 75% 45%)', label: 'Public Restroom' }
 };
 
 // Fix for default markers in Leaflet
@@ -520,7 +522,7 @@ const SurvivalistMapPage = () => {
 
       {/* Survivalist Chat */}
       {showChat && (
-        <div className="fixed bottom-16 left-4 w-80 z-[1000]">
+        <div className="fixed bottom-16 left-4 w-80 z-[1000] space-y-2">
           <Card className="glass-card border-primary/30 primary-glow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-primary flex items-center gap-2">
@@ -532,6 +534,8 @@ const SurvivalistMapPage = () => {
               <DeathChatQA />
             </CardContent>
           </Card>
+          
+          <CommunityPhotoRecognition />
         </div>
       )}
 
