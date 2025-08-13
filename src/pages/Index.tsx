@@ -5,7 +5,7 @@ import { Skull, AlertTriangle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TrendingDeaths } from "@/components/TrendingDeaths";
 import { DeathScore } from "@/components/DeathScore";
-import { Achievements } from "@/components/Achievements";
+import { EnhancedAchievements } from "@/components/EnhancedAchievements";
 import { Leaderboard } from "@/components/Leaderboard";
 import { DailyDeathFact } from "@/components/DailyDeathFact";
 import { UserStories } from "@/components/UserStories";
@@ -16,6 +16,9 @@ import { PremiumUpsell } from "@/components/PremiumUpsell";
 import { InAppPurchases } from "@/components/InAppPurchases";
 import { ViralSharingHub } from "@/components/ViralSharingHub";
 import { WildernessScanner } from "@/components/WildernessScanner";
+import { LiveGlobalFeed } from "@/components/LiveGlobalFeed";
+import { SurvivalStreakTracker } from "@/components/SurvivalStreakTracker";
+import { SurvivalGearMarketplace } from "@/components/SurvivalGearMarketplace";
 import { DeathSpinWheel } from "@/components/DeathSpinWheel";
 import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
 
@@ -86,14 +89,17 @@ const Index = () => {
               <DeathScore />
             </div>
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <Achievements />
+              <EnhancedAchievements />
+            </div>
+            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+              <SurvivalStreakTracker />
             </div>
           </div>
 
           {/* Center Column - VIRAL PHASE 4: Real-Time Social Feed */}
           <div className="space-y-6 animate-fade-in delay-150">
-            {/* VIRAL PHASE 4.3: LIVE SOCIAL FEED */}
-            <LiveDeathFeed />
+            {/* VIRAL PHASE 4.3: LIVE GLOBAL FEED */}
+            <LiveGlobalFeed />
             
             {/* Analytics & Trending - Optimized for Viral Discovery */}
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
@@ -139,6 +145,9 @@ const Index = () => {
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <CommunityLeaderboard />
             </div>
+            
+            {/* VIRAL MONETIZATION: Gear Marketplace */}
+            <SurvivalGearMarketplace />
             
             {/* Monetization */}
             <div className="glass-card border-success/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
