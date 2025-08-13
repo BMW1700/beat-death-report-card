@@ -77,94 +77,46 @@ export const CommunityPhotoRecognition = ({ onItemAdded }: CommunityPhotoRecogni
 
   const startCamera = async () => {
     try {
-      // Check if getUserMedia is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast.error("Camera not supported on this device/browser");
-        return;
-      }
-
       // Stop any existing stream first
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
         setStream(null);
       }
 
-      // Request camera permission with mobile-optimized constraints
+      // Simple constraints for better compatibility
       const constraints = {
         video: {
-          facingMode: 'environment',
-          width: { ideal: 1280, max: 1920 },
-          height: { ideal: 720, max: 1080 }
+          facingMode: { ideal: 'environment' },
+          width: { min: 320, ideal: 640, max: 1280 },
+          height: { min: 240, ideal: 480, max: 720 }
         },
         audio: false
       };
       
-      try {
-        console.log('Requesting camera with environment facing...');
-        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('Camera stream obtained:', mediaStream);
+      console.log('Requesting camera...');
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('Camera stream obtained:', mediaStream);
+      
+      setStream(mediaStream);
+      setIsCamera(true);
+      
+      // Set video source immediately
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.playsInline = true;
+        videoRef.current.muted = true;
+        videoRef.current.autoplay = true;
         
-        setStream(mediaStream);
-        setIsCamera(true);
-        
-        // Wait for video element to be ready
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-          
-          // Handle video loading
-          videoRef.current.onloadedmetadata = () => {
-            console.log('Video metadata loaded');
-            if (videoRef.current) {
-              videoRef.current.play().then(() => {
-                console.log('Video playing successfully');
-                toast.success("📸 Camera ready! Position the object and click capture.");
-              }).catch(error => {
-                console.error('Video play error:', error);
-                toast.error("Camera failed to start. Please try again.");
-              });
-            }
-          };
-        }
-        
-      } catch (envError) {
-        console.log('Environment camera failed, trying any camera...', envError);
-        // Fallback to any available camera
-        try {
-          const fallbackConstraints = {
-            video: {
-              width: { ideal: 1280, max: 1920 },
-              height: { ideal: 720, max: 1080 }
-            },
-            audio: false
-          };
-          
-          const mediaStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-          console.log('Fallback camera stream obtained:', mediaStream);
-          
-          setStream(mediaStream);
-          setIsCamera(true);
-          
+        // Play video immediately
+        setTimeout(() => {
           if (videoRef.current) {
-            videoRef.current.srcObject = mediaStream;
-            
-            videoRef.current.onloadedmetadata = () => {
-              console.log('Fallback video metadata loaded');
-              if (videoRef.current) {
-                videoRef.current.play().then(() => {
-                  console.log('Fallback video playing successfully');
-                  toast.success("📸 Camera ready! Position the object and click capture.");
-                }).catch(error => {
-                  console.error('Fallback video play error:', error);
-                  toast.error("Camera failed to start. Please try again.");
-                });
-              }
-            };
+            videoRef.current.play().catch(console.error);
           }
-        } catch (fallbackError) {
-          console.error('All camera attempts failed:', fallbackError);
-          throw fallbackError;
-        }
+        }, 100);
+        
+        toast.success("📸 Camera ready! Position the object and click capture.");
       }
+        
     } catch (error) {
       console.error('Camera error:', error);
       let errorMessage = "Unable to access camera";
