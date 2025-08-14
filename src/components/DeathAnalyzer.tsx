@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useImageCache } from "@/hooks/useImageCache";
 import { preprocessImage, validateImageForAI } from "@/utils/imagePreprocessing";
 import { useCommunityLearning } from "@/hooks/useCommunityLearning";
-import { InlineCorrectionPanel } from "./InlineCorrectionPanel";
+import { EnhancedItemCorrectionModal } from "./EnhancedItemCorrectionModal";
 
 interface DeathAnalyzerProps {
   scenario: string;
@@ -509,19 +509,16 @@ export const DeathAnalyzer = ({
         onTrainingComplete={handleTrainingComplete}
       />
       
-      {/* Inline Correction Panel */}
-      {(showCorrectionModal || showEnhancedCorrectionModal) && lastDetection && uploadedImage && (
-        <div className="mt-4">
-          <InlineCorrectionPanel
-            aiDetection={lastDetection}
-            imageFile={uploadedImage}
-            onCorrection={handleCorrectionSubmit}
-            onClose={() => {
-              setShowEnhancedCorrectionModal(false);
-            }}
-            communityStats={communityLearning.getCommunityStats()}
-          />
-        </div>
+      {/* Enhanced Correction Modal */}
+      {lastDetection && uploadedImage && (
+        <EnhancedItemCorrectionModal
+          isOpen={showCorrectionModal || showEnhancedCorrectionModal}
+          onClose={() => setShowEnhancedCorrectionModal(false)}
+          aiDetection={lastDetection}
+          imageFile={uploadedImage}
+          onCorrection={handleCorrectionSubmit}
+          communityStats={communityLearning.getCommunityStats()}
+        />
       )}
     </>
   );
