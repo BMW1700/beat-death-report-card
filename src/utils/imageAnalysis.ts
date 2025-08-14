@@ -625,11 +625,14 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     const combinedResults = combineEnsembleResults(allResults);
     const classificationResults = combinedResults.length > 0 ? combinedResults : allResults;
     
-    console.log('Enhanced AI Classification results:', classificationResults);
+    console.log('Raw AI results from all models:', allResults);
+    console.log('Combined/ensemble results:', combinedResults);
+    console.log('Final classification results:', classificationResults);
     
     // Filter out very low confidence results and log remaining
     const filteredResults = classificationResults.filter(result => {
       const confidence = result.confidence || Math.round(result.score * 100);
+      console.log(`Filtering result: ${result.label} - confidence: ${confidence}%, threshold: ${CONFIDENCE_THRESHOLDS.MINIMUM_DETECTION}%`);
       return confidence >= CONFIDENCE_THRESHOLDS.MINIMUM_DETECTION;
     });
     
@@ -797,9 +800,22 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
 const combineEnsembleResults = (allResults: any[]): any[] => {
   const labelGroups: { [key: string]: any[] } = {};
   
-  // Group results by similar labels
+  // Group results by similar labels with better food categorization
   allResults.forEach(result => {
-    const normalizedLabel = result.label.toLowerCase().replace(/[^a-z]/g, '');
+    let normalizedLabel = result.label.toLowerCase().replace(/[^a-z]/g, '');
+    
+    // Better food categorization - map common food variations to base labels
+    const foodMappings = {
+      'peanutbutter': 'peanut',
+      'peanutbutterjar': 'peanut', 
+      'nutbutter': 'peanut',
+      'jar': normalizedLabel.includes('peanut') ? 'peanut' : normalizedLabel,
+      'container': normalizedLabel.includes('food') ? 'food' : normalizedLabel,
+      'bottle': result.source === 'food' ? 'food' : normalizedLabel
+    };
+    
+    normalizedLabel = foodMappings[normalizedLabel] || normalizedLabel;
+    
     if (!labelGroups[normalizedLabel]) {
       labelGroups[normalizedLabel] = [];
     }
@@ -819,7 +835,7 @@ const combineEnsembleResults = (allResults: any[]): any[] => {
       score: Math.min(0.99, weightedScore * 1.1), // Boost ensemble confidence
       modelCount: results.length,
       sources: results.map(r => r.source),
-      confidence: weightedScore
+      confidence: Math.round(weightedScore * 100) // Convert to percentage like other confidence values
     };
   });
   
