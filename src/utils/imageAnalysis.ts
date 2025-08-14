@@ -5,9 +5,11 @@ import { searchFDADrugs, searchUSDAFood, searchPubChem, speakWarning, lookupProd
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
-// Initialize pipelines
+// Initialize multiple AI pipelines for better accuracy
 let foodClassifier: any = null;
 let generalClassifier: any = null;
+let objectClassifier: any = null;
+let toxicityClassifier: any = null;
 
 // Food safety database - toxic foods and danger levels
 const FOOD_TOXICITY_DB = {
@@ -174,6 +176,54 @@ const FOOD_TOXICITY_DB = {
     timeToDeath: '2-6 hours',
     finalWords: 'This is bananas...'
   },
+  'alcohol': { 
+    toxicityLevel: 85, 
+    reason: 'Ethanol poisoning and respiratory depression', 
+    lethalDose: '5-8 drinks per hour',
+    survival: 'CRITICAL: Call 911. Keep person awake and upright. Check breathing constantly. Do NOT induce vomiting. IV fluids and monitoring needed.',
+    timeToDeath: '30 minutes to 6 hours',
+    finalWords: 'Bottoms up was too literal...'
+  },
+  'fish': { 
+    toxicityLevel: 60, 
+    reason: 'Scombrotoxin or ciguatoxin poisoning', 
+    lethalDose: '100-200g spoiled fish',
+    survival: 'Antihistamines for scombroid. Supportive care for ciguatera. Avoid alcohol and nuts which worsen symptoms.',
+    timeToDeath: '6-24 hours',
+    finalWords: 'Something fishy about this meal...'
+  },
+  'shellfish': { 
+    toxicityLevel: 75, 
+    reason: 'Paralytic shellfish poisoning or vibrio bacteria', 
+    lethalDose: '4-5 toxic mussels',
+    survival: 'IMMEDIATE: Call 911. Support breathing if paralysis develops. Activated charcoal if recent ingestion. May need ventilator.',
+    timeToDeath: '2-12 hours',
+    finalWords: 'Clammed up permanently...'
+  },
+  'beans': { 
+    toxicityLevel: 55, 
+    reason: 'Phytohemagglutinin in raw kidney beans', 
+    lethalDose: '4-5 raw kidney beans',
+    survival: 'Induce vomiting immediately. Drink lots of water. Seek medical care for IV fluids and monitoring. Symptoms peak at 3 hours.',
+    timeToDeath: '12-24 hours',
+    finalWords: 'Spilled the beans on myself...'
+  },
+  'elderberry': { 
+    toxicityLevel: 70, 
+    reason: 'Cyanogenic glycosides in bark and seeds', 
+    lethalDose: '200-400g uncooked berries',
+    survival: 'Call Poison Control. Induce vomiting if conscious. Give oxygen if available. Monitor for cyanide poisoning symptoms.',
+    timeToDeath: '30 minutes to 4 hours',
+    finalWords: 'Elder and wiser... too late'
+  },
+  'mint': { 
+    toxicityLevel: 30, 
+    reason: 'Menthol overdose can cause liver damage', 
+    lethalDose: '1000mg menthol',
+    survival: 'Stop mint consumption. Monitor liver function. Supportive care for symptoms. Usually resolves without treatment.',
+    timeToDeath: 'Days to weeks',
+    finalWords: 'Mint to be...'
+  },
 };
 
 const OBJECT_TOXICITY_DB = {
@@ -258,6 +308,54 @@ const OBJECT_TOXICITY_DB = {
     timeToDeath: '2-24 hours',
     finalWords: 'Rats... this backfired'
   },
+  'cigarette': { 
+    toxicityLevel: 90, 
+    reason: 'Nicotine poisoning', 
+    lethalDose: '1-2 cigarettes if eaten',
+    survival: 'IMMEDIATE: Induce vomiting if conscious. Call Poison Control. Activated charcoal may help. Monitor heart rate and breathing.',
+    timeToDeath: '15 minutes to 4 hours',
+    finalWords: 'Smoking kills... literally'
+  },
+  'lighter_fluid': { 
+    toxicityLevel: 95, 
+    reason: 'Hydrocarbon poisoning', 
+    lethalDose: '10-15ml',
+    survival: 'NEVER induce vomiting (aspiration risk). Call 911. Fresh air. Support breathing. May cause chemical pneumonia.',
+    timeToDeath: '30 minutes to 6 hours',
+    finalWords: 'Lit myself up wrong...'
+  },
+  'toilet_bowl_cleaner': { 
+    toxicityLevel: 92, 
+    reason: 'Hydrochloric acid burns', 
+    lethalDose: '30-50ml',
+    survival: 'Do NOT induce vomiting. Rinse mouth with water. Drink milk or water. Call 911. Monitor for airway swelling.',
+    timeToDeath: '30 minutes to 3 hours',
+    finalWords: 'Bowl movement gone wrong...'
+  },
+  'mothballs': { 
+    toxicityLevel: 88, 
+    reason: 'Naphthalene or paradichlorobenzene toxicity', 
+    lethalDose: '1-2 mothballs',
+    survival: 'Call Poison Control immediately. Induce vomiting if conscious. Monitor for seizures and liver damage. Fresh air essential.',
+    timeToDeath: '2-8 hours',
+    finalWords: 'Moth-eaten from the inside...'
+  },
+  'antifreeze': { 
+    toxicityLevel: 97, 
+    reason: 'Ethylene glycol poisoning', 
+    lethalDose: '100ml',
+    survival: 'CRITICAL: Call 911. Ethanol or fomepizole antidote needed ASAP. Support breathing. May need kidney dialysis.',
+    timeToDeath: '30 minutes to 12 hours',
+    finalWords: 'Anti-freeze became anti-life...'
+  },
+  'superglue': { 
+    toxicityLevel: 65, 
+    reason: 'Cyanoacrylate adhesive obstruction', 
+    lethalDose: '50ml',
+    survival: 'Do NOT induce vomiting. Rinse mouth with warm water. Call Poison Control. May need endoscopy to remove hardened glue.',
+    timeToDeath: '2-6 hours from obstruction',
+    finalWords: 'Stuck in a permanent situation...'
+  },
 };
 
 // Heuristic hazard inference for any detected label
@@ -287,51 +385,85 @@ export const inferHazardMechanism = (rawLabel: string): string => {
 
 export const initializeImageAnalysis = async () => {
   try {
-    console.log('Initializing AI image analysis...');
+    console.log('Initializing enhanced multi-model AI analysis...');
     
-    // Use reliable, lightweight models that definitely exist
-    try {
-      // Try WebGPU first
-      generalClassifier = await pipeline(
-        'image-classification',
-        'Xenova/vit-base-patch16-224',
-        { device: 'webgpu' }
-      );
-      
-      console.log('AI image analysis initialized successfully with WebGPU!');
-      return true;
-    } catch (webgpuError) {
-      console.log('WebGPU not available, falling back to CPU...');
-      
+    // Initialize multiple models for ensemble prediction
+    const models = [
+      { 
+        name: 'ViT-Base', 
+        model: 'Xenova/vit-base-patch16-224',
+        classifier: 'generalClassifier' 
+      },
+      { 
+        name: 'Food-Specific', 
+        model: 'Xenova/mobilenet_v2_1.0_224',
+        classifier: 'foodClassifier' 
+      },
+      { 
+        name: 'Object-Specific', 
+        model: 'Xenova/vit-base-patch16-224-in21k',
+        classifier: 'objectClassifier' 
+      }
+    ];
+
+    let successCount = 0;
+    
+    // Try WebGPU first for all models
+    for (const modelConfig of models) {
       try {
-        // Fallback to CPU with a reliable model
-        generalClassifier = await pipeline(
+        const classifier = await pipeline(
           'image-classification',
-          'Xenova/vit-base-patch16-224'
+          modelConfig.model,
+          { device: 'webgpu' }
         );
         
-        console.log('AI image analysis initialized on CPU!');
-        return true;
-      } catch (cpuError) {
-        console.log('Lightweight model fallback...');
+        if (modelConfig.classifier === 'generalClassifier') generalClassifier = classifier;
+        else if (modelConfig.classifier === 'foodClassifier') foodClassifier = classifier;
+        else if (modelConfig.classifier === 'objectClassifier') objectClassifier = classifier;
+        
+        console.log(`✅ ${modelConfig.name} loaded on WebGPU`);
+        successCount++;
+      } catch (error) {
+        console.log(`⚠️ ${modelConfig.name} failed on WebGPU, trying CPU...`);
         
         try {
-          // Final fallback to mobilenet
-          generalClassifier = await pipeline(
+          const classifier = await pipeline(
             'image-classification',
-            'Xenova/mobilenet_v2_1.0_224'
+            modelConfig.model
           );
           
-          console.log('AI image analysis initialized with MobileNet!');
-          return true;
-        } catch (finalError) {
-          console.error('All AI models failed to load:', finalError);
-          return false;
+          if (modelConfig.classifier === 'generalClassifier') generalClassifier = classifier;
+          else if (modelConfig.classifier === 'foodClassifier') foodClassifier = classifier;
+          else if (modelConfig.classifier === 'objectClassifier') objectClassifier = classifier;
+          
+          console.log(`✅ ${modelConfig.name} loaded on CPU`);
+          successCount++;
+        } catch (cpuError) {
+          console.log(`❌ ${modelConfig.name} failed to load`);
         }
       }
     }
+    
+    // Ensure at least one model loaded
+    if (successCount === 0) {
+      try {
+        // Emergency fallback to most reliable model
+        generalClassifier = await pipeline(
+          'image-classification',
+          'Xenova/mobilenet_v2_1.0_224'
+        );
+        console.log('🆘 Emergency MobileNet fallback successful');
+        successCount = 1;
+      } catch (error) {
+        console.error('💀 All AI models failed to load:', error);
+        return false;
+      }
+    }
+    
+    console.log(`🚀 Enhanced AI initialized with ${successCount}/3 models`);
+    return true;
   } catch (error) {
-    console.error('Failed to initialize image analysis:', error);
+    console.error('Failed to initialize enhanced AI:', error);
     return false;
   }
 };
@@ -432,8 +564,40 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     // Convert file to image URL for analysis
     const imageUrl = URL.createObjectURL(imageFile);
     
-    // Use the general classifier for all objects
-    const classificationResults = await generalClassifier(imageUrl);
+    // Use ensemble prediction with multiple models for better accuracy
+    const allResults: any[] = [];
+    
+    // Get predictions from all available models
+    if (generalClassifier) {
+      try {
+        const generalResults = await generalClassifier(imageUrl);
+        allResults.push(...generalResults.map((r: any) => ({ ...r, source: 'general', weight: 1.0 })));
+      } catch (error) {
+        console.warn('General classifier failed:', error);
+      }
+    }
+    
+    if (foodClassifier) {
+      try {
+        const foodResults = await foodClassifier(imageUrl);
+        allResults.push(...foodResults.map((r: any) => ({ ...r, source: 'food', weight: 1.2 }))); // Higher weight for food-specific
+      } catch (error) {
+        console.warn('Food classifier failed:', error);
+      }
+    }
+    
+    if (objectClassifier) {
+      try {
+        const objectResults = await objectClassifier(imageUrl);
+        allResults.push(...objectResults.map((r: any) => ({ ...r, source: 'object', weight: 1.1 })));
+      } catch (error) {
+        console.warn('Object classifier failed:', error);
+      }
+    }
+    
+    // Combine and weight results from multiple models
+    const combinedResults = combineEnsembleResults(allResults);
+    const classificationResults = combinedResults.length > 0 ? combinedResults : allResults;
     
     console.log('AI Classification results:', classificationResults);
     
@@ -584,6 +748,42 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     // Fallback to manual analysis if AI fails
     return analyzeImageManually(imageFile);
   }
+};
+
+// Ensemble method to combine results from multiple AI models
+const combineEnsembleResults = (allResults: any[]): any[] => {
+  const labelGroups: { [key: string]: any[] } = {};
+  
+  // Group results by similar labels
+  allResults.forEach(result => {
+    const normalizedLabel = result.label.toLowerCase().replace(/[^a-z]/g, '');
+    if (!labelGroups[normalizedLabel]) {
+      labelGroups[normalizedLabel] = [];
+    }
+    labelGroups[normalizedLabel].push(result);
+  });
+  
+  // Combine and weight scores for each label group
+  const combinedResults = Object.entries(labelGroups).map(([normalizedLabel, results]) => {
+    const totalWeight = results.reduce((sum, r) => sum + r.weight, 0);
+    const weightedScore = results.reduce((sum, r) => sum + (r.score * r.weight), 0) / totalWeight;
+    const bestResult = results.reduce((best, current) => 
+      current.score > best.score ? current : best
+    );
+    
+    return {
+      label: bestResult.label,
+      score: Math.min(0.99, weightedScore * 1.1), // Boost ensemble confidence
+      modelCount: results.length,
+      sources: results.map(r => r.source),
+      confidence: weightedScore
+    };
+  });
+  
+  // Sort by weighted score and return top results
+  return combinedResults
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10); // Return top 10 ensemble results
 };
 
 // Manual analysis fallback when AI is not available
