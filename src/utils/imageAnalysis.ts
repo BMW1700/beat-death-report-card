@@ -750,6 +750,61 @@ export const analyzeImageForToxicity = async (
       const itemName = result.label.toLowerCase();
       const confidence = result.score;
       
+      // Check for community corrections based on detected labels
+      if (communityLearning) {
+        const similarCorrections = communityLearning.searchSimilarCorrections(result.label);
+        if (similarCorrections.length > 0) {
+          const bestCorrection = similarCorrections[0]; // Highest user count
+          console.log(`🎯 Applying community correction: ${result.label} → ${bestCorrection.correctedItem}`);
+          
+          // Find toxicity data for corrected item
+          const correctedLabel = bestCorrection.correctedItem.toLowerCase();
+          let toxicityData = null;
+          let category = bestCorrection.category;
+          
+          // Check in food database first
+          for (const [food, data] of Object.entries(FOOD_TOXICITY_DB)) {
+            if (correctedLabel.includes(food.replace('_', ' ')) || food.replace('_', ' ').includes(correctedLabel)) {
+              toxicityData = data;
+              category = 'food';
+              break;
+            }
+          }
+          
+          // Check in object database if not found in food
+          if (!toxicityData) {
+            for (const [object, data] of Object.entries(OBJECT_TOXICITY_DB)) {
+              if (correctedLabel.includes(object.replace('_', ' ')) || object.replace('_', ' ').includes(correctedLabel)) {
+                toxicityData = data;
+                category = 'object';
+                break;
+              }
+            }
+          }
+          
+          if (toxicityData) {
+            const adjustedToxicity = toxicityData.toxicityLevel * CONFIDENCE_THRESHOLDS.COMMUNITY_BOOST;
+            
+            detectedItems.push({
+              label: bestCorrection.correctedItem,
+              confidence: CONFIDENCE_THRESHOLDS.COMMUNITY_BOOST,
+              toxicityLevel: adjustedToxicity,
+              reason: toxicityData.reason,
+              lethalDose: toxicityData.lethalDose,
+              category,
+              survival: toxicityData.survival,
+              timeToDeath: toxicityData.timeToDeath,
+              finalWords: toxicityData.finalWords,
+              source: 'community-corrected',
+              isFromCommunity: true,
+              allowCorrection: false
+            });
+            maxRisk = Math.max(maxRisk, adjustedToxicity);
+            continue; // Skip original AI detection since we have a community correction
+          }
+        }
+      }
+      
       // Check foods first
       for (const [food, data] of Object.entries(FOOD_TOXICITY_DB)) {
         if (itemName.includes(food) || food.includes(itemName) ||
