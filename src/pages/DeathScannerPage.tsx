@@ -219,10 +219,7 @@ const DeathScannerPage = () => {
             setCurrentAiLabels(topItem.allClassificationResults.map(r => r.label));
           }
           
-          // Auto-show correction modal for low confidence non-community items
-          if (allowCorrection && topItem && topItem.confidence < 40 && !topItem.isFromCommunity) {
-            setShowCorrectionModal(true);
-          }
+          // Don't auto-show correction modal - only show when user clicks button
           
           // Convert AI analysis to our format
           mockAnalysis = {
