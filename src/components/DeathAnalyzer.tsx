@@ -6,10 +6,7 @@ import { Upload, Calculator, Loader2, Camera, X, Image, AlertTriangle, CheckCirc
 import { useState, useRef } from "react";
 import { CameraScanner } from "./CameraScanner";
 import { CommunityTrainingModal } from "./CommunityTrainingModal";
-import { AnalysisProgress } from "./AnalysisProgress";
 import { useToast } from "@/hooks/use-toast";
-import { useImageCache } from "@/hooks/useImageCache";
-import { preprocessImage, validateImageForAI } from "@/utils/imagePreprocessing";
 
 interface DeathAnalyzerProps {
   scenario: string;
@@ -38,11 +35,8 @@ export const DeathAnalyzer = ({
   const [imageQuality, setImageQuality] = useState<'excellent' | 'good' | 'poor' | null>(null);
   const [imageAnalytics, setImageAnalytics] = useState<{size: string, format: string} | null>(null);
   const [isDragActive, setIsDragActive] = useState(false);
-  const [isPreprocessing, setIsPreprocessing] = useState(false);
-  const [showProgress, setShowProgress] = useState(false);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { getCachedResult, setCachedResult } = useImageCache();
 
   const exampleScenarios = [
     "9 Tylenol pills",
@@ -98,76 +92,35 @@ export const DeathAnalyzer = ({
       return;
     }
 
-    setIsPreprocessing(true);
-
-    try {
-      // Check cache first
-      const cachedResult = await getCachedResult(file);
-      if (cachedResult) {
-        toast({
-          title: "Using Cached Analysis",
-          description: "Found previous analysis for this image",
-        });
-      }
-
-      // Advanced image validation
-      const validation = await validateImageForAI(file);
-      if (validation.issues.length > 0) {
-        toast({
-          title: "Image Quality Issues",
-          description: validation.issues[0],
-          variant: validation.score < 50 ? "destructive" : "default"
-        });
-      }
-
-      // Preprocess image for better AI accuracy
-      const processedFile = await preprocessImage(file);
-      
-      setUploadedImage(processedFile);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(processedFile);
-      
-      // Analyze image quality and get analytics
-      const quality = await validateImageQuality(processedFile);
-      const analytics = getImageAnalytics(processedFile);
-      setImageQuality(quality);
-      setImageAnalytics(analytics);
-      
-      // Show quality feedback
-      if (quality === 'poor') {
-        toast({
-          title: "Low Image Quality Detected",
-          description: "Try a higher resolution image for better analysis accuracy",
-          variant: "destructive"
-        });
-      } else if (quality === 'excellent') {
-        toast({
-          title: "Excellent Image Quality",
-          description: "Perfect for detailed death analysis!",
-        });
-      }
-
-      setScenario("");
-      setShowCamera(false);
-    } catch (error) {
+    setUploadedImage(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Analyze image quality and get analytics
+    const quality = await validateImageQuality(file);
+    const analytics = getImageAnalytics(file);
+    setImageQuality(quality);
+    setImageAnalytics(analytics);
+    
+    // Show quality feedback
+    if (quality === 'poor') {
       toast({
-        title: "Image Processing Failed",
-        description: "Using original image instead",
+        title: "Low Image Quality Detected",
+        description: "Try a higher resolution image for better analysis accuracy",
         variant: "destructive"
       });
-      // Fallback to original behavior
-      setUploadedImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    } finally {
-      setIsPreprocessing(false);
+    } else if (quality === 'excellent') {
+      toast({
+        title: "Excellent Image Quality",
+        description: "Perfect for detailed death analysis!",
+      });
     }
+
+    setScenario("");
+    setShowCamera(false);
   };
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,17 +167,7 @@ export const DeathAnalyzer = ({
     }
   };
 
-  const handleAnalyze = async () => {
-    if (uploadedImage) {
-      // Check cache first
-      const cachedResult = await getCachedResult(uploadedImage);
-      if (cachedResult) {
-        onAnalyze(uploadedImage, cachedResult);
-        return;
-      }
-    }
-    
-    setShowProgress(true);
+  const handleAnalyze = () => {
     onAnalyze(uploadedImage || undefined);
   };
 
@@ -251,7 +194,7 @@ export const DeathAnalyzer = ({
     setTimeout(() => onAnalyze(file), 100);
   };
 
-  const canAnalyzeWithInput = (canAnalyze && scenario.trim()) || (uploadedImage && !isPreprocessing);
+  const canAnalyzeWithInput = (canAnalyze && scenario.trim()) || uploadedImage;
 
   // Show camera scanner if active
   if (showCamera) {
@@ -265,22 +208,14 @@ export const DeathAnalyzer = ({
   }
 
   return (
-    <>
-      {showProgress && isAnalyzing && (
-        <AnalysisProgress 
-          isAnalyzing={isAnalyzing} 
-          onComplete={() => setShowProgress(false)}
-        />
-      )}
-      
-      <Card className="glass-card success-glow">
-        <CardHeader>
-          <CardTitle className="text-card-foreground flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-destructive" />
-            Death Scanner & Analysis {isPreprocessing && "(Processing...)"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Card className="glass-card success-glow">
+      <CardHeader>
+        <CardTitle className="text-card-foreground flex items-center gap-2">
+          <Calculator className="w-5 h-5 text-destructive" />
+          Death Scanner & Analysis
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {/* Image/Camera Section */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-card-foreground">
@@ -452,8 +387,7 @@ export const DeathAnalyzer = ({
             Please enter your weight and upload an image or enter a scenario to analyze
           </p>
         )}
-        </CardContent>
-      </Card>
+      </CardContent>
       
       <CommunityTrainingModal
         isOpen={showTrainingModal}
@@ -462,6 +396,6 @@ export const DeathAnalyzer = ({
         aiDetectedLabels={aiDetectedLabels}
         onTrainingComplete={handleTrainingComplete}
       />
-    </>
+    </Card>
   );
 };
