@@ -25,6 +25,14 @@ const DeathScannerPage = () => {
   const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
   const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
   const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
+  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
+  const [lastDetection, setLastDetection] = useState<{
+    label: string;
+    confidence: number;
+    source?: string;
+    allClassificationResults?: any[];
+    isFromCommunity?: boolean;
+  } | null>(null);
 
   // Death analysis database for different scenarios
   const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
@@ -119,11 +127,24 @@ const DeathScannerPage = () => {
     setCurrentAiLabels(aiLabels);
   };
 
-  const handleCorrection = (correction: any) => {
-    console.log('Item correction received:', correction);
-    toast.success("🔧 Correction submitted!", {
-      description: `AI will learn that this is actually ${correction.actualItem}`
+  const handleCorrection = (originalDetection: string, correctedItem: string, category: string) => {
+    console.log('Item correction received:', { originalDetection, correctedItem, category });
+    setShowCorrectionModal(false);
+    
+    toast.success("🎯 Community Learning Updated!", {
+      description: `The scanner now knows "${originalDetection}" is actually "${correctedItem}". Next time anyone scans this, it will be detected correctly!`,
+      duration: 5000
     });
+    
+    // Optionally trigger re-analysis with the corrected item
+    if (currentImageFile) {
+      setTimeout(() => {
+        toast.info("🔄 Re-analyzing with correction...", {
+          description: "Testing the improved detection"
+        });
+        handleAnalyze(currentImageFile);
+      }, 2000);
+    }
   };
 
   const handleAnalyze = async (imageFile?: File, communityData?: any) => {
@@ -168,8 +189,8 @@ const DeathScannerPage = () => {
             description: `Analysis based on community data for ${communityData.name}`
           });
         } else {
-          // Regular AI analysis
-          const aiAnalysis = await analyzeImageForToxicity(imageFile);
+          // Regular AI analysis with community learning integration
+          const aiAnalysis = await analyzeImageForToxicity(imageFile, communityData);
           const weightVal = parseFloat(userData.weight);
           const weightInKg = isNaN(weightVal)
             ? 70 // default if user didn't provide weight
@@ -178,12 +199,29 @@ const DeathScannerPage = () => {
           const reportData = generateDeathAnalysisReport(aiAnalysis, weightInKg, scenario);
           const topItem = aiAnalysis.detectedItems[0];
           
+          // Store detection info for potential correction
+          if (topItem) {
+            setLastDetection({
+              label: topItem.label,
+              confidence: topItem.confidence,
+              source: topItem.source,
+              allClassificationResults: topItem.allClassificationResults,
+              isFromCommunity: topItem.isFromCommunity
+            });
+          }
+          
           // Check if we need community training
           const needsTraining = topItem?.needsTraining || false;
+          const allowCorrection = topItem?.allowCorrection !== false && !topItem?.isFromCommunity;
           setNeedsCommunityTraining(needsTraining);
           
           if (needsTraining && topItem?.allClassificationResults) {
             setCurrentAiLabels(topItem.allClassificationResults.map(r => r.label));
+          }
+          
+          // Auto-show correction modal for low confidence non-community items
+          if (allowCorrection && topItem && topItem.confidence < 40 && !topItem.isFromCommunity) {
+            setShowCorrectionModal(true);
           }
           
           // Convert AI analysis to our format
@@ -283,6 +321,9 @@ const DeathScannerPage = () => {
                 canAnalyze={true}
                 needsCommunityTraining={needsCommunityTraining}
                 onCommunityTraining={handleCommunityTraining}
+                onCorrection={handleCorrection}
+                showCorrectionModal={showCorrectionModal}
+                lastDetection={lastDetection}
               />
             </div>
           </div>
@@ -295,7 +336,6 @@ const DeathScannerPage = () => {
                 userData={userData} 
                 isAnalyzing={isAnalyzing}
                 imageFile={currentImageFile}
-                onCorrectionSubmitted={handleCorrection}
               />
             </div>
             

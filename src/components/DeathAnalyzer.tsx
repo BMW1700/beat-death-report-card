@@ -10,6 +10,8 @@ import { AnalysisProgress } from "./AnalysisProgress";
 import { useToast } from "@/hooks/use-toast";
 import { useImageCache } from "@/hooks/useImageCache";
 import { preprocessImage, validateImageForAI } from "@/utils/imagePreprocessing";
+import { useCommunityLearning } from "@/hooks/useCommunityLearning";
+import { EnhancedItemCorrectionModal } from "./EnhancedItemCorrectionModal";
 
 interface DeathAnalyzerProps {
   scenario: string;
@@ -19,6 +21,15 @@ interface DeathAnalyzerProps {
   canAnalyze: boolean;
   needsCommunityTraining?: boolean;
   onCommunityTraining?: (imageFile: File, aiLabels: string[]) => void;
+  onCorrection?: (originalDetection: string, correctedItem: string, category: string) => void;
+  showCorrectionModal?: boolean;
+  lastDetection?: {
+    label: string;
+    confidence: number;
+    source?: string;
+    allClassificationResults?: any[];
+    isFromCommunity?: boolean;
+  };
 }
 
 export const DeathAnalyzer = ({ 
@@ -28,7 +39,10 @@ export const DeathAnalyzer = ({
   isAnalyzing, 
   canAnalyze,
   needsCommunityTraining = false,
-  onCommunityTraining
+  onCommunityTraining,
+  onCorrection,
+  showCorrectionModal = false,
+  lastDetection
 }: DeathAnalyzerProps) => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -43,6 +57,8 @@ export const DeathAnalyzer = ({
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { getCachedResult, setCachedResult } = useImageCache();
+  const communityLearning = useCommunityLearning();
+  const [showEnhancedCorrectionModal, setShowEnhancedCorrectionModal] = useState(false);
 
   const exampleScenarios = [
     "9 Tylenol pills",
@@ -225,7 +241,25 @@ export const DeathAnalyzer = ({
     }
     
     setShowProgress(true);
-    onAnalyze(uploadedImage || undefined);
+    onAnalyze(uploadedImage || undefined, communityLearning);
+  };
+
+  const handleCorrectionSubmit = async (originalDetection: string, correctedItem: string, category: string) => {
+    if (uploadedImage && onCorrection) {
+      // Add to community learning system
+      await communityLearning.addCommunityCorrection(uploadedImage, originalDetection, correctedItem, category);
+      
+      // Call parent correction handler
+      onCorrection(originalDetection, correctedItem, category);
+      
+      setShowEnhancedCorrectionModal(false);
+      
+      toast({
+        title: "🚀 AI Trained Successfully!",
+        description: `The scanner now knows "${originalDetection}" is actually "${correctedItem}". Thanks for making it smarter!`,
+        duration: 5000,
+      });
+    }
   };
 
   const handleCommunityTraining = () => {
@@ -445,6 +479,18 @@ export const DeathAnalyzer = ({
               Help Train AI on This Item
             </Button>
           )}
+          
+          {/* Show correction button if we have a detection that needs correction */}
+          {lastDetection && uploadedImage && !lastDetection.isFromCommunity && (
+            <Button
+              onClick={() => setShowEnhancedCorrectionModal(true)}
+              variant="outline"
+              className="w-full border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Correct AI Detection
+            </Button>
+          )}
         </div>
 
         {!canAnalyzeWithInput && (
@@ -462,6 +508,18 @@ export const DeathAnalyzer = ({
         aiDetectedLabels={aiDetectedLabels}
         onTrainingComplete={handleTrainingComplete}
       />
+      
+      {/* Enhanced Correction Modal */}
+      {lastDetection && uploadedImage && (
+        <EnhancedItemCorrectionModal
+          isOpen={showCorrectionModal || showEnhancedCorrectionModal}
+          onClose={() => setShowEnhancedCorrectionModal(false)}
+          aiDetection={lastDetection}
+          imageFile={uploadedImage}
+          onCorrection={handleCorrectionSubmit}
+          communityStats={communityLearning.getCommunityStats()}
+        />
+      )}
     </>
   );
 };

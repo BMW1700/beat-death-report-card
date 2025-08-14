@@ -1,5 +1,6 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { searchFDADrugs, searchUSDAFood, searchPubChem, speakWarning, lookupProductByBarcode } from './apiServices';
+import { useCommunityLearning } from '../hooks/useCommunityLearning';
 
 // Configure transformers.js to use browser cache and download models
 env.allowLocalModels = false;
@@ -13,10 +14,11 @@ let toxicityClassifier: any = null;
 
 // Define confidence thresholds for better accuracy
 const CONFIDENCE_THRESHOLDS = {
-  MINIMUM_DETECTION: 15, // Reject anything below this
-  LOW_CONFIDENCE: 30,    // Warn user about low confidence
-  GOOD_CONFIDENCE: 60,   // Acceptable confidence
-  HIGH_CONFIDENCE: 80    // High confidence detection
+  MINIMUM_DETECTION: 5,  // Lowered threshold for initial detection
+  LOW_CONFIDENCE: 15,    // Warn user about low confidence
+  GOOD_CONFIDENCE: 40,   // Acceptable confidence
+  HIGH_CONFIDENCE: 70,   // High confidence detection
+  COMMUNITY_BOOST: 95    // High confidence for community-corrected items
 };
 
 // Food safety database - toxic foods and danger levels
@@ -93,6 +95,22 @@ const FOOD_TOXICITY_DB = {
     survival: 'Call Poison Control immediately. Do NOT induce vomiting. Keep person calm and hydrated. Monitor for seizures. Seek emergency care.',
     timeToDeath: '3-8 hours',
     finalWords: 'Spice is not always nice...'
+  },
+  'peanut butter': { 
+    toxicityLevel: 20, 
+    reason: 'Common allergen - can cause severe anaphylactic reactions', 
+    lethalDose: 'Any amount for severely allergic individuals',
+    survival: 'If allergic reaction: Use EpiPen immediately if available. Call 911. Remove from mouth if possible. Monitor breathing. CPR if needed.',
+    timeToDeath: '5-30 minutes for severe allergic reactions',
+    finalWords: 'Nuts... should have read the label...'
+  },
+  'peanut': { 
+    toxicityLevel: 25, 
+    reason: 'Severe allergen - can trigger anaphylaxis', 
+    lethalDose: 'Microscopic amounts for allergic individuals',
+    survival: 'EMERGENCY: EpiPen injection immediately. Call 911. Position upright. Monitor airway. Be ready for CPR. Do NOT delay treatment.',
+    timeToDeath: '5-15 minutes for severe cases',
+    finalWords: 'Going nuts was the last thing I did...'
   },
   'coffee': { 
     toxicityLevel: 65, 
@@ -535,7 +553,10 @@ const checkCommunityDatabase = async (imageFile: File, classificationResults: an
   return null;
 };
 
-export const analyzeImageForToxicity = async (imageFile: File): Promise<{
+export const analyzeImageForToxicity = async (
+  imageFile: File, 
+  communityLearning?: ReturnType<typeof useCommunityLearning>
+): Promise<{
   detectedItems: Array<{
     label: string;
     confidence: number;
@@ -552,15 +573,79 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     allergyRisk?: string;
     source?: string;
     needsTraining?: boolean;
+    allowCorrection?: boolean;
     allClassificationResults?: any[];
+    isFromCommunity?: boolean;
   }>;
   overallRisk: number;
   recommendations: string[];
 }> => {
   try {
-    console.log('Analyzing image for toxicity...');
+    console.log('🔍 Enhanced AI Analysis with Community Learning...');
     
-    // Initialize AI if not ready
+    // STEP 1: Check community database first for instant results
+    if (communityLearning) {
+      const communityCorrection = await communityLearning.getCommunityCorrection(imageFile);
+      if (communityCorrection) {
+        console.log('✅ Found community correction:', communityCorrection.correctedItem);
+        
+        // Look up the corrected item in our databases
+        const correctedLabel = communityCorrection.correctedItem.toLowerCase();
+        let toxicityData = null;
+        let category: 'food' | 'object' | 'medication' | 'unknown' = 'unknown';
+        
+        // Check in food database
+        for (const [food, data] of Object.entries(FOOD_TOXICITY_DB)) {
+          if (correctedLabel.includes(food) || food.includes(correctedLabel)) {
+            toxicityData = data;
+            category = 'food';
+            break;
+          }
+        }
+        
+        // Check in object database if not found in food
+        if (!toxicityData) {
+          for (const [object, data] of Object.entries(OBJECT_TOXICITY_DB)) {
+            if (correctedLabel.includes(object.replace('_', ' ')) || object.replace('_', ' ').includes(correctedLabel)) {
+              toxicityData = data;
+              category = 'object';
+              break;
+            }
+          }
+        }
+        
+        if (toxicityData) {
+          const detectedItem = {
+            label: communityCorrection.correctedItem,
+            confidence: CONFIDENCE_THRESHOLDS.COMMUNITY_BOOST,
+            toxicityLevel: toxicityData.toxicityLevel,
+            reason: toxicityData.reason,
+            lethalDose: toxicityData.lethalDose,
+            category,
+            survival: toxicityData.survival,
+            timeToDeath: toxicityData.timeToDeath,
+            finalWords: toxicityData.finalWords,
+            source: 'community-learned',
+            isFromCommunity: true,
+            allowCorrection: false // Don't allow re-correction of community items
+          };
+          
+          return {
+            detectedItems: [detectedItem],
+            overallRisk: toxicityData.toxicityLevel,
+            recommendations: generateSurvivalRecommendations(toxicityData.toxicityLevel, [detectedItem])
+          };
+        }
+      }
+      
+      // Check for similar corrections
+      const similarCorrections = communityLearning.searchSimilarCorrections('');
+      if (similarCorrections.length > 0) {
+        console.log(`🔍 Found ${similarCorrections.length} similar community corrections for reference`);
+      }
+    }
+    
+    // STEP 2: Initialize AI if not ready
     if (!generalClassifier) {
       const initialized = await initializeImageAnalysis();
       if (!initialized) {
