@@ -215,7 +215,14 @@ export const EnhancedItemCorrectionModal: React.FC<EnhancedItemCorrectionModalPr
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={onClose} className="flex-1">
+            <Button 
+              variant="outline" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+              }} 
+              className="flex-1"
+            >
               Maybe Later
             </Button>
             <Button onClick={handleSubmit} className="flex-1" disabled={!actualItem.trim() || !category}>
