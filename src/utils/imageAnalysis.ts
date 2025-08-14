@@ -579,7 +579,13 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     if (generalClassifier) {
       try {
         const generalResults = await generalClassifier(imageUrl);
-        allResults.push(...generalResults.map((r: any) => ({ ...r, source: 'general', weight: 1.0 })));
+        const resultsArray = Array.isArray(generalResults) ? generalResults : [generalResults];
+        allResults.push(...resultsArray.map((r: any) => ({ 
+          label: r.label, 
+          score: r.score || r.confidence, 
+          source: 'general', 
+          weight: 1.0 
+        })));
       } catch (error) {
         console.warn('General classifier failed:', error);
       }
@@ -588,7 +594,13 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     if (foodClassifier) {
       try {
         const foodResults = await foodClassifier(imageUrl);
-        allResults.push(...foodResults.map((r: any) => ({ ...r, source: 'food', weight: 1.2 }))); // Higher weight for food-specific
+        const resultsArray = Array.isArray(foodResults) ? foodResults : [foodResults];
+        allResults.push(...resultsArray.map((r: any) => ({ 
+          label: r.label, 
+          score: r.score || r.confidence, 
+          source: 'food', 
+          weight: 1.2 
+        }))); // Higher weight for food-specific
       } catch (error) {
         console.warn('Food classifier failed:', error);
       }
@@ -597,7 +609,13 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
     if (objectClassifier) {
       try {
         const objectResults = await objectClassifier(imageUrl);
-        allResults.push(...objectResults.map((r: any) => ({ ...r, source: 'object', weight: 1.1 })));
+        const resultsArray = Array.isArray(objectResults) ? objectResults : [objectResults];
+        allResults.push(...resultsArray.map((r: any) => ({ 
+          label: r.label, 
+          score: r.score || r.confidence, 
+          source: 'object', 
+          weight: 1.1 
+        })));
       } catch (error) {
         console.warn('Object classifier failed:', error);
       }
