@@ -11,6 +11,14 @@ let generalClassifier: any = null;
 let objectClassifier: any = null;
 let toxicityClassifier: any = null;
 
+// Define confidence thresholds for better accuracy
+const CONFIDENCE_THRESHOLDS = {
+  MINIMUM_DETECTION: 15, // Reject anything below this
+  LOW_CONFIDENCE: 30,    // Warn user about low confidence
+  GOOD_CONFIDENCE: 60,   // Acceptable confidence
+  HIGH_CONFIDENCE: 80    // High confidence detection
+};
+
 // Food safety database - toxic foods and danger levels
 const FOOD_TOXICITY_DB = {
   // Highly toxic foods
@@ -595,14 +603,31 @@ export const analyzeImageForToxicity = async (imageFile: File): Promise<{
       }
     }
     
-    // Combine and weight results from multiple models
+    // Combine and weight results from multiple models with enhanced logic
     const combinedResults = combineEnsembleResults(allResults);
     const classificationResults = combinedResults.length > 0 ? combinedResults : allResults;
     
-    console.log('AI Classification results:', classificationResults);
+    console.log('Enhanced AI Classification results:', classificationResults);
+    
+    // Filter out very low confidence results and log remaining
+    const filteredResults = classificationResults.filter(result => {
+      const confidence = result.confidence || Math.round(result.score * 100);
+      return confidence >= CONFIDENCE_THRESHOLDS.MINIMUM_DETECTION;
+    });
+    
+    // Log confidence levels for debugging
+    filteredResults.forEach(result => {
+      const confidence = result.confidence || Math.round(result.score * 100);
+      console.log(`Detected: ${result.label} (${confidence}% confidence, sources: ${result.sources?.join(', ') || 'unknown'})`);
+    });
+    
+    if (filteredResults.length === 0) {
+      console.warn('All AI detections below minimum confidence threshold, using fallback');
+      return analyzeImageManually(imageFile);
+    }
     
     // Check community database first for user-contributed training data
-    const communityMatch = await checkCommunityDatabase(imageFile, classificationResults);
+    const communityMatch = await checkCommunityDatabase(imageFile, filteredResults);
     
     const detectedItems: any[] = [];
     let maxRisk = 0;
