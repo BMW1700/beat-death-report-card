@@ -7,12 +7,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <title>BeatDeath - Death Calculator & Survival Coach</title>
-    <meta name="description" content="Your darkly funny, science-informed AI agent that reveals how common items and scenarios can kill you - based on YOUR unique biology." />
+    
+    <!-- PWA Configuration -->
+    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BeatDeath" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <title>BeatDeath - Survivalist Scanner</title>
+    <meta name="description" content="Scan objects and scenarios for survival threats. The ultimate survivalist companion app powered by AI." />
     <meta name="author" content="Lovable" />
 
-    <meta property="og:title" content="BeatDeath - Death Calculator & Survival Coach" />
-    <meta property="og:description" content="Your darkly funny, science-informed AI agent that reveals how common items and scenarios can kill you - based on YOUR unique biology." />
+    <meta property="og:title" content="BeatDeath - Survivalist Scanner" />
+    <meta property="og:description" content="AI-powered threat detection and survival guidance for the ultimate survivalist experience." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
@@ -26,5 +34,20 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

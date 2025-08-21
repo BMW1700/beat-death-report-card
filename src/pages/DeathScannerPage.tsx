@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
 import { ShareDeathReport } from "@/components/ShareDeathReport";
+import { SurvivalistModeToggle } from "@/components/SurvivalistModeToggle";
+import { FieldManual } from "@/components/FieldManual";
+import { TacticalScanner } from "@/components/TacticalScanner";
 import { Link } from "react-router-dom";
 import { UserData, DeathAnalysis } from "@/types";
 
@@ -299,16 +302,28 @@ const DeathScannerPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Left Column - User Profile */}
-          <div className="space-y-6 animate-slide-in-right">
+        <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {/* Left Column - Controls & Manual */}
+          <div className="space-y-4">
+            <SurvivalistModeToggle />
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <UserProfile userData={userData} setUserData={setUserData} />
             </div>
+            <FieldManual />
           </div>
 
-          {/* Center Column - Death Analyzer */}
-          <div className="space-y-6 animate-fade-in delay-150">
+          {/* Center-Left Column - Scanner */}
+          <div className="space-y-4">
+            <TacticalScanner 
+              isScanning={isAnalyzing}
+              detectionResults={lastDetection ? [{
+                item: lastDetection.label,
+                confidence: lastDetection.confidence,
+                threatLevel: lastDetection.confidence > 80 ? 'high' : 
+                           lastDetection.confidence > 60 ? 'moderate' : 'low',
+                category: 'Detection'
+              }] : []}
+            />
             <div className="glass-card success-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathAnalyzer 
                 scenario={scenario} 
@@ -325,8 +340,8 @@ const DeathScannerPage = () => {
             </div>
           </div>
 
-          {/* Right Column - Results */}
-          <div className="space-y-6 animate-slide-in-left delay-300">
+          {/* Center-Right Column - Results */}
+          <div className="space-y-4">
             <div className="glass-card shadow-2xl border-primary/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
               <DeathReport 
                 analysis={analysis} 
@@ -335,7 +350,10 @@ const DeathScannerPage = () => {
                 imageFile={currentImageFile}
               />
             </div>
-            
+          </div>
+
+          {/* Right Column - Additional Features */}
+          <div className="space-y-4">
             {analysis && (
               <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                 <ShareDeathReport deathReport={`${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"`} />

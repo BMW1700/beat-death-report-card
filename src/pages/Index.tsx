@@ -21,6 +21,9 @@ import { SurvivalStreakTracker } from "@/components/SurvivalStreakTracker";
 import { SurvivalGearMarketplace } from "@/components/SurvivalGearMarketplace";
 import { DeathSpinWheel } from "@/components/DeathSpinWheel";
 import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
+import { SurvivalistModeToggle } from "@/components/SurvivalistModeToggle";
+import { FieldManual } from "@/components/FieldManual";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 // Viral Components - Phase 4 Implementation
 import { ViralChallengeHub } from "@/components/viral/ViralChallengeHub";
@@ -45,7 +48,7 @@ const Index = () => {
           </div>
           <p className="text-2xl font-playfair text-muted-foreground max-w-2xl mx-auto text-balance">
             Your darkly funny, science-informed platform that reveals how common items and scenarios can kill you. 
-            Based on YOUR unique biology.
+            Based on YOUR unique biology. Now with <span className="text-success font-bold">Survivalist Mode</span> for field operations.
           </p>
           
           {/* Quick Death Scanner Access */}
@@ -69,6 +72,12 @@ const Index = () => {
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Left Column - VIRAL PHASE 4: Core Engagement */}
           <div className="space-y-6 animate-slide-in-right">
+            {/* Survivalist Mode Toggle */}
+            <SurvivalistModeToggle />
+            
+            {/* Field Manual for Quick Reference */}
+            <FieldManual />
+            
             {/* VIRAL PHASE 4.1: LIVE ENGAGEMENT */}
             <ViralChallengeHub />
             
@@ -162,9 +171,12 @@ const Index = () => {
             Stay smart. Stay weird. Be BeatDeath. 💀
           </p>
           <p className="text-xs mt-2 opacity-75">
-            Version 2.0 • Powered by AI • Built for the curious and morbid
+            Version 2.0 • Powered by AI • Built for the curious and morbid • Survivalist Ready 🎯
           </p>
         </div>
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
       </div>
     </div>
   );
