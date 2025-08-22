@@ -14,6 +14,8 @@ import { Link } from "react-router-dom";
 import { UserData, DeathAnalysis } from "@/types";
 
 const DeathScannerPage = () => {
+  console.log("DeathScannerPage component is rendering");
+  
   const [userData, setUserData] = useState<UserData>({
     weight: "",
     weightUnit: "lbs",
