@@ -314,16 +314,6 @@ const DeathScannerPage = () => {
 
           {/* Center-Left Column - Scanner */}
           <div className="space-y-4">
-            <TacticalScanner 
-              isScanning={isAnalyzing}
-              detectionResults={lastDetection ? [{
-                item: lastDetection.label,
-                confidence: lastDetection.confidence,
-                threatLevel: lastDetection.confidence > 80 ? 'high' : 
-                           lastDetection.confidence > 60 ? 'moderate' : 'low',
-                category: 'Detection'
-              }] : []}
-            />
             <div className="glass-card success-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathAnalyzer 
                 scenario={scenario} 
@@ -338,6 +328,25 @@ const DeathScannerPage = () => {
                 lastDetection={lastDetection}
               />
             </div>
+            <TacticalScanner 
+              isScanning={isAnalyzing}
+              detectionResults={analysis?.detectedItems?.map(item => ({
+                item: item.label,
+                confidence: item.confidence,
+                threatLevel: item.confidence > 80 ? 'high' : 
+                           item.confidence > 60 ? 'moderate' : 
+                           item.confidence > 40 ? 'low' : 'low',
+                category: item.category || 'Detection',
+                sources: [item.source || 'AI']
+              })) || []}
+              onQuickScan={() => {
+                if (currentImageFile) {
+                  handleAnalyze(currentImageFile);
+                } else {
+                  toast.info("Upload an image first to use quick scan");
+                }
+              }}
+            />
           </div>
 
           {/* Center-Right Column - Results */}
