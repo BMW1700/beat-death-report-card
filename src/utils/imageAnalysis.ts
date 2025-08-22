@@ -473,15 +473,17 @@ export const initializeImageAnalysis = async () => {
     // Ensure at least one model loaded
     if (successCount === 0) {
       try {
-        // Emergency fallback to most reliable model
+        // Emergency fallback to most reliable model (avoid mobilenet due to auth issues)
         generalClassifier = await pipeline(
           'image-classification',
-          'Xenova/mobilenet_v2_1.0_224'
+          'Xenova/vit-base-patch16-224',
+          { device: 'wasm', dtype: 'q8' }
         );
-        console.log('🆘 Emergency MobileNet fallback successful');
+        console.log('🆘 Emergency ViT fallback successful on CPU');
         successCount = 1;
       } catch (error) {
         console.error('💀 All AI models failed to load:', error);
+        console.warn('Scanner will operate in manual mode only');
         return false;
       }
     }
@@ -649,7 +651,7 @@ export const analyzeImageForToxicity = async (
     if (!generalClassifier) {
       const initialized = await initializeImageAnalysis();
       if (!initialized) {
-        console.warn('AI not available, using manual analysis...');
+        console.warn('AI models failed to load, switching to manual analysis mode...');
         return analyzeImageManually(imageFile);
       }
     }
