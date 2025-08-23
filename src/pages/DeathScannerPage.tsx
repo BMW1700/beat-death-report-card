@@ -303,18 +303,16 @@ const DeathScannerPage = () => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {/* Left Column - Controls & Manual */}
-          <div className="space-y-4">
-            <SurvivalistModeToggle />
-            <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <UserProfile userData={userData} setUserData={setUserData} />
-            </div>
-            <FieldManual />
+        {/* User Profile */}
+        <div className="mb-6">
+          <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+            <UserProfile userData={userData} setUserData={setUserData} />
           </div>
+        </div>
 
-          {/* Center-Left Column - Scanner */}
+        {/* Death Scanner and Report - Top Priority Section */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          {/* Death Scanner */}
           <div className="space-y-4">
             <div className="glass-card success-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <DeathAnalyzer 
@@ -351,7 +349,7 @@ const DeathScannerPage = () => {
             />
           </div>
 
-          {/* Center-Right Column - Results */}
+          {/* Death Report */}
           <div className="space-y-4">
             <div className="glass-card shadow-2xl border-primary/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
               <DeathReport 
@@ -361,15 +359,24 @@ const DeathScannerPage = () => {
                 imageFile={currentImageFile}
               />
             </div>
-          </div>
-
-          {/* Right Column - Additional Features */}
-          <div className="space-y-4">
             {analysis && (
               <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                 <ShareDeathReport deathReport={`${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"`} />
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Secondary Content */}
+        <div className="grid lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {/* Left Column - Mode Toggle */}
+          <div className="space-y-4">
+            <SurvivalistModeToggle />
+          </div>
+
+          {/* Right Column - Field Manual */}
+          <div className="space-y-4">
+            <FieldManual />
           </div>
         </div>
       </div>
