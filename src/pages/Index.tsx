@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skull, AlertTriangle, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+// Import Life Clock components
+import { LifeClock } from "@/components/LifeClock";
+import { ActionLogger } from "@/components/ActionLogger";
+import { TimeMarketplace } from "@/components/TimeMarketplace";
 import { TrendingDeaths } from "@/components/TrendingDeaths";
 import { DeathScore } from "@/components/DeathScore";
 import { EnhancedAchievements } from "@/components/EnhancedAchievements";
@@ -33,6 +38,15 @@ import { CollaborativeDeathMap } from "@/components/viral/CollaborativeDeathMap"
 
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const hasOnboarded = localStorage.getItem('beatdeath_onboarded');
+    if (!hasOnboarded) {
+      navigate('/onboarding');
+    }
+  }, [navigate]);
 
   return (
     <div className="min-h-screen gradient-secondary-bg pt-16 transition-colors duration-300">
@@ -69,8 +83,19 @@ const Index = () => {
           </div>
         </div>
 
+        {/* CORE LIFE CLOCK SECTION - TOP PRIORITY */}
+        <div className="mb-8">
+          <LifeClock />
+        </div>
+
+        {/* ACTION & MARKETPLACE SECTION */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          <ActionLogger />
+          <TimeMarketplace />
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {/* Left Column - VIRAL PHASE 4: Core Engagement */}
+          {/* Left Column - Core Engagement */}
           <div className="space-y-6 animate-slide-in-right">
             {/* Survivalist Mode Toggle */}
             <SurvivalistModeToggle />
@@ -105,7 +130,7 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Center Column - VIRAL PHASE 4: Real-Time Social Feed */}
+          {/* Center Column - Real-Time Social Feed */}
           <div className="space-y-6 animate-fade-in delay-150">
             {/* VIRAL PHASE 4.3: LIVE GLOBAL FEED */}
             <LiveGlobalFeed />
@@ -122,7 +147,7 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Right Column - VIRAL PHASE 4: Global Community & Monetization */}
+          {/* Right Column - Global Community & Monetization */}
           <div className="space-y-6 animate-slide-in-right delay-300">
             {/* VIRAL PHASE 4.4: COLLABORATIVE WORLD MAP */}
             <CollaborativeDeathMap />
@@ -154,9 +179,6 @@ const Index = () => {
             <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
               <CommunityLeaderboard />
             </div>
-            
-            {/* VIRAL MONETIZATION: Gear Marketplace */}
-            <SurvivalGearMarketplace />
             
             {/* Monetization */}
             <div className="glass-card border-success/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
