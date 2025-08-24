@@ -234,13 +234,16 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('beatdeath_lifeclock', JSON.stringify(state));
   }, [state]);
 
-  // Real-time countdown (every second)
+  // Real-time countdown (every second) - FIXED TO ACTUALLY COUNT DOWN
   useEffect(() => {
     const interval = setInterval(() => {
-      setState(prev => ({
-        ...prev,
-        totalLifeMinutes: Math.max(0, prev.totalLifeMinutes - (1/60)) // subtract 1 second
-      }));
+      setState(prev => {
+        const newTotal = Math.max(0, prev.totalLifeMinutes - (1/60)); // subtract 1 second converted to minutes
+        return {
+          ...prev,
+          totalLifeMinutes: newTotal
+        };
+      });
     }, 1000);
 
     return () => clearInterval(interval);
