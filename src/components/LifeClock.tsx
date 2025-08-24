@@ -9,17 +9,10 @@ import grimReaperImage from '@/assets/grim-reaper.png';
 
 export const LifeClock = () => {
   const { state, toggleScientificMode, getTimeRemaining } = useLifeClock();
-  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
   const [showExplanation, setShowExplanation] = useState(false);
 
-  // Update time display every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining(getTimeRemaining());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []); // Remove getTimeRemaining dependency to prevent multiple intervals
+  // Get fresh time data on each render - context updates every second
+  const timeRemaining = getTimeRemaining();
 
   // Get recent contribution for today
   const todayContribution = state.recentActions
