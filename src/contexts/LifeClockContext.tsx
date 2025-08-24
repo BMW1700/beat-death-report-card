@@ -238,13 +238,14 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setState(prev => {
-        const newTotal = Math.max(0, prev.totalLifeMinutes - (1/60)); // subtract 1 second converted to minutes
+        const oneSecondInMinutes = 1/60; // exactly 1 second = 1/60 minutes
+        const newTotal = Math.max(0, prev.totalLifeMinutes - oneSecondInMinutes);
         return {
           ...prev,
           totalLifeMinutes: newTotal
         };
       });
-    }, 1000);
+    }, 1000); // exactly every 1000ms = 1 second
 
     return () => clearInterval(interval);
   }, []);

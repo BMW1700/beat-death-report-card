@@ -19,7 +19,7 @@ export const LifeClock = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [getTimeRemaining]);
+  }, []); // Remove getTimeRemaining dependency to prevent multiple intervals
 
   // Get recent contribution for today
   const todayContribution = state.recentActions
