@@ -22,8 +22,25 @@ export const LifeClock = () => {
     })
     .reduce((sum, action) => sum + (state.scientificMode ? action.scientific_minutes : action.playful_minutes), 0);
 
+  // Get total contribution from all actions
+  const totalContribution = state.recentActions
+    .reduce((sum, action) => sum + (state.scientificMode ? action.scientific_minutes : action.playful_minutes), 0);
+
   const isPositiveContribution = todayContribution > 0;
   const contributionHours = Math.abs(todayContribution) / 60;
+  const isTotalPositive = totalContribution > 0;
+  
+  // Format total contribution appropriately
+  const formatTotalContribution = () => {
+    const totalMinutes = Math.abs(totalContribution);
+    if (totalMinutes < 60) {
+      return `${totalMinutes.toFixed(0)} minutes`;
+    } else if (totalMinutes < 1440) { // Less than 24 hours
+      return `${(totalMinutes / 60).toFixed(1)} hours`;
+    } else {
+      return `${(totalMinutes / 1440).toFixed(1)} days`;
+    }
+  };
 
   // Format time display
   const formatTime = () => {
@@ -136,6 +153,24 @@ export const LifeClock = () => {
             isPositiveContribution ? "text-success" : "text-destructive"
           )}>
             {isPositiveContribution ? '+' : ''}{contributionHours.toFixed(1)} hours
+          </div>
+        </div>
+
+        {/* Total Lifetime Impact */}
+        <div className="flex items-center justify-center gap-4 p-4 bg-card/30 rounded-lg border border-primary/5">
+          <div className="flex items-center gap-2">
+            {isTotalPositive ? (
+              <Heart className="w-5 h-5 text-success" />
+            ) : (
+              <Skull className="w-5 h-5 text-destructive" />
+            )}
+            <span className="font-semibold">Total Impact:</span>
+          </div>
+          <div className={cn(
+            "text-lg font-bold",
+            isTotalPositive ? "text-success" : "text-destructive"
+          )}>
+            {isTotalPositive ? '+' : ''}{formatTotalContribution()}
           </div>
         </div>
 
