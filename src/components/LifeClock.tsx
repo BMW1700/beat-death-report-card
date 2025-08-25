@@ -27,12 +27,11 @@ export const LifeClock = () => {
     .reduce((sum, action) => sum + (state.scientificMode ? action.scientific_minutes : action.playful_minutes), 0);
 
   const isPositiveContribution = todayContribution > 0;
-  const contributionHours = Math.abs(todayContribution) / 60;
   const isTotalPositive = totalContribution > 0;
   
-  // Format total contribution appropriately
-  const formatTotalContribution = () => {
-    const totalMinutes = Math.abs(totalContribution);
+  // Format contribution appropriately for both today and total
+  const formatContribution = (minutes: number) => {
+    const totalMinutes = Math.abs(minutes);
     if (totalMinutes < 60) {
       return `${totalMinutes.toFixed(0)} minutes`;
     } else if (totalMinutes < 1440) { // Less than 24 hours
@@ -152,7 +151,7 @@ export const LifeClock = () => {
             "text-lg font-bold",
             isPositiveContribution ? "text-success" : "text-destructive"
           )}>
-            {isPositiveContribution ? '+' : ''}{contributionHours.toFixed(1)} hours
+            {isPositiveContribution ? '+' : ''}{formatContribution(todayContribution)}
           </div>
         </div>
 
@@ -170,7 +169,7 @@ export const LifeClock = () => {
             "text-lg font-bold",
             isTotalPositive ? "text-success" : "text-destructive"
           )}>
-            {isTotalPositive ? '+' : ''}{formatTotalContribution()}
+            {isTotalPositive ? '+' : ''}{formatContribution(totalContribution)}
           </div>
         </div>
 
