@@ -22,8 +22,7 @@ const categoryIcons = {
   diet: Apple,
   substances: Cigarette,
   preparedness: Shield,
-  behavior: Activity,
-  streaks: TrendingUp
+  behavior: Activity
 };
 
 const categoryColors = {
@@ -31,8 +30,7 @@ const categoryColors = {
   diet: 'text-primary',
   substances: 'text-destructive',
   preparedness: 'text-warning',
-  behavior: 'text-accent',
-  streaks: 'text-secondary'
+  behavior: 'text-accent'
 };
 
 export const ActionLogger = () => {
@@ -41,7 +39,6 @@ export const ActionLogger = () => {
     logAction, 
     getScientificContribution, 
     getPlayfulMinutes, 
-    getPlayfulHours,
     canPerformAction 
   } = useLifeClock();
   
@@ -62,18 +59,12 @@ export const ActionLogger = () => {
     }
   };
 
-  const formatTime = (hours: number): string => {
-    const absHours = Math.abs(hours);
-    if (absHours >= 24) {
-      const days = Math.round(absHours / 24 * 10) / 10;
-      return `${hours < 0 ? '-' : ''}${days}d`;
-    }
-    return `${Math.round(hours)}h`;
-  };
-
   const formatMinutes = (minutes: number): string => {
-    const hours = minutes / 60;
-    return formatTime(hours);
+    if (Math.abs(minutes) < 60) {
+      return `${minutes}m`;
+    }
+    const hours = Math.round(minutes / 60 * 10) / 10;
+    return `${hours}h`;
   };
 
   const categories = Object.keys(actionsByCategory);
@@ -92,7 +83,7 @@ export const ActionLogger = () => {
 
       <CardContent>
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-          <TabsList className="grid grid-cols-6 w-full mb-4">
+          <TabsList className="grid grid-cols-5 w-full mb-4">
             {categories.map((category) => {
               const Icon = categoryIcons[category as keyof typeof categoryIcons];
               return (
@@ -113,10 +104,10 @@ export const ActionLogger = () => {
               {actionsByCategory[category].map((action) => {
                 const canPerform = canPerformAction(action.action_id);
                 const scientificMinutes = getScientificContribution(action.action_id);
-                const playfulHours = getPlayfulHours(action.action_id, false);
-                const verifiedHours = getPlayfulHours(action.action_id, true);
+                const playfulMinutes = getPlayfulMinutes(action.action_id, false);
+                const verifiedMinutes = getPlayfulMinutes(action.action_id, true);
                 const Icon = categoryIcons[action.category];
-                const isNegative = playfulHours < 0;
+                const isNegative = playfulMinutes < 0;
 
                 return (
                   <div 
@@ -143,17 +134,17 @@ export const ActionLogger = () => {
                             <div className="flex items-center gap-2 text-xs">
                               <TrendingUp className="w-3 h-3 text-secondary" />
                               <span className="text-muted-foreground">
-                                Scientific: Long-term if sustained daily
+                                Scientific: {formatMinutes(scientificMinutes)} daily contribution
                               </span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2 text-xs">
                               <Zap className="w-3 h-3 text-accent" />
                               <span className="text-muted-foreground">
-                                Instant: {formatTime(playfulHours)} 
+                                Instant: {formatMinutes(playfulMinutes)} 
                                 {action.verification_bonus_pct > 0 && (
                                   <span className="text-success ml-1">
-                                    (Verified: {formatTime(verifiedHours)})
+                                    (Verified: {formatMinutes(verifiedMinutes)})
                                   </span>
                                 )}
                               </span>
@@ -179,7 +170,7 @@ export const ActionLogger = () => {
                         variant={isNegative ? "destructive" : "default"}
                         className="shrink-0"
                       >
-                        {isNegative ? 'Log' : 'Add Time'}
+                        {isNegative ? 'Log' : 'Do It'}
                       </Button>
                     </div>
                   </div>
