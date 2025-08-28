@@ -31,6 +31,11 @@ export const LifeClock = () => {
   
   // Format contribution appropriately for both today and total  
   const formatContribution = (minutes: number) => {
+    // Handle NaN or invalid values
+    if (!minutes || isNaN(minutes)) {
+      return "0 minutes";
+    }
+    
     const totalHours = Math.abs(minutes) / 60;
     if (totalHours < 1) {
       return `${Math.abs(minutes).toFixed(0)} minutes`;

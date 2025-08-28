@@ -458,6 +458,12 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
 
   const getTimeRemaining = () => {
     const totalSeconds = state.totalLifeMinutes * 60;
+    
+    // Handle NaN or invalid values
+    if (!totalSeconds || isNaN(totalSeconds) || totalSeconds < 0) {
+      return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+    
     const years = Math.floor(totalSeconds / (365 * 24 * 3600));
     const months = Math.floor((totalSeconds % (365 * 24 * 3600)) / (30 * 24 * 3600));
     const days = Math.floor((totalSeconds % (30 * 24 * 3600)) / (24 * 3600));
