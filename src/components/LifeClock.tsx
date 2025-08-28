@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Eye, EyeOff, Skull, Heart, TrendingUp, Info } from 'lucide-react';
 import { useLifeClock } from '@/contexts/LifeClockContext';
+import { AnimatedGrimReaper } from '@/components/AnimatedGrimReaper';
 import { cn } from '@/lib/utils';
-import grimReaperImage from '@/assets/grim-reaper.png';
 
 export const LifeClock = () => {
   const { state, toggleScientificMode, getTimeRemaining } = useLifeClock();
@@ -115,12 +115,11 @@ export const LifeClock = () => {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Grim Reaper */}
-        <div className="flex justify-center mb-4">
-          <img 
-            src={grimReaperImage} 
-            alt="Grim Reaper" 
-            className="w-24 h-24 animate-death-pulse"
+        {/* Professional Animated Grim Reaper */}
+        <div className="flex justify-center mb-6">
+          <AnimatedGrimReaper 
+            timeRemaining={timeRemaining}
+            todayContribution={todayContribution}
           />
         </div>
 
