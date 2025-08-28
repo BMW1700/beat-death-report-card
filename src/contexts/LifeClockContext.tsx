@@ -51,15 +51,16 @@ export interface LifeClockState {
   analyticsBuffer: any[];
 }
 
-// Default action mappings from master prompt
+// New time-based action mappings (BASE UNIT: 20 push-ups = 8 hours = 0.333 days)
 const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
+  // EXERCISE (All positive - increases life!)
   {
     action_id: 'pushups_20',
     category: 'exercise',
     description: '20 push-ups (one set)',
-    HYG: 3.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 2,
+    HYG: 1.0, // 1 unit = 8 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 480, // 8 hours = 480 minutes
     verification_bonus_pct: 50,
     max_per_day: 3
   },
@@ -67,9 +68,9 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'pushups_50',
     category: 'exercise',
     description: '50 push-ups (advanced set)',
-    HYG: 3.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 5,
+    HYG: 2.5, // 2.5 units = 20 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 1200, // 20 hours = 1200 minutes
     verification_bonus_pct: 50,
     max_per_day: 2
   },
@@ -77,9 +78,9 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'workout_30min_moderate',
     category: 'exercise',
     description: '30min moderate workout',
-    HYG: 4.5,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 10,
+    HYG: 3.0, // 3 units = 24 hours (1 day)
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 1440, // 24 hours = 1440 minutes
     verification_bonus_pct: 50,
     max_per_day: 2
   },
@@ -87,39 +88,63 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'run_1_mile',
     category: 'exercise',
     description: 'Run 1 mile',
-    HYG: 5.2,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 7,
+    HYG: 2.5, // 2.5 units = 20 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 1200, // 20 hours = 1200 minutes
     verification_bonus_pct: 50,
     max_per_day: 2
   },
   {
+    action_id: 'yoga_30min',
+    category: 'exercise',
+    description: '30min yoga session',
+    HYG: 1.0, // 1 unit = 8 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 480, // 8 hours = 480 minutes
+    verification_bonus_pct: 50,
+    max_per_day: 3
+  },
+
+  // DIET & NUTRITION
+  {
     action_id: 'healthy_meal',
     category: 'diet',
     description: 'Healthy meal (salad, fruit, whole-food)',
-    HYG: 2.3,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 3,
+    HYG: 0.5, // 0.5 units = 4 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 240, // 4 hours = 240 minutes
     verification_bonus_pct: 50,
-    max_per_day: 4
+    max_per_day: 6
   },
   {
-    action_id: 'unhealthy_meal',
+    action_id: 'processed_fast_food_meal',
     category: 'diet',
-    description: 'Unhealthy meal (fast-food burger, soda)',
-    HYG: -1.8,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: -4,
+    description: 'Processed fast food meal',
+    HYG: -0.5, // -0.5 units = -4 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: -240, // -4 hours = -240 minutes
     verification_bonus_pct: 0,
     max_per_day: 10
   },
   {
+    action_id: 'sugary_drink',
+    category: 'diet',
+    description: 'Sugary drink',
+    HYG: -0.25, // -0.25 units = -2 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: -120, // -2 hours = -120 minutes
+    verification_bonus_pct: 0,
+    max_per_day: 10
+  },
+
+  // SUBSTANCES (All negative)
+  {
     action_id: 'smoke_cigarette',
     category: 'substances',
     description: 'Smoke cigarette',
-    HYG: -7.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: -4,
+    HYG: -2.0, // -2 units = -16 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: -960, // -16 hours = -960 minutes
     verification_bonus_pct: 0,
     max_per_day: 20
   },
@@ -127,19 +152,41 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'alcohol_single_drink',
     category: 'substances',
     description: 'Single alcoholic drink',
-    HYG: -0.5,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: -1,
+    HYG: -0.25, // -0.25 units = -2 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: -120, // -2 hours = -120 minutes
     verification_bonus_pct: 0,
     max_per_day: 5
   },
   {
+    action_id: 'binge_drinking_event',
+    category: 'substances',
+    description: 'Binge drinking event',
+    HYG: -4.0, // -4 units = -32 hours
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: -1920, // -32 hours = -1920 minutes
+    verification_bonus_pct: 0,
+    max_per_day: 2
+  },
+
+  // PREPAREDNESS / SURVIVALIST (All positive)
+  {
     action_id: 'buy_survival_kit_tier1',
     category: 'preparedness',
     description: 'Buy survival kit (Tier 1)',
-    HYG: 0.2,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 30,
+    HYG: 4.0, // 4 units = 32 hours (~1.33 days)
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 1920, // 32 hours = 1920 minutes
+    verification_bonus_pct: 50,
+    max_per_day: 1
+  },
+  {
+    action_id: 'buy_survival_kit_tier2',
+    category: 'preparedness',
+    description: 'Buy survival kit (Tier 2 Premium)',
+    HYG: 10.0, // 10 units = 80 hours (~3.33 days)
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 4800, // 80 hours = 4800 minutes
     verification_bonus_pct: 50,
     max_per_day: 1
   },
@@ -147,9 +194,19 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'complete_first_aid_course_verified',
     category: 'preparedness',
     description: 'Complete first aid course (verified)',
-    HYG: 1.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 360, // 6 hours
+    HYG: 6.0, // 6 units = 48 hours (2 days)
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 2880, // 48 hours = 2880 minutes
+    verification_bonus_pct: 50,
+    max_per_day: 1
+  },
+  {
+    action_id: 'attend_survival_training_verified',
+    category: 'preparedness',
+    description: 'Attend survival training (verified)',
+    HYG: 12.0, // 12 units = 96 hours (4 days)
+    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
+    playful_default_minutes: 5760, // 96 hours = 5760 minutes
     verification_bonus_pct: 50,
     max_per_day: 1
   }
