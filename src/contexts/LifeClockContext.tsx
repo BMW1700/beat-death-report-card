@@ -212,10 +212,10 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
   }
 ];
 
-// Calculate scientific minutes from HYG
-function calculateScientificMinutes(HYG: number): number {
-  const scientificInstantYears = HYG / 365;
-  return scientificInstantYears * 525600; // minutes per year
+// Calculate time-based minutes directly from playful_default_minutes
+function calculateScientificMinutes(mapping: ActionMapping): number {
+  // For scientific mode, show the time contribution in minutes
+  return mapping.playful_default_minutes;
 }
 
 // Calculate baseline life expectancy at 80 years in minutes
@@ -245,22 +245,8 @@ const LifeClockContext = createContext<LifeClockContextType | undefined>(undefin
 
 export function LifeClockProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LifeClockState>(() => {
-    // Initialize from localStorage or defaults
-    const stored = localStorage.getItem('beatdeath_lifeclock');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return {
-          ...parsed,
-          recentActions: parsed.recentActions.map((action: any) => ({
-            ...action,
-            timestamp: new Date(action.timestamp)
-          }))
-        };
-      } catch (e) {
-        console.warn('Failed to parse stored life clock data');
-      }
-    }
+    // Force clear localStorage and use new mappings
+    localStorage.removeItem('beatdeath_lifeclock');
     
     return {
       totalLifeMinutes: calculateBaselineMinutes({ 
@@ -326,7 +312,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
     }
 
     // Calculate minutes
-    const scientificMinutes = calculateScientificMinutes(mapping.HYG);
+    const scientificMinutes = calculateScientificMinutes(mapping);
     const isVerified = method === 'verified';
     const playfulMinutes = mapping.playful_default_minutes * (isVerified ? (1 + mapping.verification_bonus_pct / 100) : 1);
 
@@ -406,7 +392,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
 
   const getScientificContribution = (actionId: string): number => {
     const mapping = state.actionMappings.find(m => m.action_id === actionId);
-    return mapping ? calculateScientificMinutes(mapping.HYG) : 0;
+    return mapping ? calculateScientificMinutes(mapping) : 0;
   };
 
   const getPlayfulMinutes = (actionId: string, isVerified = false): number => {
