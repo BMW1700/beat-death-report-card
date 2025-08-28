@@ -22,7 +22,8 @@ const categoryIcons = {
   diet: Apple,
   substances: Cigarette,
   preparedness: Shield,
-  behavior: Activity
+  behavior: Activity,
+  streaks: TrendingUp
 };
 
 const categoryColors = {
@@ -30,7 +31,8 @@ const categoryColors = {
   diet: 'text-primary',
   substances: 'text-destructive',
   preparedness: 'text-warning',
-  behavior: 'text-accent'
+  behavior: 'text-accent',
+  streaks: 'text-secondary'
 };
 
 export const ActionLogger = () => {
@@ -39,6 +41,7 @@ export const ActionLogger = () => {
     logAction, 
     getScientificContribution, 
     getPlayfulMinutes, 
+    getPlayfulHours,
     canPerformAction 
   } = useLifeClock();
   
@@ -59,12 +62,18 @@ export const ActionLogger = () => {
     }
   };
 
-  const formatMinutes = (minutes: number): string => {
-    if (Math.abs(minutes) < 60) {
-      return `${minutes}m`;
+  const formatTime = (hours: number): string => {
+    const absHours = Math.abs(hours);
+    if (absHours >= 24) {
+      const days = Math.round(absHours / 24 * 10) / 10;
+      return `${hours < 0 ? '-' : ''}${days}d`;
     }
-    const hours = Math.round(minutes / 60 * 10) / 10;
-    return `${hours}h`;
+    return `${Math.round(hours)}h`;
+  };
+
+  const formatMinutes = (minutes: number): string => {
+    const hours = minutes / 60;
+    return formatTime(hours);
   };
 
   const categories = Object.keys(actionsByCategory);
@@ -83,7 +92,7 @@ export const ActionLogger = () => {
 
       <CardContent>
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-          <TabsList className="grid grid-cols-5 w-full mb-4">
+          <TabsList className="grid grid-cols-6 w-full mb-4">
             {categories.map((category) => {
               const Icon = categoryIcons[category as keyof typeof categoryIcons];
               return (
@@ -104,10 +113,10 @@ export const ActionLogger = () => {
               {actionsByCategory[category].map((action) => {
                 const canPerform = canPerformAction(action.action_id);
                 const scientificMinutes = getScientificContribution(action.action_id);
-                const playfulMinutes = getPlayfulMinutes(action.action_id, false);
-                const verifiedMinutes = getPlayfulMinutes(action.action_id, true);
+                const playfulHours = getPlayfulHours(action.action_id, false);
+                const verifiedHours = getPlayfulHours(action.action_id, true);
                 const Icon = categoryIcons[action.category];
-                const isNegative = playfulMinutes < 0;
+                const isNegative = playfulHours < 0;
 
                 return (
                   <div 
@@ -134,17 +143,17 @@ export const ActionLogger = () => {
                             <div className="flex items-center gap-2 text-xs">
                               <TrendingUp className="w-3 h-3 text-secondary" />
                               <span className="text-muted-foreground">
-                                Scientific: {formatMinutes(scientificMinutes)} daily contribution
+                                Scientific: Long-term if sustained daily
                               </span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2 text-xs">
                               <Zap className="w-3 h-3 text-accent" />
                               <span className="text-muted-foreground">
-                                Instant: {formatMinutes(playfulMinutes)} 
+                                Instant: {formatTime(playfulHours)} 
                                 {action.verification_bonus_pct > 0 && (
                                   <span className="text-success ml-1">
-                                    (Verified: {formatMinutes(verifiedMinutes)})
+                                    (Verified: {formatTime(verifiedHours)})
                                   </span>
                                 )}
                               </span>
@@ -170,7 +179,7 @@ export const ActionLogger = () => {
                         variant={isNegative ? "destructive" : "default"}
                         className="shrink-0"
                       >
-                        {isNegative ? 'Log' : 'Do It'}
+                        {isNegative ? 'Log' : 'Add Time'}
                       </Button>
                     </div>
                   </div>

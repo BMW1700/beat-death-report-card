@@ -12,11 +12,11 @@ export interface UserData {
 
 export interface ActionMapping {
   action_id: string;
-  category: 'exercise' | 'diet' | 'substances' | 'preparedness' | 'behavior';
+  category: 'exercise' | 'diet' | 'substances' | 'preparedness' | 'behavior' | 'streaks';
   description: string;
-  HYG: number; // Habit Years Gained (if sustained daily)
-  scientific_formula: string;
-  playful_default_minutes: number;
+  units: number; // Base units (1 unit = 8 hours)
+  hours_per_unit: number; // Always 8 for BASE UNIT
+  playful_default_hours: number; // Immediate time impact
   verification_bonus_pct: number;
   max_per_day: number;
 }
@@ -28,6 +28,7 @@ export interface ActionLog {
   method: 'self' | 'verified' | 'wearable';
   scientific_minutes: number;
   playful_minutes: number;
+  hours_applied: number; // New: actual hours applied to life clock
   was_verified: boolean;
 }
 
@@ -51,15 +52,16 @@ export interface LifeClockState {
   analyticsBuffer: any[];
 }
 
-// Default action mappings from master prompt
+// Time-based action mappings (BASE UNIT: 1.0 = 8 hours)
 const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
+  // EXERCISE
   {
     action_id: 'pushups_20',
     category: 'exercise',
     description: '20 push-ups (one set)',
-    HYG: 3.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 2,
+    units: 1.0,
+    hours_per_unit: 8,
+    playful_default_hours: 8,
     verification_bonus_pct: 50,
     max_per_day: 3
   },
@@ -67,9 +69,9 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'pushups_50',
     category: 'exercise',
     description: '50 push-ups (advanced set)',
-    HYG: 3.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 5,
+    units: 2.5,
+    hours_per_unit: 8,
+    playful_default_hours: 20,
     verification_bonus_pct: 50,
     max_per_day: 2
   },
@@ -77,9 +79,9 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'workout_30min_moderate',
     category: 'exercise',
     description: '30min moderate workout',
-    HYG: 4.5,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 10,
+    units: 3.0,
+    hours_per_unit: 8,
+    playful_default_hours: 24,
     verification_bonus_pct: 50,
     max_per_day: 2
   },
@@ -87,39 +89,63 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'run_1_mile',
     category: 'exercise',
     description: 'Run 1 mile',
-    HYG: 5.2,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 7,
+    units: 2.5,
+    hours_per_unit: 8,
+    playful_default_hours: 20,
     verification_bonus_pct: 50,
     max_per_day: 2
   },
   {
+    action_id: 'yoga_30min',
+    category: 'exercise',
+    description: '30min yoga session',
+    units: 1.0,
+    hours_per_unit: 8,
+    playful_default_hours: 8,
+    verification_bonus_pct: 50,
+    max_per_day: 2
+  },
+  
+  // DIET & NUTRITION
+  {
     action_id: 'healthy_meal',
     category: 'diet',
-    description: 'Healthy meal (salad, fruit, whole-food)',
-    HYG: 2.3,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 3,
+    description: 'Healthy meal (salad/fruit/whole-food)',
+    units: 0.5,
+    hours_per_unit: 8,
+    playful_default_hours: 4,
     verification_bonus_pct: 50,
-    max_per_day: 4
+    max_per_day: 6
   },
   {
-    action_id: 'unhealthy_meal',
+    action_id: 'processed_fast_food_meal',
     category: 'diet',
-    description: 'Unhealthy meal (fast-food burger, soda)',
-    HYG: -1.8,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: -4,
+    description: 'Processed fast food meal',
+    units: -0.5,
+    hours_per_unit: 8,
+    playful_default_hours: -4,
     verification_bonus_pct: 0,
     max_per_day: 10
   },
   {
-    action_id: 'smoke_cigarette',
+    action_id: 'sugary_drink',
+    category: 'diet',
+    description: 'Sugary drink (soda/energy drink)',
+    units: -0.25,
+    hours_per_unit: 8,
+    playful_default_hours: -2,
+    verification_bonus_pct: 0,
+    max_per_day: 10
+  },
+
+  // SUBSTANCES
+  {
+    action_id: 'smoke_1_cigarette',
     category: 'substances',
-    description: 'Smoke cigarette',
-    HYG: -7.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: -4,
+    description: 'Smoke 1 cigarette',
+    units: -2.0,
+    hours_per_unit: 8,
+    playful_default_hours: -16,
     verification_bonus_pct: 0,
     max_per_day: 20
   },
@@ -127,19 +153,41 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'alcohol_single_drink',
     category: 'substances',
     description: 'Single alcoholic drink',
-    HYG: -0.5,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: -1,
+    units: -0.25,
+    hours_per_unit: 8,
+    playful_default_hours: -2,
     verification_bonus_pct: 0,
     max_per_day: 5
   },
   {
+    action_id: 'binge_drinking_event',
+    category: 'substances',
+    description: 'Binge drinking event',
+    units: -4.0,
+    hours_per_unit: 8,
+    playful_default_hours: -32,
+    verification_bonus_pct: 0,
+    max_per_day: 3
+  },
+
+  // PREPAREDNESS / SURVIVALIST
+  {
     action_id: 'buy_survival_kit_tier1',
     category: 'preparedness',
     description: 'Buy survival kit (Tier 1)',
-    HYG: 0.2,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 30,
+    units: 4.0,
+    hours_per_unit: 8,
+    playful_default_hours: 32,
+    verification_bonus_pct: 50,
+    max_per_day: 1
+  },
+  {
+    action_id: 'buy_survival_kit_tier2',
+    category: 'preparedness',
+    description: 'Buy survival kit (Tier 2 Premium)',
+    units: 10.0,
+    hours_per_unit: 8,
+    playful_default_hours: 80,
     verification_bonus_pct: 50,
     max_per_day: 1
   },
@@ -147,17 +195,72 @@ const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
     action_id: 'complete_first_aid_course_verified',
     category: 'preparedness',
     description: 'Complete first aid course (verified)',
-    HYG: 1.0,
-    scientific_formula: 'ScientificInstantYears = HYG/365; minutes = years*525600',
-    playful_default_minutes: 360, // 6 hours
+    units: 6.0,
+    hours_per_unit: 8,
+    playful_default_hours: 48,
     verification_bonus_pct: 50,
+    max_per_day: 1
+  },
+  {
+    action_id: 'attend_survival_training_verified',
+    category: 'preparedness',
+    description: 'Attend survival training (verified)',
+    units: 12.0,
+    hours_per_unit: 8,
+    playful_default_hours: 96,
+    verification_bonus_pct: 50,
+    max_per_day: 1
+  },
+
+  // BEHAVIOR (INACTION / PENALTIES)
+  {
+    action_id: 'missed_exercise_day',
+    category: 'behavior',
+    description: 'Missed exercise day (active streak)',
+    units: -1.25,
+    hours_per_unit: 8,
+    playful_default_hours: -10,
+    verification_bonus_pct: 0,
+    max_per_day: 1
+  },
+  {
+    action_id: 'sedentary_day',
+    category: 'behavior',
+    description: 'Sedentary day (no movement logged)',
+    units: -0.5,
+    hours_per_unit: 8,
+    playful_default_hours: -4,
+    verification_bonus_pct: 0,
+    max_per_day: 1
+  },
+
+  // STREAKS & BONUSES
+  {
+    action_id: '7_day_healthy_streak',
+    category: 'streaks',
+    description: '7-day healthy streak completed',
+    units: 24.0,
+    hours_per_unit: 8,
+    playful_default_hours: 192,
+    verification_bonus_pct: 0,
+    max_per_day: 1
+  },
+  {
+    action_id: '30_day_clean_streak',
+    category: 'streaks',
+    description: '30-day clean streak completed',
+    units: 168.0,
+    hours_per_unit: 8,
+    playful_default_hours: 1344,
+    verification_bonus_pct: 0,
     max_per_day: 1
   }
 ];
 
-// Calculate scientific minutes from HYG
-function calculateScientificMinutes(HYG: number): number {
-  const scientificInstantYears = HYG / 365;
+// Calculate scientific minutes from units (for long-term display)
+function calculateScientificMinutes(units: number): number {
+  // Convert units to estimated long-term impact (simplified for display)
+  const scientificInstantYears = (units * 8) / (365 * 24); // hours to yearly fraction
   return scientificInstantYears * 525600; // minutes per year
 }
 
@@ -181,6 +284,7 @@ interface LifeClockContextType {
   };
   getScientificContribution: (actionId: string) => number;
   getPlayfulMinutes: (actionId: string, isVerified?: boolean) => number;
+  getPlayfulHours: (actionId: string, isVerified?: boolean) => number;
   canPerformAction: (actionId: string) => boolean;
 }
 
@@ -268,10 +372,15 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    // Calculate minutes
-    const scientificMinutes = calculateScientificMinutes(mapping.HYG);
+    // Calculate time impact (NEW TIME-BASED SYSTEM)
     const isVerified = method === 'verified';
-    const playfulMinutes = mapping.playful_default_minutes * (isVerified ? (1 + mapping.verification_bonus_pct / 100) : 1);
+    const baseHours = mapping.playful_default_hours;
+    const verificationMultiplier = isVerified ? (1 + mapping.verification_bonus_pct / 100) : 1;
+    const hoursApplied = baseHours * verificationMultiplier;
+    
+    // Convert to minutes for internal storage
+    const playfulMinutes = hoursApplied * 60;
+    const scientificMinutes = calculateScientificMinutes(mapping.units);
 
     // Create action log
     const actionLog: ActionLog = {
@@ -281,6 +390,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       method,
       scientific_minutes: scientificMinutes,
       playful_minutes: playfulMinutes,
+      hours_applied: hoursApplied,
       was_verified: isVerified
     };
 
@@ -292,6 +402,8 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
         event: 'action_logged',
         action_id: actionId,
         method,
+        units: mapping.units,
+        hours_applied: hoursApplied,
         scientific_minutes: scientificMinutes,
         playful_minutes: playfulMinutes,
         new_total: newTotalMinutes,
@@ -310,11 +422,20 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       };
     });
 
-    // Show feedback
-    const isPositive = playfulMinutes > 0;
+    // Show feedback with time-based messaging
+    const isPositive = hoursApplied > 0;
+    const formatHours = (hours: number) => {
+      const absHours = Math.abs(hours);
+      if (absHours >= 24) {
+        const days = Math.round(absHours / 24 * 10) / 10;
+        return `${days} day${days !== 1 ? 's' : ''}`;
+      }
+      return `${Math.round(absHours)} hour${absHours !== 1 ? 's' : ''}`;
+    };
+
     toast({
       title: isPositive ? "Life Extended!" : "Life Shortened",
-      description: `${isPositive ? '+' : ''}${Math.round(playfulMinutes)} minutes ${isVerified ? '(Verified!)' : ''}`,
+      description: `${isPositive ? '+' : ''}${formatHours(hoursApplied)} ${isVerified ? '(Verified!)' : ''}`,
       variant: isPositive ? "default" : "destructive"
     });
 
@@ -349,13 +470,20 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
 
   const getScientificContribution = (actionId: string): number => {
     const mapping = state.actionMappings.find(m => m.action_id === actionId);
-    return mapping ? calculateScientificMinutes(mapping.HYG) : 0;
+    return mapping ? calculateScientificMinutes(mapping.units) : 0;
   };
 
   const getPlayfulMinutes = (actionId: string, isVerified = false): number => {
     const mapping = state.actionMappings.find(m => m.action_id === actionId);
     if (!mapping) return 0;
-    return mapping.playful_default_minutes * (isVerified ? (1 + mapping.verification_bonus_pct / 100) : 1);
+    const hours = mapping.playful_default_hours * (isVerified ? (1 + mapping.verification_bonus_pct / 100) : 1);
+    return hours * 60; // Convert to minutes for compatibility
+  };
+
+  const getPlayfulHours = (actionId: string, isVerified = false): number => {
+    const mapping = state.actionMappings.find(m => m.action_id === actionId);
+    if (!mapping) return 0;
+    return mapping.playful_default_hours * (isVerified ? (1 + mapping.verification_bonus_pct / 100) : 1);
   };
 
   const canPerformAction = (actionId: string): boolean => {
@@ -377,6 +505,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
     getTimeRemaining,
     getScientificContribution,
     getPlayfulMinutes,
+    getPlayfulHours,
     canPerformAction
   };
 

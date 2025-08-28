@@ -29,15 +29,16 @@ export const LifeClock = () => {
   const isPositiveContribution = todayContribution > 0;
   const isTotalPositive = totalContribution > 0;
   
-  // Format contribution appropriately for both today and total
+  // Format contribution appropriately for both today and total  
   const formatContribution = (minutes: number) => {
-    const totalMinutes = Math.abs(minutes);
-    if (totalMinutes < 60) {
-      return `${totalMinutes.toFixed(0)} minutes`;
-    } else if (totalMinutes < 1440) { // Less than 24 hours
-      return `${(totalMinutes / 60).toFixed(1)} hours`;
+    const totalHours = Math.abs(minutes) / 60;
+    if (totalHours < 1) {
+      return `${Math.abs(minutes).toFixed(0)} minutes`;
+    } else if (totalHours < 24) {
+      return `${totalHours.toFixed(1)} hours`;
     } else {
-      return `${(totalMinutes / 1440).toFixed(1)} days`;
+      const days = totalHours / 24;
+      return `${days.toFixed(1)} days`;
     }
   };
 
@@ -100,11 +101,11 @@ export const LifeClock = () => {
               <div className="font-semibold text-primary">How the Life Clock Works:</div>
               <div>
                 <strong>Scientific Mode:</strong> Shows real-time countdown based on evidence-based life expectancy research.
-                Each action's impact is calculated from scientific studies (HYG = Habit Years Gained).
+                Each action's impact is calculated from the BASE UNIT system (20 push-ups = 8 hours).
               </div>
               <div>
-                <strong>Playful Mode:</strong> Scaled for instant gratification and viral sharing.
-                Same scientific foundation, but amplified for immediate feedback.
+                <strong>Playful Mode:</strong> Immediate time rewards using the same BASE UNIT foundation.
+                Every action gives or takes away real hours/days from your countdown.
               </div>
               <div className="text-warning text-xs mt-2">
                 ⚠️ For entertainment only - not medical advice
@@ -181,8 +182,8 @@ export const LifeClock = () => {
               <div>
                 <div className="font-semibold text-secondary">Scientific Calculation</div>
                 <div className="text-muted-foreground">
-                  Based on peer-reviewed studies. Each action shows its real long-term impact 
-                  if sustained daily, divided by 365 days for today's contribution.
+                  Based on the BASE UNIT system (20 push-ups = 8 hours). Each action shows its 
+                  immediate time impact using scientifically-grounded conversion ratios.
                 </div>
               </div>
             </div>
@@ -192,8 +193,8 @@ export const LifeClock = () => {
               <div>
                 <div className="font-semibold text-accent">Instant Gratification</div>
                 <div className="text-muted-foreground">
-                  Scaled for viral sharing and immediate feedback. Scientifically grounded 
-                  but amplified for addictive gamification.
+                  Time-based life extension using the BASE UNIT (20 push-ups = 8 hours). 
+                  Immediate feedback with real hour/day rewards for addictive engagement.
                 </div>
               </div>
             </div>
