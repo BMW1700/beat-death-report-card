@@ -51,165 +51,77 @@ export interface LifeClockState {
   analyticsBuffer: any[];
 }
 
-// New time-based action mappings (BASE UNIT: 20 push-ups = 8 hours = 0.333 days)
+// Comprehensive time-based action mappings (BASE UNIT: 20 push-ups = 8 hours = 0.333 days)
 const DEFAULT_ACTION_MAPPINGS: ActionMapping[] = [
-  // EXERCISE (All positive - increases life!)
-  {
-    action_id: 'pushups_20',
-    category: 'exercise',
-    description: '20 push-ups (one set)',
-    HYG: 1.0, // 1 unit = 8 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 480, // 8 hours = 480 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 3
-  },
-  {
-    action_id: 'pushups_50',
-    category: 'exercise',
-    description: '50 push-ups (advanced set)',
-    HYG: 2.5, // 2.5 units = 20 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 1200, // 20 hours = 1200 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 2
-  },
-  {
-    action_id: 'workout_30min_moderate',
-    category: 'exercise',
-    description: '30min moderate workout',
-    HYG: 3.0, // 3 units = 24 hours (1 day)
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 1440, // 24 hours = 1440 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 2
-  },
-  {
-    action_id: 'run_1_mile',
-    category: 'exercise',
-    description: 'Run 1 mile',
-    HYG: 2.5, // 2.5 units = 20 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 1200, // 20 hours = 1200 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 2
-  },
-  {
-    action_id: 'yoga_30min',
-    category: 'exercise',
-    description: '30min yoga session',
-    HYG: 1.0, // 1 unit = 8 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 480, // 8 hours = 480 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 3
-  },
-
+  // EXERCISE
+  { action_id: 'pushups_20', category: 'exercise', description: '20 push-ups (one set)', HYG: 1.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 480, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'pushups_50', category: 'exercise', description: '50 push-ups (one session)', HYG: 2.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1200, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'workout_30min_moderate', category: 'exercise', description: '30-min moderate workout', HYG: 3.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1440, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'run_1_mile', category: 'exercise', description: 'Run 1 mile', HYG: 2.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1200, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'yoga_30min', category: 'exercise', description: '30-min yoga/mobility', HYG: 1.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 480, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'hiit_20min', category: 'exercise', description: '20-min HIIT session', HYG: 3.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1680, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'plank_2min', category: 'exercise', description: '2-minute plank hold', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'squats_50', category: 'exercise', description: '50 bodyweight squats', HYG: 1.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 720, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'burpees_20', category: 'exercise', description: '20 burpees', HYG: 2.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 960, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'pullups_10', category: 'exercise', description: '10 pull-ups', HYG: 2.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 960, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'walk_30min', category: 'exercise', description: '30-minute brisk walk', HYG: 1.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 480, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'swim_30min', category: 'exercise', description: '30-minute swim', HYG: 4.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1920, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'cycle_30min', category: 'exercise', description: '30-minute cycling', HYG: 3.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1440, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'stretch_10min', category: 'exercise', description: '10-minute stretching', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'bike_commute_weekday', category: 'exercise', description: 'Commute by bike 1 day', HYG: 2.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 960, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'stairs_instead_elevator', category: 'exercise', description: 'Take stairs instead of elevator', HYG: 0.1, scientific_formula: 'Units * 8 hours', playful_default_minutes: 48, verification_bonus_pct: 50, max_per_day: 20 },
+  { action_id: 'garden_activity_30min', category: 'exercise', description: '30-min gardening activity', HYG: 1.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 480, verification_bonus_pct: 50, max_per_day: 3 },
+  
   // DIET & NUTRITION
-  {
-    action_id: 'healthy_meal',
-    category: 'diet',
-    description: 'Healthy meal (salad, fruit, whole-food)',
-    HYG: 0.5, // 0.5 units = 4 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 240, // 4 hours = 240 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 6
-  },
-  {
-    action_id: 'processed_fast_food_meal',
-    category: 'diet',
-    description: 'Processed fast food meal',
-    HYG: -0.5, // -0.5 units = -4 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: -240, // -4 hours = -240 minutes
-    verification_bonus_pct: 0,
-    max_per_day: 10
-  },
-  {
-    action_id: 'sugary_drink',
-    category: 'diet',
-    description: 'Sugary drink',
-    HYG: -0.25, // -0.25 units = -2 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: -120, // -2 hours = -120 minutes
-    verification_bonus_pct: 0,
-    max_per_day: 10
-  },
-
+  { action_id: 'healthy_meal', category: 'diet', description: 'Healthy whole-food meal (salad/veg)', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'fruit_serving', category: 'diet', description: 'One serving of fruit', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'vegetable_serving', category: 'diet', description: 'One serving of vegetables', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'drink_water_instead_soda', category: 'diet', description: 'Choose water instead of soda', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'water_intake_goal_habit', category: 'diet', description: 'Meet daily water intake goal', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'fruit_veg_daily_goal', category: 'diet', description: 'Meet daily fruit/veg target', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 6 },
+  { action_id: 'plant_based_meal_switch', category: 'diet', description: 'Replace meal with plant-based option', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'processed_fast_food', category: 'diet', description: 'Processed fast-food meal (negative)', HYG: -0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: -240, verification_bonus_pct: 0, max_per_day: 3 },
+  { action_id: 'sugary_drink', category: 'diet', description: 'Sugary drink (soda/energy drink)', HYG: -0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: -120, verification_bonus_pct: 0, max_per_day: 6 },
+  { action_id: 'skip_breakfast_behavior', category: 'diet', description: 'Skip balanced breakfast (negative)', HYG: -0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: -120, verification_bonus_pct: 0, max_per_day: 3 },
+  
   // SUBSTANCES (All negative)
-  {
-    action_id: 'smoke_cigarette',
-    category: 'substances',
-    description: 'Smoke cigarette',
-    HYG: -2.0, // -2 units = -16 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: -960, // -16 hours = -960 minutes
-    verification_bonus_pct: 0,
-    max_per_day: 20
-  },
-  {
-    action_id: 'alcohol_single_drink',
-    category: 'substances',
-    description: 'Single alcoholic drink',
-    HYG: -0.25, // -0.25 units = -2 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: -120, // -2 hours = -120 minutes
-    verification_bonus_pct: 0,
-    max_per_day: 5
-  },
-  {
-    action_id: 'binge_drinking_event',
-    category: 'substances',
-    description: 'Binge drinking event',
-    HYG: -4.0, // -4 units = -32 hours
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: -1920, // -32 hours = -1920 minutes
-    verification_bonus_pct: 0,
-    max_per_day: 2
-  },
-
-  // PREPAREDNESS / SURVIVALIST (All positive)
-  {
-    action_id: 'buy_survival_kit_tier1',
-    category: 'preparedness',
-    description: 'Buy survival kit (Tier 1)',
-    HYG: 4.0, // 4 units = 32 hours (~1.33 days)
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 1920, // 32 hours = 1920 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 1
-  },
-  {
-    action_id: 'buy_survival_kit_tier2',
-    category: 'preparedness',
-    description: 'Buy survival kit (Tier 2 Premium)',
-    HYG: 10.0, // 10 units = 80 hours (~3.33 days)
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 4800, // 80 hours = 4800 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 1
-  },
-  {
-    action_id: 'complete_first_aid_course_verified',
-    category: 'preparedness',
-    description: 'Complete first aid course (verified)',
-    HYG: 6.0, // 6 units = 48 hours (2 days)
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 2880, // 48 hours = 2880 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 1
-  },
-  {
-    action_id: 'attend_survival_training_verified',
-    category: 'preparedness',
-    description: 'Attend survival training (verified)',
-    HYG: 12.0, // 12 units = 96 hours (4 days)
-    scientific_formula: 'Units * 8 hours (Base: 20 pushups = 8h)',
-    playful_default_minutes: 5760, // 96 hours = 5760 minutes
-    verification_bonus_pct: 50,
-    max_per_day: 1
-  }
+  { action_id: 'smoke_1_cigarette', category: 'substances', description: 'Smoke 1 cigarette (negative)', HYG: -2.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: -960, verification_bonus_pct: 0, max_per_day: 999 },
+  { action_id: 'alcohol_single_drink', category: 'substances', description: 'Single alcoholic drink (negative)', HYG: -0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: -120, verification_bonus_pct: 0, max_per_day: 6 },
+  { action_id: 'binge_drinking_event', category: 'substances', description: 'Binge drinking episode (negative)', HYG: -4.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: -1920, verification_bonus_pct: 0, max_per_day: 1 },
+  { action_id: 'vape_use_single', category: 'substances', description: 'Single vape nicotine use (negative)', HYG: -1.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: -480, verification_bonus_pct: 0, max_per_day: 999 },
+  
+  // WELLNESS
+  { action_id: 'sleep_7_9hrs', category: 'behavior', description: 'Good sleep night (7-9 hrs)', HYG: 1.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 720, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'nap_20min', category: 'behavior', description: '20-minute restorative nap', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'meditation_10min', category: 'behavior', description: '10-minute meditation/relaxation', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'cold_exposure_3min', category: 'behavior', description: 'Cold exposure (brief) session', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'breathwork_10min', category: 'behavior', description: '10-minute breathwork session', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 3 },
+  { action_id: 'mental_health_checkin', category: 'behavior', description: 'Weekly mental health check-in', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'therapy_session', category: 'behavior', description: 'Attend therapy session (verified)', HYG: 1.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 480, verification_bonus_pct: 50, max_per_day: 2 },
+  { action_id: 'limit_screen_time_evening', category: 'behavior', description: 'Limit screens before bed', HYG: 0.25, scientific_formula: 'Units * 8 hours', playful_default_minutes: 120, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'standing_breaks_at_work', category: 'behavior', description: 'Take hourly standing/movement breaks', HYG: 0.1, scientific_formula: 'Units * 8 hours', playful_default_minutes: 48, verification_bonus_pct: 50, max_per_day: 10 },
+  
+  // PREPAREDNESS
+  { action_id: 'buy_survival_kit_tier1', category: 'preparedness', description: 'Buy basic survival kit', HYG: 4.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1920, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'buy_survival_kit_tier2', category: 'preparedness', description: 'Buy premium survival kit', HYG: 10.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 4800, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'water_filter_purchase', category: 'preparedness', description: 'Buy certified water filter', HYG: 5.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 2400, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'solar_charger_purchase', category: 'preparedness', description: 'Buy small solar charger', HYG: 3.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1440, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'emergency_food_cache', category: 'preparedness', description: 'Buy 72-hr emergency food kit', HYG: 6.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 2880, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'first_aid_kit_buy', category: 'preparedness', description: 'Purchase basic first-aid kit', HYG: 2.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 960, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'complete_first_aid_course', category: 'preparedness', description: 'Complete first-aid course (verified)', HYG: 6.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 2880, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'attend_survival_training', category: 'preparedness', description: 'Attend survival training (verified)', HYG: 12.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 5760, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'smoke_alarm_test', category: 'preparedness', description: 'Test home smoke alarm (safety)', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'fire_extinguisher_check', category: 'preparedness', description: 'Inspect home fire extinguisher', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'cpr_certified', category: 'preparedness', description: 'Obtain CPR certification (verified)', HYG: 8.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 3840, verification_bonus_pct: 50, max_per_day: 1 },
+  
+  // SAFETY & MEDICAL
+  { action_id: 'helmet_use_bike', category: 'behavior', description: 'Wear helmet while biking', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 10 },
+  { action_id: 'seatbelt_consistent_use', category: 'behavior', description: 'Consistent seatbelt use habit', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 10 },
+  { action_id: 'vaccination_up_to_date', category: 'behavior', description: 'Update recommended vaccines (verified)', HYG: 8.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 3840, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'annual_physical', category: 'behavior', description: 'Annual physical exam (verified)', HYG: 4.0, scientific_formula: 'Units * 8 hours', playful_default_minutes: 1920, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'flu_vaccine', category: 'behavior', description: 'Annual flu vaccine (verified)', HYG: 1.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 720, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'dentist_checkup', category: 'behavior', description: 'Annual dental checkup', HYG: 0.5, scientific_formula: 'Units * 8 hours', playful_default_minutes: 240, verification_bonus_pct: 50, max_per_day: 1 },
+  { action_id: 'handwashing_habit', category: 'behavior', description: 'Proper handwashing after public contact', HYG: 0.1, scientific_formula: 'Units * 8 hours', playful_default_minutes: 48, verification_bonus_pct: 50, max_per_day: 20 }
 ];
 
 // Calculate time-based minutes directly from playful_default_minutes
