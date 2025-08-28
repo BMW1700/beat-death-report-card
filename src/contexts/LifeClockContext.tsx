@@ -300,7 +300,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
 
       return {
         ...prev,
-        totalLifeMinutes: Math.max(0, newTotalMinutes),
+        totalLifeMinutes: Math.max(calculateBaselineMinutes(prev.userData) * 0.1, newTotalMinutes), // Prevent going below 10% of baseline
         recentActions: [actionLog, ...prev.recentActions.slice(0, 49)], // Keep last 50
         dailyCaps: {
           ...prev.dailyCaps,
