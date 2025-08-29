@@ -281,8 +281,8 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                {!isGainingTime ? (
                  // BALANCED HAPPY SMILE WITH TEETH - METALLIC SILVER MOUTH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* METALLIC SILVER Smiling mouth opening - balanced size */}
-                   <div className="w-8 h-3 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 rounded-full border border-gray-400" />
+                   {/* DARKER METALLIC SILVER Smiling mouth opening - balanced size */}
+                   <div className="w-8 h-3 bg-gradient-to-br from-gray-600 via-gray-500 to-gray-600 rounded-full border border-gray-700" />
                    {/* Visible white teeth - balanced */}
                    <div className="absolute top-0.5 left-1.5 w-5 h-2 bg-white rounded-sm flex gap-0.5">
                      <div className="w-0.5 h-full bg-white rounded-sm" />
@@ -295,8 +295,8 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                ) : (
                  // BALANCED ANGRY METALLIC SILVER FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* METALLIC SILVER Frowning mouth - balanced size */}
-                   <div className="w-8 h-2.5 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 transform rotate-180 rounded-b-full border border-gray-400" />
+                   {/* DARKER METALLIC SILVER Frowning mouth - balanced size */}
+                   <div className="w-8 h-2.5 bg-gradient-to-br from-gray-600 via-gray-500 to-gray-600 transform rotate-180 rounded-b-full border border-gray-700" />
                  </div>
                )}
              </div>
