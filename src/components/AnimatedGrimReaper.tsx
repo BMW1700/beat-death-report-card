@@ -206,29 +206,20 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         
         {/* Death's Imposing Figure */}
         <div className="relative scale-100">
-          {/* MENACING DEATH HOOD - COMPLETELY BLACK VOID */}
+          {/* MENACING DEATH HOOD - CURVED AND FLOWING */}
           <div className="relative w-36 h-44 mx-auto">
-            {/* Outer Hood Shape - Pure Black */}
-            <div className="absolute top-0 w-full h-36 bg-black shadow-2xl border-4 border-black"
+            {/* Outer Hood Shape - Natural curved hood */}
+            <div className="absolute top-0 w-full h-36 bg-black shadow-2xl border-2 border-gray-900"
                  style={{
-                   clipPath: "polygon(20% 0%, 80% 0%, 95% 30%, 100% 60%, 90% 90%, 10% 90%, 0% 60%, 5% 30%)",
+                   clipPath: "polygon(25% 0%, 75% 0%, 90% 15%, 95% 35%, 90% 55%, 85% 75%, 75% 90%, 25% 90%, 15% 75%, 10% 55%, 5% 35%, 10% 15%)",
                  }}>
-              {/* Multiple layers of darkness for depth */}
-              <div className="absolute inset-1 bg-black" />
-              <div className="absolute inset-2 bg-black" />
-              <div className="absolute inset-3 bg-black" />
-              <div className="absolute inset-4 bg-black" />
+              {/* Deep hood interior shadows */}
+              <div className="absolute inset-4 bg-gradient-radial from-transparent via-black/80 to-black rounded-full" />
+              <div className="absolute inset-6 bg-gradient-radial from-transparent to-black opacity-90" />
               
-              {/* Hood opening - darker void */}
-              <div className="absolute top-8 left-4 right-4 bottom-4 bg-black rounded-t-3xl" />
-              <div className="absolute top-12 left-6 right-6 bottom-6 bg-black" />
+              {/* Hood opening - creates depth */}
+              <div className="absolute top-8 left-6 right-6 bottom-4 bg-black rounded-t-full opacity-95" />
             </div>
-            
-            {/* Hood Shadow Cast */}
-            <div className="absolute top-0 w-full h-36 bg-gradient-to-b from-black/80 to-transparent"
-                 style={{
-                   clipPath: "polygon(20% 0%, 80% 0%, 95% 30%, 100% 60%, 90% 90%, 10% 90%, 0% 60%, 5% 30%)",
-                 }} />
           </div>
             
             {/* Menacing Skull Face */}
