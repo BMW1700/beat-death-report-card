@@ -279,24 +279,23 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               
                {/* DRAMATIC Facial Expression Changes - METALLIC SILVER MOUTH */}
                {!isGainingTime ? (
-                 // BIG HAPPY SMILE WITH TEETH - METALLIC SILVER MOUTH
+                 // SUBTLE HAPPY SMILE WITH TEETH - METALLIC SILVER MOUTH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* METALLIC SILVER Smiling mouth opening */}
-                   <div className="w-12 h-4 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 rounded-full border-2 border-gray-400" />
-                   {/* Visible white teeth */}
-                   <div className="absolute top-1 left-2 w-8 h-2 bg-white rounded-sm flex gap-0.5">
-                     <div className="w-1 h-full bg-white rounded-sm" />
-                     <div className="w-1 h-full bg-white rounded-sm" />
-                     <div className="w-1 h-full bg-white rounded-sm" />
-                     <div className="w-1 h-full bg-white rounded-sm" />
-                     <div className="w-1 h-full bg-white rounded-sm" />
+                   {/* METALLIC SILVER Smiling mouth opening - smaller and less goofy */}
+                   <div className="w-6 h-2.5 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 rounded-full border border-gray-400" />
+                   {/* Visible white teeth - smaller */}
+                   <div className="absolute top-0.5 left-1 w-4 h-1.5 bg-white rounded-sm flex gap-0.5">
+                     <div className="w-0.5 h-full bg-white rounded-sm" />
+                     <div className="w-0.5 h-full bg-white rounded-sm" />
+                     <div className="w-0.5 h-full bg-white rounded-sm" />
+                     <div className="w-0.5 h-full bg-white rounded-sm" />
                    </div>
                  </div>
                ) : (
-                 // DEEP ANGRY METALLIC SILVER FROWN
+                 // SUBTLE ANGRY METALLIC SILVER FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* METALLIC SILVER Frowning mouth - inverted curve */}
-                   <div className="w-10 h-3 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 transform rotate-180 rounded-b-full border-2 border-gray-400" />
+                   {/* METALLIC SILVER Frowning mouth - smaller and more subtle */}
+                   <div className="w-6 h-2 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 transform rotate-180 rounded-b-full border border-gray-400" />
                  </div>
                )}
              </div>
