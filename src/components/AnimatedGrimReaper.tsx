@@ -45,7 +45,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
   const lifePercentage = Math.max(5, Math.min(95, (timeRemaining.years / 80) * 100));
 
   return (
-    <div className="relative flex justify-center items-center h-40">
+    <div className="relative flex justify-center items-center h-48">
       {/* Dark Aura/Energy Field */}
       <div className={cn(
         "absolute inset-0 transition-all duration-1000",
@@ -58,7 +58,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
       </div>
 
       {/* Life Clock Bar - Enhanced */}
-      <div className="relative w-80 h-12 bg-gradient-to-r from-red-950 via-red-800 to-red-600 rounded-full border-3 border-red-700 shadow-2xl overflow-hidden">
+      <div className="relative w-80 h-12 bg-gradient-to-r from-red-950 via-red-800 to-red-600 rounded-full border-3 border-red-700 shadow-2xl overflow-hidden z-10">
         {/* Inner glow */}
         <div className="absolute inset-1 bg-gradient-to-r from-black/50 to-transparent rounded-full" />
         
@@ -100,11 +100,93 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             <div className="absolute -bottom-1 right-20 w-1.5 h-1.5 bg-red-300 rounded-full animate-pulse" />
           </>
         )}
+
+        {/* Left Hand - Gripping FROM ABOVE */}
+        <div className={cn(
+          "absolute -top-6 left-12 w-8 h-10 transition-all duration-300 z-20",
+          handAnimation === 'frustrated' && "animate-hand-frustrated scale-110",
+          handAnimation === 'pleased' && "animate-hand-pleased scale-105",
+          handAnimation === 'idle' && "animate-hand-idle"
+        )}>
+          {/* Skeletal Hand gripping down */}
+          <div className="relative w-full h-full">
+            {/* Palm positioned above bar */}
+            <div className="absolute bottom-0 left-0 w-6 h-6 bg-gradient-to-b from-gray-600 to-gray-800 rounded-lg border-2 border-gray-500 shadow-lg transform rotate-12">
+              {/* Palm lines */}
+              <div className="absolute top-1 left-1 w-4 h-px bg-gray-400" />
+              <div className="absolute top-3 left-0.5 w-5 h-px bg-gray-400" />
+            </div>
+            
+            {/* Fingers gripping down onto the bar */}
+            <div className="absolute bottom-6 left-1 w-1.5 h-8 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform rotate-25 border border-gray-400" />
+            <div className="absolute bottom-6 left-2.5 w-1.5 h-9 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform rotate-15 border border-gray-400" />
+            <div className="absolute bottom-6 left-4 w-1.5 h-8 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform rotate-5 border border-gray-400" />
+            <div className="absolute bottom-5 left-5.5 w-1 h-6 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform -rotate-10 border border-gray-400" />
+            
+            {/* Thumb wrapping around */}
+            <div className="absolute bottom-2 -left-1 w-1.5 h-5 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform rotate-60 border border-gray-400" />
+            
+            {/* Knuckles */}
+            <div className="absolute bottom-1 left-1.5 w-1 h-1 bg-gray-400 rounded-full" />
+            <div className="absolute bottom-1 left-3 w-1 h-1 bg-gray-400 rounded-full" />
+            <div className="absolute bottom-1 left-4.5 w-1 h-1 bg-gray-400 rounded-full" />
+          </div>
+          
+          {/* Intense Grip Effects */}
+          {isGripping && (
+            <div className="absolute bottom-2 -right-2 transform">
+              <div className="w-4 h-0.5 bg-red-400 animate-pulse shadow-lg shadow-red-400/50" />
+              <div className="w-3 h-0.5 bg-red-300 animate-pulse mt-0.5 shadow-lg shadow-red-300/50" />
+              <div className="w-2 h-0.5 bg-red-200 animate-pulse mt-0.5 shadow-lg shadow-red-200/50" />
+            </div>
+          )}
+        </div>
+
+        {/* Right Hand - Gripping FROM ABOVE */}
+        <div className={cn(
+          "absolute -top-6 right-12 w-8 h-10 transition-all duration-300 z-20",
+          handAnimation === 'frustrated' && "animate-hand-frustrated-right scale-110",
+          handAnimation === 'pleased' && "animate-hand-pleased-right scale-105", 
+          handAnimation === 'idle' && "animate-hand-idle-right"
+        )}>
+          {/* Skeletal Hand gripping down (mirrored) */}
+          <div className="relative w-full h-full">
+            {/* Palm positioned above bar */}
+            <div className="absolute bottom-0 right-0 w-6 h-6 bg-gradient-to-b from-gray-600 to-gray-800 rounded-lg border-2 border-gray-500 shadow-lg transform -rotate-12">
+              {/* Palm lines */}
+              <div className="absolute top-1 right-1 w-4 h-px bg-gray-400" />
+              <div className="absolute top-3 right-0.5 w-5 h-px bg-gray-400" />
+            </div>
+            
+            {/* Fingers gripping down onto the bar (mirrored) */}
+            <div className="absolute bottom-6 right-1 w-1.5 h-8 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform -rotate-25 border border-gray-400" />
+            <div className="absolute bottom-6 right-2.5 w-1.5 h-9 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform -rotate-15 border border-gray-400" />
+            <div className="absolute bottom-6 right-4 w-1.5 h-8 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform -rotate-5 border border-gray-400" />
+            <div className="absolute bottom-5 right-5.5 w-1 h-6 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform rotate-10 border border-gray-400" />
+            
+            {/* Thumb wrapping around */}
+            <div className="absolute bottom-2 -right-1 w-1.5 h-5 bg-gradient-to-t from-gray-700 to-gray-500 rounded-full transform -rotate-60 border border-gray-400" />
+            
+            {/* Knuckles */}
+            <div className="absolute bottom-1 right-1.5 w-1 h-1 bg-gray-400 rounded-full" />
+            <div className="absolute bottom-1 right-3 w-1 h-1 bg-gray-400 rounded-full" />
+            <div className="absolute bottom-1 right-4.5 w-1 h-1 bg-gray-400 rounded-full" />
+          </div>
+          
+          {/* Intense Grip Effects */}
+          {isGripping && (
+            <div className="absolute bottom-2 -left-2 transform">
+              <div className="w-4 h-0.5 bg-red-400 animate-pulse shadow-lg shadow-red-400/50" />
+              <div className="w-3 h-0.5 bg-red-300 animate-pulse mt-0.5 shadow-lg shadow-red-300/50" />
+              <div className="w-2 h-0.5 bg-red-200 animate-pulse mt-0.5 shadow-lg shadow-red-200/50" />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Masterful Grim Reaper */}
+      {/* Masterful Grim Reaper ABOVE the bar */}
       <div className={cn(
-        "absolute inset-0 flex justify-center items-center transition-all duration-700 scale-110",
+        "absolute -top-16 flex justify-center items-center transition-all duration-700 scale-110",
         isGripping && "scale-115",
         isCriticallyLow ? "animate-death-dance" : "animate-death-hover",
         isGainingTime && "animate-frustrated-shake"
@@ -169,92 +251,6 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute right-2 top-6 w-1 h-12 bg-gray-800 rounded-full opacity-40" />
               <div className="absolute left-1/2 top-8 w-px h-10 bg-gray-700 opacity-50" />
             </div>
-          </div>
-
-          {/* Enhanced Left Hand */}
-          <div className={cn(
-            "absolute -left-12 top-16 w-8 h-10 transition-all duration-300 z-10",
-            handAnimation === 'frustrated' && "animate-hand-frustrated scale-110",
-            handAnimation === 'pleased' && "animate-hand-pleased scale-105",
-            handAnimation === 'idle' && "animate-hand-idle"
-          )}>
-            {/* Skeletal Hand */}
-            <div className="relative w-full h-full">
-              {/* Palm */}
-              <div className="absolute bottom-0 left-0 w-6 h-6 bg-gradient-to-b from-gray-700 to-gray-900 rounded-lg border-2 border-gray-600 shadow-lg">
-                {/* Palm lines */}
-                <div className="absolute top-1 left-1 w-4 h-px bg-gray-500" />
-                <div className="absolute top-3 left-0.5 w-5 h-px bg-gray-500" />
-              </div>
-              
-              {/* Fingers - More detailed */}
-              <div className="absolute -bottom-2 left-1 w-1.5 h-6 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform rotate-20 border border-gray-500" />
-              <div className="absolute -bottom-2 left-2.5 w-1.5 h-7 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform rotate-5 border border-gray-500" />
-              <div className="absolute -bottom-2 left-4 w-1.5 h-6 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform -rotate-5 border border-gray-500" />
-              <div className="absolute -bottom-1 left-5.5 w-1 h-4 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform -rotate-20 border border-gray-500" />
-              
-              {/* Thumb */}
-              <div className="absolute top-2 -left-1 w-1.5 h-4 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform rotate-45 border border-gray-500" />
-              
-              {/* Knuckles */}
-              <div className="absolute bottom-2 left-1.5 w-1 h-1 bg-gray-500 rounded-full" />
-              <div className="absolute bottom-2 left-3 w-1 h-1 bg-gray-500 rounded-full" />
-              <div className="absolute bottom-2 left-4.5 w-1 h-1 bg-gray-500 rounded-full" />
-            </div>
-            
-            {/* Intense Grip Effects */}
-            {isGripping && (
-              <div className="absolute -right-4 top-1/2 transform -translate-y-1/2">
-                <div className="w-6 h-0.5 bg-red-400 animate-pulse shadow-lg shadow-red-400/50" />
-                <div className="w-4 h-0.5 bg-red-300 animate-pulse mt-1 shadow-lg shadow-red-300/50" />
-                <div className="w-3 h-0.5 bg-red-200 animate-pulse mt-1 shadow-lg shadow-red-200/50" />
-                {/* Energy crackling */}
-                <div className="absolute -top-2 right-0 w-1 h-4 bg-red-400 animate-pulse transform rotate-45 opacity-60" />
-              </div>
-            )}
-          </div>
-
-          {/* Enhanced Right Hand */}
-          <div className={cn(
-            "absolute -right-12 top-16 w-8 h-10 transition-all duration-300 z-10",
-            handAnimation === 'frustrated' && "animate-hand-frustrated-right scale-110",
-            handAnimation === 'pleased' && "animate-hand-pleased-right scale-105", 
-            handAnimation === 'idle' && "animate-hand-idle-right"
-          )}>
-            {/* Skeletal Hand (mirrored) */}
-            <div className="relative w-full h-full">
-              {/* Palm */}
-              <div className="absolute bottom-0 right-0 w-6 h-6 bg-gradient-to-b from-gray-700 to-gray-900 rounded-lg border-2 border-gray-600 shadow-lg">
-                {/* Palm lines */}
-                <div className="absolute top-1 right-1 w-4 h-px bg-gray-500" />
-                <div className="absolute top-3 right-0.5 w-5 h-px bg-gray-500" />
-              </div>
-              
-              {/* Fingers - More detailed (mirrored) */}
-              <div className="absolute -bottom-2 right-1 w-1.5 h-6 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform -rotate-20 border border-gray-500" />
-              <div className="absolute -bottom-2 right-2.5 w-1.5 h-7 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform -rotate-5 border border-gray-500" />
-              <div className="absolute -bottom-2 right-4 w-1.5 h-6 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform rotate-5 border border-gray-500" />
-              <div className="absolute -bottom-1 right-5.5 w-1 h-4 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform rotate-20 border border-gray-500" />
-              
-              {/* Thumb */}
-              <div className="absolute top-2 -right-1 w-1.5 h-4 bg-gradient-to-t from-gray-800 to-gray-600 rounded-full transform -rotate-45 border border-gray-500" />
-              
-              {/* Knuckles */}
-              <div className="absolute bottom-2 right-1.5 w-1 h-1 bg-gray-500 rounded-full" />
-              <div className="absolute bottom-2 right-3 w-1 h-1 bg-gray-500 rounded-full" />
-              <div className="absolute bottom-2 right-4.5 w-1 h-1 bg-gray-500 rounded-full" />
-            </div>
-            
-            {/* Intense Grip Effects */}
-            {isGripping && (
-              <div className="absolute -left-4 top-1/2 transform -translate-y-1/2">
-                <div className="w-6 h-0.5 bg-red-400 animate-pulse shadow-lg shadow-red-400/50" />
-                <div className="w-4 h-0.5 bg-red-300 animate-pulse mt-1 shadow-lg shadow-red-300/50" />
-                <div className="w-3 h-0.5 bg-red-200 animate-pulse mt-1 shadow-lg shadow-red-200/50" />
-                {/* Energy crackling */}
-                <div className="absolute -top-2 left-0 w-1 h-4 bg-red-400 animate-pulse transform -rotate-45 opacity-60" />
-              </div>
-            )}
           </div>
 
           {/* Legendary Scythe */}
