@@ -282,9 +282,9 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* DRAMATIC Facial Expression Changes */}
+               {/* DRAMATIC Facial Expression Changes - POSITIONED BELOW NOSE */}
                {!isGainingTime ? (
-                 // BIG HAPPY SMILE WITH TEETH
+                 // BIG HAPPY SMILE WITH TEETH - POSITIONED LOWER
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
                    {/* Smiling mouth opening */}
                    <div className="w-12 h-4 bg-black rounded-full" />
@@ -301,7 +301,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-gray-600 rounded-full transform rotate-45" />
                  </div>
                ) : (
-                 // DEEP ANGRY FROWN
+                 // DEEP ANGRY FROWN - POSITIONED LOWER
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
                    {/* Frowning mouth - inverted curve */}
                    <div className="w-10 h-3 bg-black transform rotate-180 rounded-b-full" />
