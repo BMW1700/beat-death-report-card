@@ -263,14 +263,14 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-gray-700 rounded-full" />
                  </div>
                ) : (
-                 // Angry frowning mouth (downward curve)
+                 // Angry frowning mouth (downward curve) - NO LIPSTICK!
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   <div className="w-8 h-3 bg-red-900 rounded-t-full border-2 border-red-700" />
+                   <div className="w-8 h-3 bg-black rounded-t-full border-2 border-gray-700" />
                    {/* Frown curve */}
-                   <div className="absolute bottom-0 left-1 w-6 h-1 bg-red-800 rounded-t-full" />
+                   <div className="absolute bottom-0 left-1 w-6 h-1 bg-gray-800 rounded-t-full" />
                    {/* Angry lines */}
-                   <div className="absolute -bottom-1 -left-1 w-2 h-1 bg-red-700 transform rotate-12" />
-                   <div className="absolute -bottom-1 -right-1 w-2 h-1 bg-red-700 transform -rotate-12" />
+                   <div className="absolute -bottom-1 -left-1 w-2 h-1 bg-gray-600 transform rotate-12" />
+                   <div className="absolute -bottom-1 -right-1 w-2 h-1 bg-gray-600 transform -rotate-12" />
                  </div>
                )}
             </div>
