@@ -22,10 +22,21 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
   const [handAnimation, setHandAnimation] = useState('idle');
   const [powerLevel, setPowerLevel] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
   
   const isGainingTime = todayContribution > 0;
   const isCriticallyLow = timeRemaining.years < 1 && timeRemaining.months < 6;
   
+  useEffect(() => {
+    // Eye blinking every 5 seconds
+    const blinkInterval = setInterval(() => {
+      setIsBlinking(true);
+      setTimeout(() => setIsBlinking(false), 200); // Blink for 200ms
+    }, 5000);
+
+    return () => clearInterval(blinkInterval);
+  }, []);
+
   useEffect(() => {
     // Trigger hand animations based on time changes
     if (Math.abs(todayContribution) > 0) {
@@ -208,8 +219,8 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         isShaking && "animate-frustrated-shake"
       )}>
         
-        {/* Death's Imposing Figure */}
-        <div className="relative scale-100">
+        {/* Death's Imposing Figure - SMALLER SIZE */}
+        <div className="relative scale-75">
           {/* MENACING DEATH HOOD - CURVED AND FLOWING */}
           <div className="relative w-36 h-44 mx-auto">
             {/* Outer Hood Shape - Natural curved hood */}
@@ -241,11 +252,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-4">
                 <div className="relative">
                   <div className="w-5 h-7 bg-black rounded-full border-2 border-gray-800" />
-                  <div className={cn(
-                    "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
-                    isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
-                    isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90"
-                  )} />
+                   <div className={cn(
+                     "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
+                     isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
+                     isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90",
+                     isBlinking && "opacity-0"
+                   )} />
                   {/* Intense inner glow */}
                   <div className="absolute top-1 left-1 w-3 h-3 bg-red-300 rounded-full opacity-90" />
                   <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-white rounded-full opacity-60" />
@@ -254,11 +266,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                 </div>
                 <div className="relative">
                   <div className="w-5 h-7 bg-black rounded-full border-2 border-gray-800" />
-                  <div className={cn(
-                    "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
-                    isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
-                    isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90"
-                  )} />
+                   <div className={cn(
+                     "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
+                     isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
+                     isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90",
+                     isBlinking && "opacity-0"
+                   )} />
                   <div className="absolute top-1 left-1 w-3 h-3 bg-red-300 rounded-full opacity-90" />
                   <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-white rounded-full opacity-60" />
                   <div className="absolute -inset-2 bg-red-500/40 rounded-full blur-md animate-pulse" />
@@ -345,9 +358,6 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               
               {/* Blade-to-handle connection */}
               <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded border-2 border-gray-500" />
-              
-              {/* Scythe tip */}
-              <div className="absolute top-0 right-2 w-4 h-4 bg-gradient-to-br from-gray-200 to-gray-400 transform rotate-45 border border-gray-500" />
             </div>
             
             {/* Death Aura around Scythe */}
