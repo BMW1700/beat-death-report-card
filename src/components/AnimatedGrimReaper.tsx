@@ -316,32 +316,33 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
 
-          {/* REBUILT Death Scythe - Complete Silver */}
+          {/* REDESIGNED Death Scythe - Brown Handle, Clean Silver Blade */}
           <div className={cn(
             "absolute -right-20 -top-16 transition-all duration-500 z-10",
             isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-6",
             isCriticallyLow && "animate-pulse"
           )}>
-            {/* Pure Silver Scythe Handle */}
-            <div className="w-3 h-52 bg-gradient-to-b from-gray-300 via-gray-200 to-gray-300 rounded-full border-2 border-gray-400 shadow-2xl" />
+            {/* Brown Wooden Scythe Handle */}
+            <div className="w-3 h-52 bg-gradient-to-b from-amber-800 via-amber-900 to-amber-950 rounded-full border-2 border-amber-700 shadow-2xl">
+              {/* Wood grain texture */}
+              <div className="absolute left-0.5 top-4 w-0.5 h-40 bg-amber-700 opacity-60 rounded-full" />
+              <div className="absolute right-0.5 top-8 w-0.5 h-36 bg-amber-600 opacity-40 rounded-full" />
+            </div>
             
-            {/* Pure Silver Scythe Blade - NO BLACK AT ALL */}
-            <div className="absolute -top-4 -right-4">
-              {/* Single Silver Blade Element - NO BLACK BORDERS */}
+            {/* Clean Silver Scythe Blade - Single Element Only */}
+            <div className="absolute -top-2 -right-2">
               <div 
-                className="w-24 h-8 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 shadow-2xl"
+                className="w-20 h-6 bg-gradient-to-br from-gray-300 via-gray-100 to-gray-300 shadow-2xl"
                 style={{
-                  borderRadius: "0 30px 30px 0",
-                  transform: "rotate(-20deg) translateY(16px)",
+                  borderRadius: "0 25px 25px 0",
+                  transform: "rotate(-15deg)",
                   transformOrigin: "left center"
                 }}
               >
                 {/* Blade shine effect */}
-                <div className="absolute top-1 left-2 w-16 h-2 bg-white rounded-r-full" />
+                <div className="absolute top-1 left-1 w-14 h-1 bg-white rounded-r-full opacity-90" />
+                <div className="absolute top-3 left-1 w-12 h-0.5 bg-white/70 rounded-r-full" />
               </div>
-              
-              {/* Handle Connection - Silver */}
-              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-gray-300 to-gray-200 rounded border-2 border-gray-400" />
             </div>
             
             {/* Scythe Power Aura */}
