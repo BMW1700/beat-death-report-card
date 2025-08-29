@@ -268,7 +268,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
           {/* Legendary Scythe */}
           <div className={cn(
             "absolute -right-16 -top-8 transition-all duration-500 z-5",
-            isGainingTime && "animate-scythe-angry scale-110 rotate-12",
+            isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-12",
             isCriticallyLow && "animate-pulse"
           )}>
             {/* Scythe Handle */}
@@ -282,21 +282,32 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-16 left-0 w-full h-8 bg-gradient-to-b from-amber-800 to-amber-900 rounded-full border border-amber-600" />
             </div>
             
-            {/* Scythe Blade */}
-            <div className="absolute -top-4 -right-6 w-12 h-8 bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 rounded-l-full border-2 border-gray-400 shadow-2xl">
-              {/* Blade edge glow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent rounded-l-full" />
-              {/* Blade reflection */}
-              <div className="absolute top-1 left-1 w-8 h-2 bg-gradient-to-r from-white/80 to-transparent rounded-l-full" />
-              {/* Sharp edge */}
-              <div className="absolute left-0 top-0 w-10 h-px bg-white shadow-lg shadow-white/50" />
+            {/* Proper Curved Scythe Blade */}
+            <div className="absolute -top-6 -right-8 w-16 h-12">
+              {/* Main curved blade */}
+              <div className="relative w-full h-full">
+                {/* Outer curve of scythe */}
+                <div className="absolute top-0 right-0 w-14 h-10 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-2 border-gray-500 shadow-2xl"
+                     style={{
+                       clipPath: "polygon(0% 20%, 85% 0%, 100% 15%, 100% 85%, 15% 100%, 0% 80%)",
+                       borderRadius: "8px"
+                     }}>
+                  {/* Blade shine effect */}
+                  <div className="absolute top-1 left-2 w-8 h-3 bg-gradient-to-r from-white/90 to-transparent opacity-80"
+                       style={{ clipPath: "polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)" }} />
+                </div>
+                
+                {/* Sharp cutting edge */}
+                <div className="absolute top-2 right-1 w-12 h-px bg-white shadow-lg shadow-white/70" />
+                <div className="absolute top-8 right-2 w-10 h-px bg-white shadow-lg shadow-white/50" />
+              </div>
             </div>
             
             {/* Mystical Scythe Effects */}
-            {powerLevel > 0.3 && (
-              <div className="absolute -top-2 -right-4 w-8 h-6">
-                <div className="absolute inset-0 bg-red-500/30 blur-sm animate-pulse rounded-l-full" />
-                <div className="absolute inset-1 bg-red-400/20 blur-md animate-pulse rounded-l-full" />
+            {isGripping && powerLevel > 0.3 && (
+              <div className="absolute -top-4 -right-6 w-12 h-8">
+                <div className="absolute inset-0 bg-red-500/30 blur-sm animate-pulse" />
+                <div className="absolute inset-1 bg-red-400/20 blur-md animate-pulse" />
               </div>
             )}
           </div>
