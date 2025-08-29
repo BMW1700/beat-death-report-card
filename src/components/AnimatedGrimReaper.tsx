@@ -58,15 +58,19 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
 
   return (
     <div className="relative flex justify-center items-center h-48">
-      {/* Dark Aura/Energy Field */}
+      {/* TERRIFYING Dark Aura/Energy Field - MUCH MORE INTENSE */}
       <div className={cn(
         "absolute inset-0 transition-all duration-1000",
         isGripping && "animate-pulse"
       )}>
-        <div className="absolute inset-0 bg-gradient-radial from-red-900/20 via-black/40 to-transparent rounded-full blur-xl" />
+        <div className="absolute inset-0 bg-gradient-radial from-red-900/40 via-black/60 to-transparent rounded-full blur-xl" />
+        <div className="absolute inset-0 bg-gradient-radial from-black/80 via-red-950/30 to-transparent rounded-full blur-2xl animate-pulse" />
         {powerLevel > 0.5 && (
-          <div className="absolute inset-0 bg-gradient-radial from-red-500/30 via-transparent to-transparent animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-radial from-red-500/50 via-transparent to-transparent animate-pulse" />
         )}
+        {/* Dark energy waves */}
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-red-800/20 to-transparent animate-pulse rounded-full scale-125" />
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/40 to-transparent animate-pulse rounded-full scale-150 animation-delay-1000" />
       </div>
 
       {/* Life Clock Bar - Enhanced */}
@@ -222,32 +226,42 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
             
-            {/* Menacing Skull Face */}
-            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-20 h-24">
-              {/* Skull base */}
-              <div className="absolute inset-0 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400 opacity-15"
-                   style={{ clipPath: "polygon(20% 0%, 80% 0%, 100% 70%, 90% 100%, 10% 100%, 0% 70%)" }} />
+            {/* Menacing Skull Face - ENHANCED TERROR */}
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-22 h-26">
+              {/* SKELETAL Skull base - more pronounced */}
+              <div className="absolute inset-0 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 opacity-20 border-2 border-gray-700"
+                   style={{ clipPath: "polygon(15% 0%, 85% 0%, 100% 65%, 95% 85%, 85% 100%, 15% 100%, 5% 85%, 0% 65%)" }} />
               
-              {/* Glowing Red Eye Sockets */}
+              {/* Bone texture lines for extra horror */}
+              <div className="absolute top-2 left-4 w-12 h-px bg-gray-600 opacity-40" />
+              <div className="absolute top-4 left-3 w-14 h-px bg-gray-600 opacity-30" />
+              <div className="absolute top-14 left-2 w-16 h-px bg-gray-700 opacity-50" />
+              
+              {/* TERRIFYING Glowing Red Eye Sockets */}
               <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-4">
                 <div className="relative">
-                  <div className="w-4 h-6 bg-black rounded-full" />
+                  <div className="w-5 h-7 bg-black rounded-full border-2 border-gray-800" />
                   <div className={cn(
-                    "absolute top-1 left-1 w-2.5 h-3 rounded-full transition-all duration-300",
-                    isCriticallyLow ? "bg-red-400 animate-pulse shadow-lg shadow-red-400/70" : "bg-red-500 shadow-lg shadow-red-500/50",
-                    isGainingTime && "bg-orange-400 animate-bounce shadow-lg shadow-orange-400/70"
+                    "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
+                    isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
+                    isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90"
                   )} />
-                  {/* Inner glow */}
-                  <div className="absolute top-1.5 left-1.5 w-1.5 h-2 bg-red-300 rounded-full opacity-80" />
+                  {/* Intense inner glow */}
+                  <div className="absolute top-1 left-1 w-3 h-3 bg-red-300 rounded-full opacity-90" />
+                  <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-white rounded-full opacity-60" />
+                  {/* Eye glow effect */}
+                  <div className="absolute -inset-2 bg-red-500/40 rounded-full blur-md animate-pulse" />
                 </div>
                 <div className="relative">
-                  <div className="w-4 h-6 bg-black rounded-full" />
+                  <div className="w-5 h-7 bg-black rounded-full border-2 border-gray-800" />
                   <div className={cn(
-                    "absolute top-1 left-1 w-2.5 h-3 rounded-full transition-all duration-300",
-                    isCriticallyLow ? "bg-red-400 animate-pulse shadow-lg shadow-red-400/70" : "bg-red-500 shadow-lg shadow-red-500/50",
-                    isGainingTime && "bg-orange-400 animate-bounce shadow-lg shadow-orange-400/70"
+                    "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
+                    isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
+                    isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90"
                   )} />
-                  <div className="absolute top-1.5 left-1.5 w-1.5 h-2 bg-red-300 rounded-full opacity-80" />
+                  <div className="absolute top-1 left-1 w-3 h-3 bg-red-300 rounded-full opacity-90" />
+                  <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-white rounded-full opacity-60" />
+                  <div className="absolute -inset-2 bg-red-500/40 rounded-full blur-md animate-pulse" />
                 </div>
               </div>
               
@@ -373,11 +387,14 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         </div>
       )}
 
-      {/* Power Aura Effects */}
-      {powerLevel > 0.7 && (
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-radial from-red-600/20 via-red-500/10 to-transparent animate-pulse rounded-full scale-150" />
-          <div className="absolute inset-0 bg-gradient-radial from-orange-500/10 to-transparent animate-pulse rounded-full scale-125 animation-delay-500" />
+      {/* ULTIMATE TERROR AURA - Death Energy Emanating */}
+      {isCriticallyLow && (
+        <div className="absolute inset-0 pointer-events-none z-50">
+          <div className="absolute inset-0 bg-gradient-radial from-red-700/30 via-black/50 to-transparent animate-pulse rounded-full scale-200 blur-2xl" />
+          <div className="absolute inset-0 bg-gradient-radial from-red-600/20 to-transparent animate-pulse rounded-full scale-175 animation-delay-700" />
+          {/* Death whispers effect */}
+          <div className="absolute top-0 left-1/4 w-2 h-20 bg-red-500/20 blur-sm animate-pulse transform rotate-12" />
+          <div className="absolute top-0 right-1/4 w-2 h-20 bg-red-500/20 blur-sm animate-pulse transform -rotate-12 animation-delay-300" />
         </div>
       )}
     </div>
