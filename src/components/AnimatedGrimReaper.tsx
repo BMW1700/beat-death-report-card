@@ -326,10 +326,10 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             <div className="relative w-3 h-52 bg-gradient-to-b from-black via-black to-black rounded-full border-2 border-black shadow-2xl">
             </div>
             
-            {/* CLASSIC CURVED SCYTHE BLADE - PURE SILVER METAL, NO GREY */}
+            {/* CLASSIC CURVED SCYTHE BLADE - PURE SILVER ONLY */}
             <div className="absolute -top-4 -right-4 w-28 h-16">
               {/* Main curved blade - classic scythe shape - PURE SILVER */}
-              <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-slate-200 via-white to-slate-300 border-2 border-black shadow-2xl"
+              <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-white via-white to-white border-2 border-black shadow-2xl"
                    style={{
                      borderRadius: "0 30px 30px 0",
                      transform: "rotate(-20deg)",
@@ -339,8 +339,6 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                 <div className="absolute top-1 left-2 w-16 h-2 bg-gradient-to-r from-white/90 to-transparent rounded-r-full opacity-90" />
                 {/* Sharp cutting edge */}
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-white rounded-r-full shadow-lg shadow-white/70" />
-                {/* Inner edge detail - WHITE */}
-                <div className="absolute top-2 left-1 w-20 h-4 bg-gradient-to-r from-white to-slate-200 rounded-r-full opacity-60" />
               </div>
               
               {/* Blade-to-handle connection - PURE BLACK */}
