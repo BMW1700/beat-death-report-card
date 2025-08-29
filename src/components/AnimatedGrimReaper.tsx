@@ -277,12 +277,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* DRAMATIC Facial Expression Changes - SILVER MOUTH */}
+               {/* DRAMATIC Facial Expression Changes - PURE SILVER MOUTH */}
                {!isGainingTime ? (
-                 // BIG HAPPY SMILE WITH TEETH - SILVER MOUTH
+                 // BIG HAPPY SMILE WITH TEETH - PURE SILVER MOUTH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* SILVER Smiling mouth opening */}
-                   <div className="w-12 h-4 bg-gray-400 rounded-full border-2 border-gray-500" />
+                   {/* PURE SILVER Smiling mouth opening */}
+                   <div className="w-12 h-4 bg-white rounded-full border-2 border-black" />
                    {/* Visible white teeth */}
                    <div className="absolute top-1 left-2 w-8 h-2 bg-white rounded-sm flex gap-0.5">
                      <div className="w-1 h-full bg-white rounded-sm" />
@@ -293,10 +293,10 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                    </div>
                  </div>
                ) : (
-                 // DEEP ANGRY SILVER FROWN
+                 // DEEP ANGRY PURE SILVER FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* SILVER Frowning mouth - inverted curve */}
-                   <div className="w-10 h-3 bg-gray-500 transform rotate-180 rounded-b-full border-2 border-gray-600" />
+                   {/* PURE SILVER Frowning mouth - inverted curve */}
+                   <div className="w-10 h-3 bg-white transform rotate-180 rounded-b-full border-2 border-black" />
                  </div>
                )}
              </div>
@@ -316,36 +316,35 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
 
-          {/* MASSIVE Death Scythe - COMPLETELY BLACK, NO GREY */}
+          {/* REBUILT Death Scythe - Pure Black Handle, Pure Silver Blade */}
           <div className={cn(
             "absolute -right-20 -top-16 transition-all duration-500 z-10",
             isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-6",
             isCriticallyLow && "animate-pulse"
           )}>
-            {/* Long BLACK Scythe Handle - NO GREY */}
-            <div className="relative w-3 h-52 bg-gradient-to-b from-black via-black to-black rounded-full border-2 border-black shadow-2xl">
-            </div>
+            {/* Pure Black Scythe Handle */}
+            <div className="w-3 h-52 bg-black rounded-full border-2 border-black shadow-2xl" />
             
-            {/* CLASSIC CURVED SCYTHE BLADE - PURE SILVER ONLY */}
-            <div className="absolute -top-4 -right-4 w-28 h-16">
-              {/* Main curved blade - classic scythe shape - PURE SILVER */}
-              <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-white via-white to-white border-2 border-black shadow-2xl"
-                   style={{
-                     borderRadius: "0 30px 30px 0",
-                     transform: "rotate(-20deg)",
-                     transformOrigin: "left center"
-                   }}>
-                {/* Blade shine */}
-                <div className="absolute top-1 left-2 w-16 h-2 bg-gradient-to-r from-white/90 to-transparent rounded-r-full opacity-90" />
-                {/* Sharp cutting edge */}
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-white rounded-r-full shadow-lg shadow-white/70" />
+            {/* Pure Silver Scythe Blade - Completely Rebuilt */}
+            <div className="absolute -top-4 -right-4">
+              {/* Single Silver Blade Element */}
+              <div 
+                className="w-24 h-8 bg-white border-2 border-black shadow-2xl"
+                style={{
+                  borderRadius: "0 30px 30px 0",
+                  transform: "rotate(-20deg) translateY(16px)",
+                  transformOrigin: "left center"
+                }}
+              >
+                {/* Blade shine effect */}
+                <div className="absolute top-1 left-2 w-16 h-2 bg-white/80 rounded-r-full" />
               </div>
               
-              {/* Blade-to-handle connection - PURE BLACK */}
-              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-black to-black rounded border-2 border-black" />
+              {/* Handle Connection */}
+              <div className="absolute top-2 -left-2 w-4 h-8 bg-black rounded border-2 border-black" />
             </div>
             
-            {/* Death Aura around Scythe */}
+            {/* Scythe Power Aura */}
             {isGripping && powerLevel > 0.3 && (
               <div className="absolute -top-8 -right-8 w-20 h-12">
                 <div className="absolute inset-0 bg-red-600/40 blur-md animate-pulse rounded-full" />
