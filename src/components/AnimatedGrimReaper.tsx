@@ -277,12 +277,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* DRAMATIC Facial Expression Changes - RED MOUTH */}
+               {/* DRAMATIC Facial Expression Changes - SILVER MOUTH */}
                {!isGainingTime ? (
-                 // BIG HAPPY SMILE WITH TEETH - RED MOUTH
+                 // BIG HAPPY SMILE WITH TEETH - SILVER MOUTH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* RED Smiling mouth opening */}
-                   <div className="w-12 h-4 bg-red-600 rounded-full border-2 border-red-700" />
+                   {/* SILVER Smiling mouth opening */}
+                   <div className="w-12 h-4 bg-gray-400 rounded-full border-2 border-gray-500" />
                    {/* Visible white teeth */}
                    <div className="absolute top-1 left-2 w-8 h-2 bg-white rounded-sm flex gap-0.5">
                      <div className="w-1 h-full bg-white rounded-sm" />
@@ -293,10 +293,10 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                    </div>
                  </div>
                ) : (
-                 // DEEP ANGRY RED FROWN
+                 // DEEP ANGRY SILVER FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* RED Frowning mouth - inverted curve */}
-                   <div className="w-10 h-3 bg-red-700 transform rotate-180 rounded-b-full border-2 border-red-800" />
+                   {/* SILVER Frowning mouth - inverted curve */}
+                   <div className="w-10 h-3 bg-gray-500 transform rotate-180 rounded-b-full border-2 border-gray-600" />
                  </div>
                )}
              </div>
