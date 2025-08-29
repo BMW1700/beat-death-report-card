@@ -316,14 +316,14 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
 
-          {/* REBUILT Death Scythe - Pure Black Handle, Pure Silver Blade */}
+          {/* REBUILT Death Scythe - Complete Silver */}
           <div className={cn(
             "absolute -right-20 -top-16 transition-all duration-500 z-10",
             isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-6",
             isCriticallyLow && "animate-pulse"
           )}>
-            {/* Pure Black Scythe Handle */}
-            <div className="w-3 h-52 bg-black rounded-full border-2 border-black shadow-2xl" />
+            {/* Pure Silver Scythe Handle */}
+            <div className="w-3 h-52 bg-gradient-to-b from-gray-300 via-gray-200 to-gray-300 rounded-full border-2 border-gray-400 shadow-2xl" />
             
             {/* Pure Silver Scythe Blade - NO BLACK AT ALL */}
             <div className="absolute -top-4 -right-4">
@@ -340,8 +340,8 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                 <div className="absolute top-1 left-2 w-16 h-2 bg-white rounded-r-full" />
               </div>
               
-              {/* Handle Connection */}
-              <div className="absolute top-2 -left-2 w-4 h-8 bg-black rounded border-2 border-black" />
+              {/* Handle Connection - Silver */}
+              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-gray-300 to-gray-200 rounded border-2 border-gray-400" />
             </div>
             
             {/* Scythe Power Aura */}
