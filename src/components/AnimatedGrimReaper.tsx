@@ -282,25 +282,30 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-16 left-0 w-full h-8 bg-gradient-to-b from-amber-800 to-amber-900 rounded-full border border-amber-600" />
             </div>
             
-            {/* Proper Curved Scythe Blade */}
-            <div className="absolute -top-6 -right-8 w-16 h-12">
-              {/* Main curved blade */}
-              <div className="relative w-full h-full">
-                {/* Outer curve of scythe */}
-                <div className="absolute top-0 right-0 w-14 h-10 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-2 border-gray-500 shadow-2xl"
-                     style={{
-                       clipPath: "polygon(0% 20%, 85% 0%, 100% 15%, 100% 85%, 15% 100%, 0% 80%)",
-                       borderRadius: "8px"
-                     }}>
-                  {/* Blade shine effect */}
-                  <div className="absolute top-1 left-2 w-8 h-3 bg-gradient-to-r from-white/90 to-transparent opacity-80"
-                       style={{ clipPath: "polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)" }} />
-                </div>
-                
+            {/* Proper Grim Reaper Scythe Blade */}
+            <div className="absolute -top-2 -right-2 w-20 h-8">
+              {/* Long curved scythe blade extending horizontally */}
+              <div className="absolute top-2 left-0 w-18 h-4 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-400 shadow-2xl"
+                   style={{
+                     borderRadius: "0 20px 20px 0",
+                     transform: "rotate(-15deg)",
+                     transformOrigin: "left center"
+                   }}>
+                {/* Blade shine */}
+                <div className="absolute top-0.5 left-1 w-14 h-1 bg-gradient-to-r from-white/90 to-transparent rounded-r-full" />
                 {/* Sharp cutting edge */}
-                <div className="absolute top-2 right-1 w-12 h-px bg-white shadow-lg shadow-white/70" />
-                <div className="absolute top-8 right-2 w-10 h-px bg-white shadow-lg shadow-white/50" />
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-100 rounded-r-full shadow-md" />
               </div>
+              
+              {/* Blade attachment to handle */}
+              <div className="absolute top-1 -left-1 w-3 h-6 bg-gradient-to-r from-amber-800 to-amber-700 rounded border border-amber-600" />
+              
+              {/* Inner curve detail */}
+              <div className="absolute top-3.5 left-2 w-12 h-2 bg-gradient-to-r from-gray-400 to-gray-300 shadow-inner"
+                   style={{
+                     borderRadius: "0 10px 10px 0",
+                     transform: "rotate(-15deg)"
+                   }} />
             </div>
             
             {/* Mystical Scythe Effects */}
