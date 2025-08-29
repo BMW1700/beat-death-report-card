@@ -251,10 +251,20 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* Menacing Jaw */}
-               <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-black"
-                    style={{ clipPath: "polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%)" }}>
-               </div>
+               {/* Menacing Jaw - Smiles normally, frowns when gaining time */}
+               {!isGainingTime ? (
+                 // Smiling mouth (curved upward)
+                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
+                   <div className="w-8 h-2 bg-black rounded-b-full" />
+                   {/* Smile curve */}
+                   <div className="absolute top-0 left-1 w-6 h-1 bg-gray-600 rounded-b-full" />
+                 </div>
+               ) : (
+                 // Frowning mouth (straight/downward)
+                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-black"
+                      style={{ clipPath: "polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%)" }}>
+                 </div>
+               )}
             </div>
           </div>
 
