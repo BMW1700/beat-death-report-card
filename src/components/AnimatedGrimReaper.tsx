@@ -316,20 +316,20 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
 
-          {/* MASSIVE Death Scythe */}
+          {/* MASSIVE Death Scythe - COMPLETELY BLACK, NO GREY */}
           <div className={cn(
             "absolute -right-20 -top-16 transition-all duration-500 z-10",
             isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-6",
             isCriticallyLow && "animate-pulse"
           )}>
-            {/* Long Scythe Handle */}
-            <div className="relative w-3 h-52 bg-gradient-to-b from-gray-600 via-gray-700 to-gray-600 rounded-full border-2 border-gray-500 shadow-2xl">
+            {/* Long BLACK Scythe Handle - NO GREY */}
+            <div className="relative w-3 h-52 bg-gradient-to-b from-black via-black to-black rounded-full border-2 border-black shadow-2xl">
             </div>
             
-            {/* CLASSIC CURVED SCYTHE BLADE - NO GREY PIECE */}
+            {/* CLASSIC CURVED SCYTHE BLADE - PURE SILVER METAL, NO GREY */}
             <div className="absolute -top-4 -right-4 w-28 h-16">
-              {/* Main curved blade - classic scythe shape */}
-              <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-2 border-gray-500 shadow-2xl"
+              {/* Main curved blade - classic scythe shape - PURE SILVER */}
+              <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-slate-200 via-white to-slate-300 border-2 border-black shadow-2xl"
                    style={{
                      borderRadius: "0 30px 30px 0",
                      transform: "rotate(-20deg)",
@@ -339,12 +339,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                 <div className="absolute top-1 left-2 w-16 h-2 bg-gradient-to-r from-white/90 to-transparent rounded-r-full opacity-90" />
                 {/* Sharp cutting edge */}
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-white rounded-r-full shadow-lg shadow-white/70" />
-                {/* Inner edge detail */}
-                <div className="absolute top-2 left-1 w-20 h-4 bg-gradient-to-r from-gray-300 to-gray-200 rounded-r-full opacity-60" />
+                {/* Inner edge detail - WHITE */}
+                <div className="absolute top-2 left-1 w-20 h-4 bg-gradient-to-r from-white to-slate-200 rounded-r-full opacity-60" />
               </div>
               
-              {/* Blade-to-handle connection */}
-              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded border-2 border-gray-500" />
+              {/* Blade-to-handle connection - PURE BLACK */}
+              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-black to-black rounded border-2 border-black" />
             </div>
             
             {/* Death Aura around Scythe */}
