@@ -206,16 +206,19 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         
         {/* Death's Imposing Figure */}
         <div className="relative scale-100">
-          {/* Large Death Hood */}
+          {/* Large Death Hood - MUCH DARKER AND MORE MENACING */}
           <div className="relative w-32 h-40 mx-auto">
             {/* Deep Shadowy Hood */}
-            <div className="absolute top-0 w-full h-32 bg-gradient-to-b from-black via-gray-950 to-gray-900 shadow-2xl"
+            <div className="absolute top-0 w-full h-32 bg-gradient-to-b from-black via-black to-gray-950 shadow-2xl border-2 border-gray-900"
                  style={{
                    clipPath: "polygon(15% 0%, 85% 0%, 95% 40%, 90% 80%, 75% 95%, 25% 95%, 10% 80%, 5% 40%)",
                  }}>
-              {/* Deep hood shadows */}
-              <div className="absolute inset-4 bg-gradient-radial from-transparent via-black/60 to-black/90" />
-              <div className="absolute inset-8 bg-gradient-radial from-transparent to-black/80" />
+              {/* EXTRA DEEP hood shadows for that void look */}
+              <div className="absolute inset-2 bg-black rounded-full" />
+              <div className="absolute inset-4 bg-black" />
+              <div className="absolute inset-6 bg-black" />
+              {/* Hood interior darkness */}
+              <div className="absolute inset-8 bg-black opacity-100" />
             </div>
             
             {/* Menacing Skull Face */}
