@@ -326,7 +326,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             <div className="relative w-3 h-52 bg-gradient-to-b from-gray-600 via-gray-700 to-gray-600 rounded-full border-2 border-gray-500 shadow-2xl">
             </div>
             
-            {/* CLASSIC CURVED SCYTHE BLADE */}
+            {/* CLASSIC CURVED SCYTHE BLADE - NO GREY PIECE */}
             <div className="absolute -top-4 -right-4 w-28 h-16">
               {/* Main curved blade - classic scythe shape */}
               <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-2 border-gray-500 shadow-2xl"
