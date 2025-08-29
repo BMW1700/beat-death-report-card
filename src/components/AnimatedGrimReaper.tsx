@@ -251,26 +251,34 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* Dynamic Facial Expression - Smiles normally, frowns when gaining time */}
+               {/* DRAMATIC Facial Expression Changes */}
                {!isGainingTime ? (
-                 // Happy smiling mouth (curved upward)
+                 // BIG HAPPY SMILE WITH TEETH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   <div className="w-10 h-3 bg-black rounded-b-full border-2 border-gray-600" />
-                   {/* Smile curve - more pronounced */}
-                   <div className="absolute top-0 left-1 w-8 h-2 bg-gray-600 rounded-b-full" />
-                   {/* Corner dimples */}
-                   <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-700 rounded-full" />
-                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-gray-700 rounded-full" />
+                   {/* Smiling mouth opening */}
+                   <div className="w-12 h-4 bg-black rounded-full" />
+                   {/* Visible white teeth */}
+                   <div className="absolute top-1 left-2 w-8 h-2 bg-white rounded-sm flex gap-0.5">
+                     <div className="w-1 h-full bg-white rounded-sm" />
+                     <div className="w-1 h-full bg-white rounded-sm" />
+                     <div className="w-1 h-full bg-white rounded-sm" />
+                     <div className="w-1 h-full bg-white rounded-sm" />
+                     <div className="w-1 h-full bg-white rounded-sm" />
+                   </div>
+                   {/* Smile corners lifted up */}
+                   <div className="absolute -top-1 -left-1 w-3 h-3 bg-gray-600 rounded-full transform rotate-45" />
+                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-gray-600 rounded-full transform rotate-45" />
                  </div>
                ) : (
-                 // Angry frowning mouth (downward curve) - NO LIPSTICK!
+                 // DEEP ANGRY FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   <div className="w-8 h-3 bg-black rounded-t-full border-2 border-gray-700" />
-                   {/* Frown curve */}
-                   <div className="absolute bottom-0 left-1 w-6 h-1 bg-gray-800 rounded-t-full" />
-                   {/* Angry lines */}
-                   <div className="absolute -bottom-1 -left-1 w-2 h-1 bg-gray-600 transform rotate-12" />
-                   <div className="absolute -bottom-1 -right-1 w-2 h-1 bg-gray-600 transform -rotate-12" />
+                   {/* Frowning mouth - inverted curve */}
+                   <div className="w-10 h-3 bg-black transform rotate-180 rounded-b-full" />
+                   {/* Downward corners */}
+                   <div className="absolute top-2 -left-2 w-2 h-2 bg-gray-700 transform rotate-45" />
+                   <div className="absolute top-2 -right-2 w-2 h-2 bg-gray-700 transform rotate-45" />
+                   {/* Angry wrinkles */}
+                   <div className="absolute -top-2 left-2 w-6 h-1 bg-gray-600" />
                  </div>
                )}
             </div>
