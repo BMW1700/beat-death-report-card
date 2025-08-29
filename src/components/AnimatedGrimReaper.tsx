@@ -205,7 +205,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
       )}>
         
         {/* Death's Imposing Figure */}
-        <div className="relative scale-150">
+        <div className="relative scale-100">
           {/* Large Death Hood */}
           <div className="relative w-32 h-40 mx-auto">
             {/* Deep Shadowy Hood */}
@@ -251,22 +251,10 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-              {/* Menacing Jaw */}
-              <div className={cn(
-                "absolute top-16 left-1/2 transform -translate-x-1/2 transition-all duration-300",
-                isGainingTime ? "w-8 h-3 bg-red-800" : "w-6 h-2 bg-black"
-              )}
-                   style={{ clipPath: "polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%)" }}>
-                {/* Sharp Teeth when angry */}
-                {isGainingTime && (
-                  <>
-                    <div className="absolute -top-1 left-1 w-1 h-3 bg-gray-200 transform rotate-12" />
-                    <div className="absolute -top-1 left-3 w-1 h-2 bg-gray-200" />
-                    <div className="absolute -top-1 right-3 w-1 h-2 bg-gray-200" />
-                    <div className="absolute -top-1 right-1 w-1 h-3 bg-gray-200 transform -rotate-12" />
-                  </>
-                )}
-              </div>
+               {/* Menacing Jaw */}
+               <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-black"
+                    style={{ clipPath: "polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%)" }}>
+               </div>
             </div>
           </div>
 
@@ -292,14 +280,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             isCriticallyLow && "animate-pulse"
           )}>
             {/* Long Scythe Handle */}
-            <div className="relative w-3 h-52 bg-gradient-to-b from-amber-900 via-amber-800 to-amber-900 rounded-full border-2 border-amber-700 shadow-2xl">
-              {/* Handle decorative rings */}
-              <div className="absolute top-8 left-0 w-full h-2 bg-amber-700 rounded-full" />
-              <div className="absolute top-24 left-0 w-full h-2 bg-amber-700 rounded-full" />
-              <div className="absolute top-40 left-0 w-full h-2 bg-amber-700 rounded-full" />
-              
-              {/* Handle grip */}
-              <div className="absolute top-20 left-0 w-full h-12 bg-gradient-to-b from-amber-800 to-amber-900 rounded-full border-2 border-amber-600" />
+            <div className="relative w-3 h-52 bg-gradient-to-b from-gray-600 via-gray-700 to-gray-600 rounded-full border-2 border-gray-500 shadow-2xl">
             </div>
             
             {/* CLASSIC CURVED SCYTHE BLADE */}
@@ -320,7 +301,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               </div>
               
               {/* Blade-to-handle connection */}
-              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-amber-800 to-amber-700 rounded border-2 border-amber-600" />
+              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded border-2 border-gray-500" />
               
               {/* Scythe tip */}
               <div className="absolute top-0 right-2 w-4 h-4 bg-gradient-to-br from-gray-200 to-gray-400 transform rotate-45 border border-gray-500" />
