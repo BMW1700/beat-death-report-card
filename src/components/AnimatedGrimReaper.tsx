@@ -33,10 +33,10 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
       setHandAnimation(isGainingTime ? 'frustrated' : 'pleased');
       setPowerLevel(Math.min(Math.abs(todayContribution) / 100, 1));
       
-      // Only shake when gaining time, and only for 2 seconds
+      // Only shake when gaining time, and only for 3 seconds
       if (isGainingTime) {
         setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 2000);
+        setTimeout(() => setIsShaking(false), 3000);
       }
       
       const timer = setTimeout(() => {
@@ -313,7 +313,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               isGainingTime ? "bg-red-400" : "bg-emerald-400"
             )} />
             <span className="uppercase tracking-wide">
-              {isGainingTime ? "Resisting Changes" : "Accepting Fate"}
+              {isGainingTime ? "Frustrated" : "Pleased"}
             </span>
             {powerLevel > 0.3 && (
               <div className="text-xs opacity-70 ml-1">
