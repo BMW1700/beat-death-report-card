@@ -237,16 +237,11 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
             
-            {/* Menacing Skull Face - ENHANCED TERROR */}
+            {/* Menacing Skull Face - CLEAN WITHOUT SILVER */}
             <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-22 h-26">
-              {/* SKELETAL Skull base - more pronounced */}
+              {/* SKELETAL Skull base - no silver elements */}
               <div className="absolute inset-0 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 opacity-20 border-2 border-gray-700"
                    style={{ clipPath: "polygon(15% 0%, 85% 0%, 100% 65%, 95% 85%, 85% 100%, 15% 100%, 5% 85%, 0% 65%)" }} />
-              
-              {/* Bone texture lines for extra horror */}
-              <div className="absolute top-2 left-4 w-12 h-px bg-gray-600 opacity-40" />
-              <div className="absolute top-4 left-3 w-14 h-px bg-gray-600 opacity-30" />
-              <div className="absolute top-14 left-2 w-16 h-px bg-gray-700 opacity-50" />
               
               {/* TERRIFYING Glowing Red Eye Sockets */}
               <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-4">
@@ -282,12 +277,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* DRAMATIC Facial Expression Changes - POSITIONED BELOW NOSE */}
+               {/* DRAMATIC Facial Expression Changes - RED MOUTH */}
                {!isGainingTime ? (
-                 // BIG HAPPY SMILE WITH TEETH - POSITIONED LOWER
+                 // BIG HAPPY SMILE WITH TEETH - RED MOUTH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* Smiling mouth opening */}
-                   <div className="w-12 h-4 bg-black rounded-full" />
+                   {/* RED Smiling mouth opening */}
+                   <div className="w-12 h-4 bg-red-600 rounded-full border-2 border-red-700" />
                    {/* Visible white teeth */}
                    <div className="absolute top-1 left-2 w-8 h-2 bg-white rounded-sm flex gap-0.5">
                      <div className="w-1 h-full bg-white rounded-sm" />
@@ -296,20 +291,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                      <div className="w-1 h-full bg-white rounded-sm" />
                      <div className="w-1 h-full bg-white rounded-sm" />
                    </div>
-                   {/* Smile corners lifted up */}
-                   <div className="absolute -top-1 -left-1 w-3 h-3 bg-gray-600 rounded-full transform rotate-45" />
-                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-gray-600 rounded-full transform rotate-45" />
                  </div>
                ) : (
-                 // DEEP ANGRY FROWN - POSITIONED LOWER
+                 // DEEP ANGRY RED FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* Frowning mouth - inverted curve */}
-                   <div className="w-10 h-3 bg-black transform rotate-180 rounded-b-full" />
-                   {/* Downward corners */}
-                   <div className="absolute top-2 -left-2 w-2 h-2 bg-gray-700 transform rotate-45" />
-                   <div className="absolute top-2 -right-2 w-2 h-2 bg-gray-700 transform rotate-45" />
-                   {/* Angry wrinkles */}
-                   <div className="absolute -top-2 left-2 w-6 h-1 bg-gray-600" />
+                   {/* RED Frowning mouth - inverted curve */}
+                   <div className="w-10 h-3 bg-red-700 transform rotate-180 rounded-b-full border-2 border-red-800" />
                  </div>
                )}
              </div>
