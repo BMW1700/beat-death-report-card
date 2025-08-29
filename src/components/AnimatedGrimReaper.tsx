@@ -21,6 +21,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
   const [isGripping, setIsGripping] = useState(false);
   const [handAnimation, setHandAnimation] = useState('idle');
   const [powerLevel, setPowerLevel] = useState(0);
+  const [isShaking, setIsShaking] = useState(false);
   
   const isGainingTime = todayContribution > 0;
   const isCriticallyLow = timeRemaining.years < 1 && timeRemaining.months < 6;
@@ -31,6 +32,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
       setIsGripping(true);
       setHandAnimation(isGainingTime ? 'frustrated' : 'pleased');
       setPowerLevel(Math.min(Math.abs(todayContribution) / 100, 1));
+      
+      // Only shake when gaining time, and only for 2 seconds
+      if (isGainingTime) {
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 2000);
+      }
       
       const timer = setTimeout(() => {
         setIsGripping(false);
@@ -184,12 +191,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         </div>
       </div>
 
-      {/* Masterful Grim Reaper ABOVE the bar */}
+      {/* Masterful Grim Reaper ABOVE the bar - Moved higher to avoid overlap */}
       <div className={cn(
-        "absolute -top-16 flex justify-center items-center transition-all duration-700 scale-110",
+        "absolute -top-24 flex justify-center items-center transition-all duration-700 scale-110",
         isGripping && "scale-115",
         isCriticallyLow ? "animate-death-dance" : "animate-death-hover",
-        isGainingTime && "animate-frustrated-shake"
+        isShaking && "animate-frustrated-shake"
       )}>
         
         {/* Main Reaper Figure */}
@@ -291,30 +298,31 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         </div>
       </div>
 
-      {/* Enhanced Emotional State */}
-      <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-        <div className={cn(
-          "px-4 py-2 rounded-full text-sm font-bold transition-all duration-500 border-2 shadow-lg",
-          isGainingTime 
-            ? "bg-gradient-to-r from-red-900 to-red-800 text-red-100 border-red-600 shadow-red-500/30" 
-            : "bg-gradient-to-r from-green-900 to-green-800 text-green-100 border-green-600 shadow-green-500/30",
-          isGripping && "scale-110 animate-pulse"
-        )}>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">
-              {isGainingTime ? "😠" : "😈"}
+      {/* Professional Status Indicator */}
+      {isGripping && (
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 backdrop-blur-sm",
+            isGainingTime 
+              ? "bg-red-950/80 text-red-200 border border-red-800/50" 
+              : "bg-emerald-950/80 text-emerald-200 border border-emerald-800/50",
+            "animate-fade-in"
+          )}>
+            <div className={cn(
+              "w-2 h-2 rounded-full animate-pulse",
+              isGainingTime ? "bg-red-400" : "bg-emerald-400"
+            )} />
+            <span className="uppercase tracking-wide">
+              {isGainingTime ? "Resisting Changes" : "Accepting Fate"}
             </span>
-            <span>
-              {isGainingTime ? "FRUSTRATED" : "PLEASED"}
-            </span>
-            {powerLevel > 0.5 && (
-              <span className="text-xs opacity-80">
-                [{Math.round(powerLevel * 100)}%]
-              </span>
+            {powerLevel > 0.3 && (
+              <div className="text-xs opacity-70 ml-1">
+                {Math.round(powerLevel * 100)}%
+              </div>
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Power Aura Effects */}
       {powerLevel > 0.7 && (
