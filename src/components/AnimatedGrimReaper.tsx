@@ -34,18 +34,23 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
       setPowerLevel(Math.min(Math.abs(todayContribution) / 100, 1));
       
       // Only shake when gaining time, and only for 3 seconds
+      let shakeTimer: NodeJS.Timeout | null = null;
       if (isGainingTime) {
         setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 3000);
+        shakeTimer = setTimeout(() => setIsShaking(false), 3000);
       }
       
-      const timer = setTimeout(() => {
+      const mainTimer = setTimeout(() => {
         setIsGripping(false);
         setHandAnimation('idle');
         setPowerLevel(0);
+        setIsShaking(false); // Ensure shaking stops
       }, 3000);
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(mainTimer);
+        if (shakeTimer) clearTimeout(shakeTimer);
+      };
     }
   }, [todayContribution, isGainingTime]);
 
