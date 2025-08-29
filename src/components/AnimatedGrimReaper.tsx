@@ -196,123 +196,141 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         </div>
       </div>
 
-      {/* Masterful Grim Reaper ABOVE the bar - Moved higher to avoid overlap */}
+      {/* PROPER GRIM REAPER - Tall, Menacing Death Figure */}
       <div className={cn(
-        "absolute -top-24 flex justify-center items-center transition-all duration-700 scale-110",
-        isGripping && "scale-115",
+        "absolute -top-32 flex justify-center items-center transition-all duration-700",
+        isGripping && "scale-105",
         isCriticallyLow ? "animate-death-dance" : "animate-death-hover",
         isShaking && "animate-frustrated-shake"
       )}>
         
-        {/* Main Reaper Figure */}
-        <div className="relative">
-          {/* Hood & Skull */}
-          <div className="relative w-24 h-28 mx-auto">
-            {/* Deep Hood */}
-            <div className="absolute top-0 w-full h-20 bg-gradient-to-b from-gray-950 via-gray-900 to-black rounded-t-full border-2 border-gray-800 shadow-2xl">
-              {/* Hood interior shadow */}
-              <div className="absolute inset-2 bg-gradient-radial from-transparent to-black/80 rounded-t-full" />
+        {/* Death's Imposing Figure */}
+        <div className="relative scale-150">
+          {/* Large Death Hood */}
+          <div className="relative w-32 h-40 mx-auto">
+            {/* Deep Shadowy Hood */}
+            <div className="absolute top-0 w-full h-32 bg-gradient-to-b from-black via-gray-950 to-gray-900 shadow-2xl"
+                 style={{
+                   clipPath: "polygon(15% 0%, 85% 0%, 95% 40%, 90% 80%, 75% 95%, 25% 95%, 10% 80%, 5% 40%)",
+                 }}>
+              {/* Deep hood shadows */}
+              <div className="absolute inset-4 bg-gradient-radial from-transparent via-black/60 to-black/90" />
+              <div className="absolute inset-8 bg-gradient-radial from-transparent to-black/80" />
             </div>
             
-            {/* Skull Face */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-16 h-16">
-              {/* Skull outline */}
-              <div className="absolute inset-0 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full opacity-20" />
+            {/* Menacing Skull Face */}
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-20 h-24">
+              {/* Skull base */}
+              <div className="absolute inset-0 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400 opacity-15"
+                   style={{ clipPath: "polygon(20% 0%, 80% 0%, 100% 70%, 90% 100%, 10% 100%, 0% 70%)" }} />
               
-              {/* Eye Sockets */}
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex gap-3">
+              {/* Glowing Red Eye Sockets */}
+              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-4">
                 <div className="relative">
-                  <div className="w-3 h-4 bg-black rounded-full border border-gray-700" />
+                  <div className="w-4 h-6 bg-black rounded-full" />
                   <div className={cn(
-                    "absolute top-0.5 left-0.5 w-2 h-2 rounded-full transition-all duration-300",
-                    isCriticallyLow ? "bg-red-400 animate-pulse shadow-lg shadow-red-400/50" : "bg-red-500",
-                    isGainingTime && "bg-orange-400 animate-bounce"
+                    "absolute top-1 left-1 w-2.5 h-3 rounded-full transition-all duration-300",
+                    isCriticallyLow ? "bg-red-400 animate-pulse shadow-lg shadow-red-400/70" : "bg-red-500 shadow-lg shadow-red-500/50",
+                    isGainingTime && "bg-orange-400 animate-bounce shadow-lg shadow-orange-400/70"
                   )} />
+                  {/* Inner glow */}
+                  <div className="absolute top-1.5 left-1.5 w-1.5 h-2 bg-red-300 rounded-full opacity-80" />
                 </div>
                 <div className="relative">
-                  <div className="w-3 h-4 bg-black rounded-full border border-gray-700" />
+                  <div className="w-4 h-6 bg-black rounded-full" />
                   <div className={cn(
-                    "absolute top-0.5 left-0.5 w-2 h-2 rounded-full transition-all duration-300",
-                    isCriticallyLow ? "bg-red-400 animate-pulse shadow-lg shadow-red-400/50" : "bg-red-500",
-                    isGainingTime && "bg-orange-400 animate-bounce"
+                    "absolute top-1 left-1 w-2.5 h-3 rounded-full transition-all duration-300",
+                    isCriticallyLow ? "bg-red-400 animate-pulse shadow-lg shadow-red-400/70" : "bg-red-500 shadow-lg shadow-red-500/50",
+                    isGainingTime && "bg-orange-400 animate-bounce shadow-lg shadow-orange-400/70"
                   )} />
+                  <div className="absolute top-1.5 left-1.5 w-1.5 h-2 bg-red-300 rounded-full opacity-80" />
                 </div>
               </div>
               
               {/* Nasal Cavity */}
-              <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-1 h-3 bg-black rounded-full border border-gray-700" />
+              <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
+                   style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-              {/* Jaw/Mouth */}
+              {/* Menacing Jaw */}
               <div className={cn(
-                "absolute top-11 left-1/2 transform -translate-x-1/2 transition-all duration-300",
-                isGainingTime ? "w-6 h-2 bg-red-700 rounded-t-xl" : "w-5 h-1 bg-gray-800 rounded"
-              )}>
-                {/* Teeth */}
+                "absolute top-16 left-1/2 transform -translate-x-1/2 transition-all duration-300",
+                isGainingTime ? "w-8 h-3 bg-red-800" : "w-6 h-2 bg-black"
+              )}
+                   style={{ clipPath: "polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%)" }}>
+                {/* Sharp Teeth when angry */}
                 {isGainingTime && (
-                  <div className="absolute -top-1 left-1 w-1 h-2 bg-gray-200 transform rotate-12" />
+                  <>
+                    <div className="absolute -top-1 left-1 w-1 h-3 bg-gray-200 transform rotate-12" />
+                    <div className="absolute -top-1 left-3 w-1 h-2 bg-gray-200" />
+                    <div className="absolute -top-1 right-3 w-1 h-2 bg-gray-200" />
+                    <div className="absolute -top-1 right-1 w-1 h-3 bg-gray-200 transform -rotate-12" />
+                  </>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Flowing Robe */}
-          <div className="relative w-20 h-24 mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-950 to-gray-900 rounded-b-2xl border-x-2 border-b-2 border-gray-800 shadow-2xl">
-              {/* Robe folds */}
-              <div className="absolute left-2 top-4 w-1 h-16 bg-gray-800 rounded-full opacity-60" />
-              <div className="absolute right-2 top-6 w-1 h-12 bg-gray-800 rounded-full opacity-40" />
-              <div className="absolute left-1/2 top-8 w-px h-10 bg-gray-700 opacity-50" />
+          {/* Flowing Death Robe */}
+          <div className="relative w-28 h-32 mx-auto -mt-8">
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-950 to-gray-800 shadow-2xl"
+                 style={{
+                   clipPath: "polygon(10% 0%, 90% 0%, 95% 20%, 100% 100%, 0% 100%, 5% 20%)",
+                 }}>
+              {/* Robe texture and folds */}
+              <div className="absolute left-4 top-8 w-1 h-20 bg-gray-800 rounded-full opacity-60" />
+              <div className="absolute right-4 top-12 w-1 h-16 bg-gray-800 rounded-full opacity-40" />
+              <div className="absolute left-1/2 top-16 w-px h-12 bg-gray-700 opacity-50" />
+              <div className="absolute left-8 top-20 w-px h-8 bg-gray-700 opacity-30" />
+              <div className="absolute right-8 top-18 w-px h-10 bg-gray-700 opacity-30" />
             </div>
           </div>
 
-          {/* Legendary Scythe */}
+          {/* MASSIVE Death Scythe */}
           <div className={cn(
-            "absolute -right-16 -top-8 transition-all duration-500 z-5",
-            isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-12",
+            "absolute -right-20 -top-16 transition-all duration-500 z-10",
+            isGripping && isGainingTime && "animate-scythe-angry scale-110 rotate-6",
             isCriticallyLow && "animate-pulse"
           )}>
-            {/* Scythe Handle */}
-            <div className="relative w-2 h-40 bg-gradient-to-b from-amber-900 via-amber-800 to-amber-900 rounded-full border border-amber-700 shadow-lg">
-              {/* Handle details */}
-              <div className="absolute top-4 left-0 w-full h-1 bg-amber-700 rounded-full" />
-              <div className="absolute top-20 left-0 w-full h-1 bg-amber-700 rounded-full" />
-              <div className="absolute top-36 left-0 w-full h-1 bg-amber-700 rounded-full" />
+            {/* Long Scythe Handle */}
+            <div className="relative w-3 h-52 bg-gradient-to-b from-amber-900 via-amber-800 to-amber-900 rounded-full border-2 border-amber-700 shadow-2xl">
+              {/* Handle decorative rings */}
+              <div className="absolute top-8 left-0 w-full h-2 bg-amber-700 rounded-full" />
+              <div className="absolute top-24 left-0 w-full h-2 bg-amber-700 rounded-full" />
+              <div className="absolute top-40 left-0 w-full h-2 bg-amber-700 rounded-full" />
               
-              {/* Handle grip wrap */}
-              <div className="absolute top-16 left-0 w-full h-8 bg-gradient-to-b from-amber-800 to-amber-900 rounded-full border border-amber-600" />
+              {/* Handle grip */}
+              <div className="absolute top-20 left-0 w-full h-12 bg-gradient-to-b from-amber-800 to-amber-900 rounded-full border-2 border-amber-600" />
             </div>
             
-            {/* Proper Grim Reaper Scythe Blade */}
-            <div className="absolute -top-2 -right-2 w-20 h-8">
-              {/* Long curved scythe blade extending horizontally */}
-              <div className="absolute top-2 left-0 w-18 h-4 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-400 shadow-2xl"
+            {/* CLASSIC CURVED SCYTHE BLADE */}
+            <div className="absolute -top-4 -right-4 w-28 h-16">
+              {/* Main curved blade - classic scythe shape */}
+              <div className="absolute top-4 left-0 w-24 h-8 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-2 border-gray-500 shadow-2xl"
                    style={{
-                     borderRadius: "0 20px 20px 0",
-                     transform: "rotate(-15deg)",
+                     borderRadius: "0 30px 30px 0",
+                     transform: "rotate(-20deg)",
                      transformOrigin: "left center"
                    }}>
                 {/* Blade shine */}
-                <div className="absolute top-0.5 left-1 w-14 h-1 bg-gradient-to-r from-white/90 to-transparent rounded-r-full" />
+                <div className="absolute top-1 left-2 w-16 h-2 bg-gradient-to-r from-white/90 to-transparent rounded-r-full opacity-90" />
                 {/* Sharp cutting edge */}
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-100 rounded-r-full shadow-md" />
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-white rounded-r-full shadow-lg shadow-white/70" />
+                {/* Inner edge detail */}
+                <div className="absolute top-2 left-1 w-20 h-4 bg-gradient-to-r from-gray-300 to-gray-200 rounded-r-full opacity-60" />
               </div>
               
-              {/* Blade attachment to handle */}
-              <div className="absolute top-1 -left-1 w-3 h-6 bg-gradient-to-r from-amber-800 to-amber-700 rounded border border-amber-600" />
+              {/* Blade-to-handle connection */}
+              <div className="absolute top-2 -left-2 w-4 h-8 bg-gradient-to-r from-amber-800 to-amber-700 rounded border-2 border-amber-600" />
               
-              {/* Inner curve detail */}
-              <div className="absolute top-3.5 left-2 w-12 h-2 bg-gradient-to-r from-gray-400 to-gray-300 shadow-inner"
-                   style={{
-                     borderRadius: "0 10px 10px 0",
-                     transform: "rotate(-15deg)"
-                   }} />
+              {/* Scythe tip */}
+              <div className="absolute top-0 right-2 w-4 h-4 bg-gradient-to-br from-gray-200 to-gray-400 transform rotate-45 border border-gray-500" />
             </div>
             
-            {/* Mystical Scythe Effects */}
+            {/* Death Aura around Scythe */}
             {isGripping && powerLevel > 0.3 && (
-              <div className="absolute -top-4 -right-6 w-12 h-8">
-                <div className="absolute inset-0 bg-red-500/30 blur-sm animate-pulse" />
-                <div className="absolute inset-1 bg-red-400/20 blur-md animate-pulse" />
+              <div className="absolute -top-8 -right-8 w-20 h-12">
+                <div className="absolute inset-0 bg-red-600/40 blur-md animate-pulse rounded-full" />
+                <div className="absolute inset-2 bg-red-500/30 blur-lg animate-pulse rounded-full" />
               </div>
             )}
           </div>
