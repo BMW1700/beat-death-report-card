@@ -277,12 +277,12 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* DRAMATIC Facial Expression Changes - PURE SILVER MOUTH */}
+               {/* DRAMATIC Facial Expression Changes - METALLIC SILVER MOUTH */}
                {!isGainingTime ? (
-                 // BIG HAPPY SMILE WITH TEETH - PURE SILVER MOUTH
+                 // BIG HAPPY SMILE WITH TEETH - METALLIC SILVER MOUTH
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* PURE SILVER Smiling mouth opening */}
-                   <div className="w-12 h-4 bg-white rounded-full border-2 border-black" />
+                   {/* METALLIC SILVER Smiling mouth opening */}
+                   <div className="w-12 h-4 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 rounded-full border-2 border-gray-400" />
                    {/* Visible white teeth */}
                    <div className="absolute top-1 left-2 w-8 h-2 bg-white rounded-sm flex gap-0.5">
                      <div className="w-1 h-full bg-white rounded-sm" />
@@ -293,10 +293,10 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                    </div>
                  </div>
                ) : (
-                 // DEEP ANGRY PURE SILVER FROWN
+                 // DEEP ANGRY METALLIC SILVER FROWN
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* PURE SILVER Frowning mouth - inverted curve */}
-                   <div className="w-10 h-3 bg-white transform rotate-180 rounded-b-full border-2 border-black" />
+                   {/* METALLIC SILVER Frowning mouth - inverted curve */}
+                   <div className="w-10 h-3 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 transform rotate-180 rounded-b-full border-2 border-gray-400" />
                  </div>
                )}
              </div>
@@ -325,11 +325,11 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             {/* Pure Black Scythe Handle */}
             <div className="w-3 h-52 bg-black rounded-full border-2 border-black shadow-2xl" />
             
-            {/* Pure Silver Scythe Blade - Completely Rebuilt */}
+            {/* Pure Silver Scythe Blade - NO BLACK AT ALL */}
             <div className="absolute -top-4 -right-4">
-              {/* Single Silver Blade Element */}
+              {/* Single Silver Blade Element - NO BLACK BORDERS */}
               <div 
-                className="w-24 h-8 bg-white border-2 border-black shadow-2xl"
+                className="w-24 h-8 bg-gradient-to-br from-gray-300 via-gray-200 to-gray-300 shadow-2xl"
                 style={{
                   borderRadius: "0 30px 30px 0",
                   transform: "rotate(-20deg) translateY(16px)",
@@ -337,7 +337,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
                 }}
               >
                 {/* Blade shine effect */}
-                <div className="absolute top-1 left-2 w-16 h-2 bg-white/80 rounded-r-full" />
+                <div className="absolute top-1 left-2 w-16 h-2 bg-white rounded-r-full" />
               </div>
               
               {/* Handle Connection */}
