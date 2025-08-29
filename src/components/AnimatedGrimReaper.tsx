@@ -251,18 +251,26 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
               <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
                    style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
               
-               {/* Menacing Jaw - Smiles normally, frowns when gaining time */}
+               {/* Dynamic Facial Expression - Smiles normally, frowns when gaining time */}
                {!isGainingTime ? (
-                 // Smiling mouth (curved upward)
+                 // Happy smiling mouth (curved upward)
                  <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   <div className="w-8 h-2 bg-black rounded-b-full" />
-                   {/* Smile curve */}
-                   <div className="absolute top-0 left-1 w-6 h-1 bg-gray-600 rounded-b-full" />
+                   <div className="w-10 h-3 bg-black rounded-b-full border-2 border-gray-600" />
+                   {/* Smile curve - more pronounced */}
+                   <div className="absolute top-0 left-1 w-8 h-2 bg-gray-600 rounded-b-full" />
+                   {/* Corner dimples */}
+                   <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-700 rounded-full" />
+                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-gray-700 rounded-full" />
                  </div>
                ) : (
-                 // Frowning mouth (straight/downward)
-                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-black"
-                      style={{ clipPath: "polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%)" }}>
+                 // Angry frowning mouth (downward curve)
+                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
+                   <div className="w-8 h-3 bg-red-900 rounded-t-full border-2 border-red-700" />
+                   {/* Frown curve */}
+                   <div className="absolute bottom-0 left-1 w-6 h-1 bg-red-800 rounded-t-full" />
+                   {/* Angry lines */}
+                   <div className="absolute -bottom-1 -left-1 w-2 h-1 bg-red-700 transform rotate-12" />
+                   <div className="absolute -bottom-1 -right-1 w-2 h-1 bg-red-700 transform -rotate-12" />
                  </div>
                )}
             </div>
