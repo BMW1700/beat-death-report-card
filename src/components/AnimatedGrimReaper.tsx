@@ -237,69 +237,85 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
             </div>
           </div>
             
-            {/* Menacing Skull Face - CLEAN WITHOUT SILVER */}
-            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-22 h-26">
-              {/* SKELETAL Skull base - no silver elements */}
-              <div className="absolute inset-0 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 opacity-20 border-2 border-gray-700"
-                   style={{ clipPath: "polygon(15% 0%, 85% 0%, 100% 65%, 95% 85%, 85% 100%, 15% 100%, 5% 85%, 0% 65%)" }} />
+            {/* Proper Skull Face with Red Eyes */}
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-24 h-28">
+              {/* Skull Base - Bone White Structure */}
+              <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 border-2 border-gray-400 shadow-2xl"
+                   style={{ clipPath: "polygon(20% 5%, 80% 5%, 95% 25%, 100% 45%, 95% 70%, 85% 85%, 75% 95%, 65% 100%, 35% 100%, 25% 95%, 15% 85%, 5% 70%, 0% 45%, 5% 25%)" }}>
+                
+                {/* Skull Surface Details */}
+                <div className="absolute inset-2 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-150 opacity-80" />
+                
+                {/* Skull Cracks and Details */}
+                <div className="absolute top-2 left-4 w-8 h-0.5 bg-gray-400 transform rotate-12 opacity-60" />
+                <div className="absolute top-4 right-6 w-6 h-0.5 bg-gray-400 transform -rotate-6 opacity-50" />
+                <div className="absolute bottom-8 left-6 w-4 h-0.5 bg-gray-400 transform rotate-45 opacity-40" />
+              </div>
               
-              {/* TERRIFYING Glowing Red Eye Sockets */}
-              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-4">
+              {/* Eye Sockets - Deep and Dark */}
+              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-3">
                 <div className="relative">
-                  <div className="w-5 h-7 bg-black rounded-full border-2 border-gray-800" />
-                   <div className={cn(
-                     "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
-                     isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
-                     isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90",
-                     isBlinking && "opacity-0"
-                   )} />
-                  {/* Intense inner glow */}
-                  <div className="absolute top-1 left-1 w-3 h-3 bg-red-300 rounded-full opacity-90" />
-                  <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-white rounded-full opacity-60" />
-                  {/* Eye glow effect */}
+                  {/* Eye Socket */}
+                  <div className="w-6 h-8 bg-black rounded-full border-2 border-gray-600 shadow-inner">
+                    <div className="absolute inset-1 bg-gradient-radial from-gray-900 to-black rounded-full" />
+                  </div>
+                  {/* Glowing Red Eye */}
+                  <div className={cn(
+                    "absolute top-1 left-1 w-4 h-6 rounded-full transition-all duration-300",
+                    isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
+                    isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90",
+                    isBlinking && "opacity-0"
+                  )} />
+                  {/* Inner Eye Glow */}
+                  <div className="absolute top-1.5 left-1.5 w-3 h-4 bg-red-300 rounded-full opacity-90" />
+                  <div className="absolute top-2 left-2 w-2 h-3 bg-white rounded-full opacity-60" />
+                  {/* Outer Glow Effect */}
                   <div className="absolute -inset-2 bg-red-500/40 rounded-full blur-md animate-pulse" />
                 </div>
                 <div className="relative">
-                  <div className="w-5 h-7 bg-black rounded-full border-2 border-gray-800" />
-                   <div className={cn(
-                     "absolute top-0.5 left-0.5 w-4 h-5 rounded-full transition-all duration-300",
-                     isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
-                     isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90",
-                     isBlinking && "opacity-0"
-                   )} />
-                  <div className="absolute top-1 left-1 w-3 h-3 bg-red-300 rounded-full opacity-90" />
-                  <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-white rounded-full opacity-60" />
+                  {/* Eye Socket */}
+                  <div className="w-6 h-8 bg-black rounded-full border-2 border-gray-600 shadow-inner">
+                    <div className="absolute inset-1 bg-gradient-radial from-gray-900 to-black rounded-full" />
+                  </div>
+                  {/* Glowing Red Eye */}
+                  <div className={cn(
+                    "absolute top-1 left-1 w-4 h-6 rounded-full transition-all duration-300",
+                    isCriticallyLow ? "bg-red-600 animate-pulse shadow-2xl shadow-red-600/90" : "bg-red-500 shadow-2xl shadow-red-500/80",
+                    isGainingTime && "bg-orange-500 animate-bounce shadow-2xl shadow-orange-500/90",
+                    isBlinking && "opacity-0"
+                  )} />
+                  <div className="absolute top-1.5 left-1.5 w-3 h-4 bg-red-300 rounded-full opacity-90" />
+                  <div className="absolute top-2 left-2 w-2 h-3 bg-white rounded-full opacity-60" />
                   <div className="absolute -inset-2 bg-red-500/40 rounded-full blur-md animate-pulse" />
                 </div>
               </div>
               
-              {/* Nasal Cavity */}
-              <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-2 h-4 bg-black"
-                   style={{ clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)" }} />
+              {/* Nasal Cavity - Triangular Dark Opening */}
+              <div className="absolute top-14 left-1/2 transform -translate-x-1/2 w-3 h-5 bg-black border border-gray-600"
+                   style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
               
-               {/* DRAMATIC Facial Expression Changes - METALLIC SILVER MOUTH */}
-               {!isGainingTime ? (
-                 // BALANCED HAPPY SMILE WITH TEETH - METALLIC SILVER MOUTH
-                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* DARKER METALLIC SILVER Smiling mouth opening - balanced size */}
-                   <div className="w-8 h-3 bg-gradient-to-br from-gray-600 via-gray-500 to-gray-600 rounded-full border border-gray-700" />
-                   {/* Visible white teeth - balanced */}
-                   <div className="absolute top-0.5 left-1.5 w-5 h-2 bg-white rounded-sm flex gap-0.5">
-                     <div className="w-0.5 h-full bg-white rounded-sm" />
-                     <div className="w-0.5 h-full bg-white rounded-sm" />
-                     <div className="w-0.5 h-full bg-white rounded-sm" />
-                     <div className="w-0.5 h-full bg-white rounded-sm" />
-                     <div className="w-0.5 h-full bg-white rounded-sm" />
-                   </div>
-                 </div>
-               ) : (
-                 // BALANCED ANGRY METALLIC SILVER FROWN
-                 <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
-                   {/* DARKER METALLIC SILVER Frowning mouth - balanced size */}
-                   <div className="w-8 h-2.5 bg-gradient-to-br from-gray-600 via-gray-500 to-gray-600 transform rotate-180 rounded-b-full border border-gray-700" />
-                 </div>
-               )}
-             </div>
+              {/* Jaw and Mouth Area */}
+              <div className="absolute top-20 left-1/2 transform -translate-x-1/2 w-16 h-6">
+                {/* Upper Jaw */}
+                <div className="w-full h-3 bg-gradient-to-b from-gray-100 to-gray-200 border border-gray-400 rounded-t-lg" />
+                
+                {/* Teeth Row */}
+                <div className="absolute top-2 left-2 flex gap-0.5">
+                  <div className="w-1.5 h-3 bg-white border border-gray-300 rounded-sm" />
+                  <div className="w-1.5 h-3 bg-white border border-gray-300 rounded-sm" />
+                  <div className="w-1.5 h-3 bg-white border border-gray-300 rounded-sm" />
+                  <div className="w-1.5 h-3 bg-white border border-gray-300 rounded-sm" />
+                  <div className="w-1.5 h-3 bg-white border border-gray-300 rounded-sm" />
+                  <div className="w-1.5 h-3 bg-white border border-gray-300 rounded-sm" />
+                </div>
+                
+                {/* Lower Jaw */}
+                <div className={cn(
+                  "absolute top-3 w-full h-3 bg-gradient-to-b from-gray-100 to-gray-200 border border-gray-400 rounded-b-lg transition-transform duration-300",
+                  !isGainingTime ? "transform translate-y-0" : "transform translate-y-1"
+                )} />
+              </div>
+            </div>
            
            {/* Flowing Death Robe */}
            <div className="relative w-28 h-32 mx-auto -mt-8">
