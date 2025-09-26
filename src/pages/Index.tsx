@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skull, AlertTriangle, ArrowRight } from "lucide-react";
+import { Skull, AlertTriangle, ArrowRight, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 // Import Life Clock components
 import { LifeClock } from "@/components/LifeClock";
@@ -39,14 +40,56 @@ import { CollaborativeDeathMap } from "@/components/viral/CollaborativeDeathMap"
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  // Check if user has completed onboarding
+  // Check authentication and onboarding
   useEffect(() => {
+    if (loading) return;
+    
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
     const hasOnboarded = localStorage.getItem('beatdeath_onboarded');
     if (!hasOnboarded) {
       navigate('/onboarding');
     }
-  }, [navigate]);
+  }, [navigate, user, loading]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-secondary-bg flex items-center justify-center">
+        <div className="text-center">
+          <Skull className="w-12 h-12 text-destructive animate-death-pulse mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your deadly profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen gradient-secondary-bg flex items-center justify-center">
+        <Card className="glass-card max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <CardTitle className="gradient-text">Authentication Required</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">Please sign in to access BeatDeath</p>
+            <Link to="/auth">
+              <Button className="gradient-bg">
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-secondary-bg pt-16 transition-colors duration-300">

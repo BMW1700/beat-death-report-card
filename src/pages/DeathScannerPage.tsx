@@ -6,6 +6,7 @@ import { analyzeImageForToxicity, generateDeathAnalysisReport, inferHazardMechan
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
+import { useDeathAnalysis } from "@/hooks/useDeathAnalysis";
 import { ShareDeathReport } from "@/components/ShareDeathReport";
 import { SurvivalistModeToggle } from "@/components/SurvivalistModeToggle";
 import { FieldManual } from "@/components/FieldManual";
@@ -26,7 +27,7 @@ const DeathScannerPage = () => {
   
   const [scenario, setScenario] = useState("");
   const [analysis, setAnalysis] = useState<DeathAnalysis | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { isAnalyzing, performAnalysis } = useDeathAnalysis();
   const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
   const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
   const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
@@ -157,45 +158,17 @@ const DeathScannerPage = () => {
       return;
     }
     
-    setIsAnalyzing(true);
-    
     try {
-      let itemToAnalyze = scenario;
-      
-      if (imageFile) {
-        // Store the current image file for correction purposes
-        setCurrentImageFile(imageFile);
-        
-        // Use AI image analysis for real toxicity detection
-        toast.info("🧠 AI analyzing image for death potential...", {
-          description: "Using advanced AI to detect toxic substances"
-        });
-        
-        let mockAnalysis: DeathAnalysis;
-        
-        // If we have community training data, use it
-        if (communityData) {
-          mockAnalysis = {
-            item: `Community Trained: ${communityData.name}`,
-            allergyRisk: communityData.deathAnalysis.allergyRisk || "No allergy information provided",
-            killRating: communityData.deathAnalysis.killRating,
-            killRatingText: communityData.deathAnalysis.killRatingText,
-            lethalDose: communityData.deathAnalysis.lethalDose,
-            timeToDeath: communityData.deathAnalysis.timeToDeath,
-            mechanism: communityData.deathAnalysis.mechanism,
-            survival: communityData.deathAnalysis.survival,
-            finalWords: communityData.deathAnalysis.finalWords
-          };
-          
-          setAnalysis(mockAnalysis);
-          setNeedsCommunityTraining(false);
-          
-          toast.success("✅ Community training applied!", {
-            description: `Analysis based on community data for ${communityData.name}`
-          });
-        } else {
-          // Regular AI analysis with community learning integration
-          const aiAnalysis = await analyzeImageForToxicity(imageFile, communityData);
+      const result = await performAnalysis(scenario, imageFile);
+      if (result) {
+        setAnalysis(result);
+        setCurrentImageFile(imageFile || null);
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast.error("Analysis failed. Please try again.");
+    }
+  };
           const weightVal = parseFloat(userData.weight);
           const weightInKg = isNaN(weightVal)
             ? 70 // default if user didn't provide weight

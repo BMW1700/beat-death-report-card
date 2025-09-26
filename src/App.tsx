@@ -14,32 +14,37 @@ import DeathScannerPage from "./pages/DeathScannerPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import { MainNavBar } from "@/components/MainNavBar";
 import { LifeClockProvider } from "@/contexts/LifeClockContext";
+import { AuthProvider } from "@/hooks/useAuth";
+import AuthPage from "./pages/AuthPage";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LifeClockProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <MainNavBar />
-          <div className="pt-16">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/death-scanner" element={<DeathScannerPage />} />
-              <Route path="/api-platform" element={<ApiPlatformPage />} />
-              <Route path="/survival-map" element={<SurvivalistMapPage />} />
-              <Route path="/wellness" element={<WellnessPage />} />
-              <Route path="/science" element={<SciencePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </LifeClockProvider>
+    <AuthProvider>
+      <LifeClockProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <MainNavBar />
+            <div className="pt-16">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/death-scanner" element={<DeathScannerPage />} />
+                <Route path="/api-platform" element={<ApiPlatformPage />} />
+                <Route path="/survival-map" element={<SurvivalistMapPage />} />
+                <Route path="/wellness" element={<WellnessPage />} />
+                <Route path="/science" element={<SciencePage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LifeClockProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
