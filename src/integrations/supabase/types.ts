@@ -14,13 +14,356 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          description: string | null
+          icon: string | null
+          id: string
+          metadata: Json | null
+          rarity: string | null
+          unlocked_at: string | null
+          user_id: string
+          xp_reward: number | null
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          metadata?: Json | null
+          rarity?: string | null
+          unlocked_at?: string | null
+          user_id: string
+          xp_reward?: number | null
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          metadata?: Json | null
+          rarity?: string | null
+          unlocked_at?: string | null
+          user_id?: string
+          xp_reward?: number | null
+        }
+        Relationships: []
+      }
+      community_interactions: {
+        Row: {
+          analysis_id: string | null
+          content: string | null
+          created_at: string | null
+          id: string
+          interaction_type: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          analysis_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          interaction_type: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          analysis_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          interaction_type?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_interactions_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "death_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      death_analyses: {
+        Row: {
+          analysis_type: string | null
+          category: string | null
+          community_corrected: boolean | null
+          confidence: number | null
+          corrected_item: string | null
+          created_at: string | null
+          final_words: string | null
+          id: string
+          image_url: string | null
+          is_public: boolean | null
+          item_detected: string | null
+          kill_rating: number | null
+          kill_rating_text: string | null
+          lethal_dose: string | null
+          mechanism: string | null
+          original_detection: string | null
+          scenario: string | null
+          survival_tips: string | null
+          time_to_death: string | null
+          toxicity_level: number | null
+          user_id: string
+        }
+        Insert: {
+          analysis_type?: string | null
+          category?: string | null
+          community_corrected?: boolean | null
+          confidence?: number | null
+          corrected_item?: string | null
+          created_at?: string | null
+          final_words?: string | null
+          id?: string
+          image_url?: string | null
+          is_public?: boolean | null
+          item_detected?: string | null
+          kill_rating?: number | null
+          kill_rating_text?: string | null
+          lethal_dose?: string | null
+          mechanism?: string | null
+          original_detection?: string | null
+          scenario?: string | null
+          survival_tips?: string | null
+          time_to_death?: string | null
+          toxicity_level?: number | null
+          user_id: string
+        }
+        Update: {
+          analysis_type?: string | null
+          category?: string | null
+          community_corrected?: boolean | null
+          confidence?: number | null
+          corrected_item?: string | null
+          created_at?: string | null
+          final_words?: string | null
+          id?: string
+          image_url?: string | null
+          is_public?: boolean | null
+          item_detected?: string | null
+          kill_rating?: number | null
+          kill_rating_text?: string | null
+          lethal_dose?: string | null
+          mechanism?: string | null
+          original_detection?: string | null
+          scenario?: string | null
+          survival_tips?: string | null
+          time_to_death?: string | null
+          toxicity_level?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      death_duels: {
+        Row: {
+          challenger_id: string
+          challenger_scenario: string
+          challenger_score: number | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          opponent_id: string | null
+          opponent_scenario: string | null
+          opponent_score: number | null
+          status: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          challenger_id: string
+          challenger_scenario: string
+          challenger_score?: number | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          opponent_id?: string | null
+          opponent_scenario?: string | null
+          opponent_score?: number | null
+          status?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          challenger_id?: string
+          challenger_scenario?: string
+          challenger_score?: number | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          opponent_id?: string | null
+          opponent_scenario?: string | null
+          opponent_score?: number | null
+          status?: string | null
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
+      leaderboard_entries: {
+        Row: {
+          created_at: string | null
+          id: string
+          leaderboard_type: string
+          rank: number | null
+          score: number
+          updated_at: string | null
+          user_id: string
+          week_of: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          leaderboard_type: string
+          rank?: number | null
+          score: number
+          updated_at?: string | null
+          user_id: string
+          week_of?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          leaderboard_type?: string
+          rank?: number | null
+          score?: number
+          updated_at?: string | null
+          user_id?: string
+          week_of?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          allergies: string | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          danger_level: number | null
+          display_name: string | null
+          gender: string | null
+          id: string
+          immortal_mode: boolean | null
+          location: string | null
+          premium_user: boolean | null
+          survival_streak: number | null
+          survivalist_mode: boolean | null
+          total_xp: number | null
+          updated_at: string | null
+          user_id: string
+          username: string | null
+          weight: number | null
+          weight_unit: string | null
+        }
+        Insert: {
+          age?: number | null
+          allergies?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          danger_level?: number | null
+          display_name?: string | null
+          gender?: string | null
+          id?: string
+          immortal_mode?: boolean | null
+          location?: string | null
+          premium_user?: boolean | null
+          survival_streak?: number | null
+          survivalist_mode?: boolean | null
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id: string
+          username?: string | null
+          weight?: number | null
+          weight_unit?: string | null
+        }
+        Update: {
+          age?: number | null
+          allergies?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          danger_level?: number | null
+          display_name?: string | null
+          gender?: string | null
+          id?: string
+          immortal_mode?: boolean | null
+          location?: string | null
+          premium_user?: boolean | null
+          survival_streak?: number | null
+          survivalist_mode?: boolean | null
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id?: string
+          username?: string | null
+          weight?: number | null
+          weight_unit?: string | null
+        }
+        Relationships: []
+      }
+      viral_challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_featured: boolean | null
+          likes_count: number | null
+          parameters: Json | null
+          participants_count: number | null
+          shares_count: number | null
+          title: string
+          trending_score: number | null
+        }
+        Insert: {
+          challenge_type: string
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          likes_count?: number | null
+          parameters?: Json | null
+          participants_count?: number | null
+          shares_count?: number | null
+          title: string
+          trending_score?: number | null
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          likes_count?: number | null
+          parameters?: Json | null
+          participants_count?: number | null
+          shares_count?: number | null
+          title?: string
+          trending_score?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_trending_scores: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
