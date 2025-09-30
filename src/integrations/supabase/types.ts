@@ -241,17 +241,43 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          alcohol_frequency: string | null
           allergies: string | null
           avatar_url: string | null
           bio: string | null
+          calculated_baseline_years: number | null
+          chronic_conditions: Json | null
           created_at: string | null
           danger_level: number | null
+          data_consent_level: string | null
+          desired_products: Json | null
+          diet_quality_score: number | null
+          diet_restrictions: string | null
           display_name: string | null
+          email: string | null
+          exercise_frequency: string | null
+          exercise_history_years: number | null
+          exercise_intensity: string | null
+          family_health_history: Json | null
           gender: string | null
+          happiness_score: number | null
+          health_score: number | null
           id: string
           immortal_mode: boolean | null
+          life_satisfaction_score: number | null
           location: string | null
+          medication_count: number | null
+          mental_health_score: number | null
+          onboarding_completed_at: string | null
           premium_user: boolean | null
+          sleep_disorders: string | null
+          sleep_hours_avg: number | null
+          sleep_quality_score: number | null
+          smoking_status: string | null
+          social_connections_score: number | null
+          stress_level: number | null
+          substance_use: string | null
+          supplements: Json | null
           survival_streak: number | null
           survivalist_mode: boolean | null
           total_xp: number | null
@@ -263,17 +289,43 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          alcohol_frequency?: string | null
           allergies?: string | null
           avatar_url?: string | null
           bio?: string | null
+          calculated_baseline_years?: number | null
+          chronic_conditions?: Json | null
           created_at?: string | null
           danger_level?: number | null
+          data_consent_level?: string | null
+          desired_products?: Json | null
+          diet_quality_score?: number | null
+          diet_restrictions?: string | null
           display_name?: string | null
+          email?: string | null
+          exercise_frequency?: string | null
+          exercise_history_years?: number | null
+          exercise_intensity?: string | null
+          family_health_history?: Json | null
           gender?: string | null
+          happiness_score?: number | null
+          health_score?: number | null
           id?: string
           immortal_mode?: boolean | null
+          life_satisfaction_score?: number | null
           location?: string | null
+          medication_count?: number | null
+          mental_health_score?: number | null
+          onboarding_completed_at?: string | null
           premium_user?: boolean | null
+          sleep_disorders?: string | null
+          sleep_hours_avg?: number | null
+          sleep_quality_score?: number | null
+          smoking_status?: string | null
+          social_connections_score?: number | null
+          stress_level?: number | null
+          substance_use?: string | null
+          supplements?: Json | null
           survival_streak?: number | null
           survivalist_mode?: boolean | null
           total_xp?: number | null
@@ -285,17 +337,43 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          alcohol_frequency?: string | null
           allergies?: string | null
           avatar_url?: string | null
           bio?: string | null
+          calculated_baseline_years?: number | null
+          chronic_conditions?: Json | null
           created_at?: string | null
           danger_level?: number | null
+          data_consent_level?: string | null
+          desired_products?: Json | null
+          diet_quality_score?: number | null
+          diet_restrictions?: string | null
           display_name?: string | null
+          email?: string | null
+          exercise_frequency?: string | null
+          exercise_history_years?: number | null
+          exercise_intensity?: string | null
+          family_health_history?: Json | null
           gender?: string | null
+          happiness_score?: number | null
+          health_score?: number | null
           id?: string
           immortal_mode?: boolean | null
+          life_satisfaction_score?: number | null
           location?: string | null
+          medication_count?: number | null
+          mental_health_score?: number | null
+          onboarding_completed_at?: string | null
           premium_user?: boolean | null
+          sleep_disorders?: string | null
+          sleep_hours_avg?: number | null
+          sleep_quality_score?: number | null
+          smoking_status?: string | null
+          social_connections_score?: number | null
+          stress_level?: number | null
+          substance_use?: string | null
+          supplements?: Json | null
           survival_streak?: number | null
           survivalist_mode?: boolean | null
           total_xp?: number | null

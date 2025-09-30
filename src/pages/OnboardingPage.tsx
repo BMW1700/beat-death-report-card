@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,57 +7,121 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Skull, 
   Heart, 
   ArrowRight, 
-  ArrowLeft, 
-  AlertTriangle, 
-  Shield,
-  Eye,
-  Clock,
-  Smartphone
+  ArrowLeft,
+  Mail,
+  DollarSign,
+  Activity,
+  Apple,
+  Moon,
+  Smile,
+  Cigarette,
+  Pill,
+  TrendingUp,
+  Star,
+  Trophy,
+  Sparkles
 } from 'lucide-react';
-import { useLifeClock } from '@/contexts/LifeClockContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { calculateLifeExpectancy, getDataMonetizationValue } from '@/utils/lifeExpectancyCalculator';
 
 const ONBOARDING_STEPS = [
   'welcome',
-  'understanding',
-  'profile',
-  'permissions',
-  'ready'
+  'email',
+  'consent',
+  'demographics',
+  'physical',
+  'exercise',
+  'diet',
+  'sleep',
+  'mental',
+  'lifestyle',
+  'health',
+  'products',
+  'results'
 ] as const;
 
 type OnboardingStep = typeof ONBOARDING_STEPS[number];
 
+interface OnboardingData {
+  email: string;
+  consentLevel: string;
+  age: string;
+  sex: string;
+  height: string;
+  weight: string;
+  exerciseFrequency: string;
+  exerciseIntensity: string;
+  exerciseYears: string;
+  dietQuality: number;
+  dietRestrictions: string;
+  sleepHours: number;
+  sleepQuality: number;
+  stressLevel: number;
+  happinessScore: number;
+  socialScore: number;
+  lifeSatisfaction: number;
+  smokingStatus: string;
+  alcoholFrequency: string;
+  chronicConditions: string[];
+  medications: string;
+  desiredProducts: string[];
+}
+
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { updateUserData, state } = useLifeClock();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
-  const [profileData, setProfileData] = useState({
+  const [data, setData] = useState<OnboardingData>({
+    email: '',
+    consentLevel: 'none',
     age: '',
     sex: '',
     height: '',
-    weight: ''
+    weight: '',
+    exerciseFrequency: '',
+    exerciseIntensity: '',
+    exerciseYears: '0',
+    dietQuality: 5,
+    dietRestrictions: '',
+    sleepHours: 7,
+    sleepQuality: 5,
+    stressLevel: 5,
+    happinessScore: 7,
+    socialScore: 5,
+    lifeSatisfaction: 7,
+    smokingStatus: '',
+    alcoholFrequency: '',
+    chronicConditions: [],
+    medications: '0',
+    desiredProducts: []
   });
-  const [permissions, setPermissions] = useState({
-    healthKit: false,
-    notifications: false,
-    camera: false
-  });
+  const [calculatedResults, setCalculatedResults] = useState<any>(null);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
 
   const currentStepIndex = ONBOARDING_STEPS.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / ONBOARDING_STEPS.length) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const currentIndex = ONBOARDING_STEPS.indexOf(currentStep);
+    
+    if (currentIndex === ONBOARDING_STEPS.length - 2) {
+      // Calculate results before showing them
+      await calculateAndShowResults();
+    }
+    
     if (currentIndex < ONBOARDING_STEPS.length - 1) {
       setCurrentStep(ONBOARDING_STEPS[currentIndex + 1]);
     } else {
-      handleComplete();
+      await handleComplete();
     }
   };
 
@@ -68,50 +132,110 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleComplete = () => {
-    // Save profile data
-    if (profileData.age && profileData.sex) {
-      updateUserData({
-        age: parseInt(profileData.age),
-        sex: profileData.sex as 'male' | 'female' | 'other',
-        height: parseInt(profileData.height) || 170,
-        weight: parseInt(profileData.weight) || 70
-      });
+  const calculateAndShowResults = async () => {
+    const healthData = {
+      age: parseInt(data.age),
+      sex: data.sex as 'male' | 'female' | 'other',
+      weight: parseFloat(data.weight),
+      height: parseFloat(data.height),
+      exerciseFrequency: data.exerciseFrequency as any,
+      exerciseIntensity: data.exerciseIntensity as any,
+      exerciseHistoryYears: parseInt(data.exerciseYears),
+      dietQualityScore: data.dietQuality,
+      sleepHoursAvg: data.sleepHours,
+      sleepQualityScore: data.sleepQuality,
+      stressLevel: data.stressLevel,
+      happinessScore: data.happinessScore,
+      socialConnectionsScore: data.socialScore,
+      lifeSatisfactionScore: data.lifeSatisfaction,
+      smokingStatus: data.smokingStatus as any,
+      alcoholFrequency: data.alcoholFrequency as any,
+      chronicConditionsCount: data.chronicConditions.length,
+      medicationCount: parseInt(data.medications)
+    };
+
+    const results = calculateLifeExpectancy(healthData);
+    const dataValue = getDataMonetizationValue(data.consentLevel, results.healthScore);
+    
+    setCalculatedResults({ ...results, dataValue });
+  };
+
+  const handleComplete = async () => {
+    if (!user) {
+      toast({ title: "Please log in first", variant: "destructive" });
+      navigate('/auth');
+      return;
     }
 
-    // Mark onboarding as complete
-    localStorage.setItem('beatdeath_onboarded', 'true');
+    try {
+      // Save all data to Supabase profiles
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          email: data.email,
+          data_consent_level: data.consentLevel,
+          age: parseInt(data.age),
+          gender: data.sex,
+          weight: parseFloat(data.weight),
+          weight_unit: 'kg',
+          exercise_frequency: data.exerciseFrequency,
+          exercise_intensity: data.exerciseIntensity,
+          exercise_history_years: parseInt(data.exerciseYears),
+          diet_quality_score: data.dietQuality,
+          diet_restrictions: data.dietRestrictions,
+          sleep_hours_avg: data.sleepHours,
+          sleep_quality_score: data.sleepQuality,
+          stress_level: data.stressLevel,
+          happiness_score: data.happinessScore,
+          social_connections_score: data.socialScore,
+          life_satisfaction_score: data.lifeSatisfaction,
+          smoking_status: data.smokingStatus,
+          alcohol_frequency: data.alcoholFrequency,
+          chronic_conditions: data.chronicConditions,
+          medication_count: parseInt(data.medications),
+          desired_products: data.desiredProducts,
+          calculated_baseline_years: calculatedResults.baselineYears,
+          health_score: calculatedResults.healthScore,
+          onboarding_completed_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
 
-    toast({
-      title: "Welcome to Beat Death!",
-      description: "Your life clock is now running. Start taking actions to extend your time!",
-      variant: "default"
-    });
+      if (error) throw error;
 
-    navigate('/');
+      localStorage.setItem('beatdeath_onboarded', 'true');
+
+      toast({
+        title: "🎉 Profile Complete!",
+        description: `Your personalized life expectancy: ${calculatedResults.baselineYears} years. Health score: ${calculatedResults.healthScore}/100`,
+      });
+
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({ title: "Error saving profile", variant: "destructive" });
+    }
   };
 
   const canContinue = () => {
     switch (currentStep) {
-      case 'welcome':
-        return hasAcceptedTerms;
-      case 'understanding':
-        return true;
-      case 'profile':
-        return profileData.age && profileData.sex;
-      case 'permissions':
-        return true;
-      case 'ready':
-        return true;
-      default:
-        return false;
+      case 'welcome': return hasAcceptedTerms;
+      case 'email': return data.email.includes('@');
+      case 'consent': return data.consentLevel !== 'none';
+      case 'demographics': return data.age && data.sex;
+      case 'physical': return data.height && data.weight;
+      case 'exercise': return data.exerciseFrequency && data.exerciseIntensity;
+      case 'lifestyle': return data.smokingStatus && data.alcoholFrequency;
+      default: return true;
     }
+  };
+
+  const updateData = (field: keyof OnboardingData, value: any) => {
+    setData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
     <div className="min-h-screen gradient-secondary-bg flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Progress Bar */}
         <div className="mb-6">
           <Progress value={progress} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground mt-2">
@@ -123,119 +247,132 @@ export default function OnboardingPage() {
         <Card className="glass-card">
           <CardContent className="p-8">
             
-            {/* Welcome Step */}
+            {/* Welcome */}
             {currentStep === 'welcome' && (
               <div className="text-center space-y-6">
-                <div className="flex items-center justify-center gap-3 mb-6">
+                <div className="flex items-center justify-center gap-3">
                   <Skull className="w-16 h-16 text-destructive animate-death-pulse" />
-                  <h1 className="text-5xl font-bold font-playfair gradient-text">
-                    BeatDeath
-                  </h1>
+                  <h1 className="text-5xl font-bold font-playfair gradient-text">BeatDeath</h1>
                   <Heart className="w-16 h-16 text-success animate-pulse" />
                 </div>
-                
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold">Welcome to the Future of Longevity</h2>
-                  <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                    A scientifically-inspired, gamified platform where your real-world actions 
-                    immediately impact your life expectancy countdown.
-                  </p>
+                <h2 className="text-2xl font-bold">Discover Your True Life Expectancy</h2>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Complete our comprehensive health assessment to get a personalized life expectancy calculation based on your unique lifestyle and health factors.
+                </p>
+                <div className="bg-primary/10 p-4 rounded-lg">
+                  <Sparkles className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <p className="text-sm font-medium">We'll calculate your PERSONALIZED baseline</p>
+                  <p className="text-xs text-muted-foreground mt-1">No more generic 80 years - get YOUR number!</p>
                 </div>
-
-                <div className="bg-card/50 p-4 rounded-lg border border-primary/20">
-                  <h3 className="font-semibold mb-2">You'll Start With:</h3>
-                  <div className="text-3xl font-bold gradient-text">80 Years</div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Real-time countdown that changes based on your verified actions
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-2 text-sm">
+                <div className="flex items-start space-x-2 text-sm">
                   <Checkbox 
                     id="terms" 
                     checked={hasAcceptedTerms}
                     onCheckedChange={(checked) => setHasAcceptedTerms(checked as boolean)}
                   />
-                  <Label htmlFor="terms" className="text-muted-foreground">
-                    I understand this is for entertainment only and not medical advice
+                  <Label htmlFor="terms" className="text-muted-foreground text-left">
+                    I understand this is for entertainment and educational purposes only. This is not medical advice.
                   </Label>
                 </div>
+              </div>
+            )}
 
-                <div className="flex items-center justify-center gap-2 text-warning text-sm">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span>Always consult healthcare professionals for medical decisions</span>
+            {/* Email Collection */}
+            {currentStep === 'email' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Mail className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Your Email</h2>
+                  <p className="text-muted-foreground">Required to save your results and access premium features</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input 
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={data.email}
+                    onChange={(e) => updateData('email', e.target.value)}
+                  />
+                </div>
+                <div className="bg-muted/20 p-3 rounded text-sm">
+                  <p className="font-medium mb-1">🔒 Your privacy matters</p>
+                  <p className="text-xs text-muted-foreground">We use your email only for account purposes. You control your data sharing preferences next.</p>
                 </div>
               </div>
             )}
 
-            {/* Understanding Step */}
-            {currentStep === 'understanding' && (
+            {/* Data Consent Tiers */}
+            {currentStep === 'consent' && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-4">How Beat Death Works</h2>
-                  <p className="text-muted-foreground">
-                    Understand the dual display system that makes this app unique
-                  </p>
+                  <DollarSign className="w-12 h-12 text-success mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Data Sharing Benefits</h2>
+                  <p className="text-muted-foreground">Choose how you want to participate (optional)</p>
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Scientific Mode */}
-                  <div className="p-4 bg-secondary/20 rounded-lg border border-secondary/40">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Eye className="w-5 h-5 text-secondary" />
-                      <h3 className="font-semibold">Scientific Mode</h3>
-                      <Badge variant="secondary">Credible</Badge>
+                
+                <div className="space-y-3">
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${data.consentLevel === 'none' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                    onClick={() => updateData('consentLevel', 'none')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold">Private Mode</h3>
+                      <Badge variant="outline">Free</Badge>
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <p>• Based on peer-reviewed research</p>
-                      <p>• Shows real lifetime impact (HYG)</p>
-                      <p>• Daily contribution calculations</p>
-                      <p>• Conservative, evidence-based</p>
-                    </div>
-                    <div className="mt-3 p-2 bg-secondary/30 rounded text-xs">
-                      Example: "Daily exercise → +3.0 years if sustained. Today: +3 days"
-                    </div>
+                    <p className="text-sm text-muted-foreground">Your data stays with you. No sharing, no compensation.</p>
                   </div>
 
-                  {/* Playful Mode */}
-                  <div className="p-4 bg-accent/20 rounded-lg border border-accent/40">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Skull className="w-5 h-5 text-accent" />
-                      <h3 className="font-semibold">Playful Mode</h3>
-                      <Badge variant="default">Viral</Badge>
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${data.consentLevel === 'bronze' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                    onClick={() => updateData('consentLevel', 'bronze')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold">Bronze Tier</h3>
+                      <Badge>$1-5/month value</Badge>
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <p>• Instant gratification</p>
-                      <p>• Scaled for virality</p>
-                      <p>• Verification bonuses</p>
-                      <p>• Addictive feedback loops</p>
+                    <p className="text-sm text-muted-foreground">Share anonymized basic health metrics with research partners.</p>
+                  </div>
+
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${data.consentLevel === 'silver' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                    onClick={() => updateData('consentLevel', 'silver')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold">Silver Tier</h3>
+                      <Badge>$5-25/month value</Badge>
                     </div>
-                    <div className="mt-3 p-2 bg-accent/30 rounded text-xs">
-                      Example: "Instant gain: +2 minutes (Verified: +3 min)"
+                    <p className="text-sm text-muted-foreground">Include detailed lifestyle data for health product companies.</p>
+                  </div>
+
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${data.consentLevel === 'gold' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                    onClick={() => updateData('consentLevel', 'gold')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-500" />
+                        Gold Tier
+                      </h3>
+                      <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500">$25-100+/month value</Badge>
                     </div>
+                    <p className="text-sm text-muted-foreground">Premium data package with ongoing health tracking insights. Maximum value.</p>
                   </div>
                 </div>
 
-                <div className="bg-primary/20 p-4 rounded-lg text-center">
-                  <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="font-semibold">Both modes shown together</p>
-                  <p className="text-sm text-muted-foreground">
-                    Scientific credibility + viral engagement = unique experience
-                  </p>
+                <div className="bg-success/10 p-3 rounded text-xs text-center">
+                  💰 You can change this anytime. Higher tiers unlock premium features + compensation!
                 </div>
               </div>
             )}
 
-            {/* Profile Step */}
-            {currentStep === 'profile' && (
+            {/* Demographics */}
+            {currentStep === 'demographics' && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-4">Your Profile</h2>
-                  <p className="text-muted-foreground">
-                    Help us personalize your life clock calculations (optional but recommended)
-                  </p>
+                  <h2 className="text-2xl font-bold">Basic Information</h2>
+                  <p className="text-muted-foreground">Help us calculate your baseline</p>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="age">Age *</Label>
@@ -243,17 +380,13 @@ export default function OnboardingPage() {
                       id="age"
                       type="number"
                       placeholder="25"
-                      value={profileData.age}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, age: e.target.value }))}
+                      value={data.age}
+                      onChange={(e) => updateData('age', e.target.value)}
                     />
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="sex">Sex *</Label>
-                    <Select 
-                      value={profileData.sex}
-                      onValueChange={(value) => setProfileData(prev => ({ ...prev, sex: value }))}
-                    >
+                    <Label htmlFor="sex">Biological Sex *</Label>
+                    <Select value={data.sex} onValueChange={(v) => updateData('sex', v)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select..." />
                       </SelectTrigger>
@@ -264,127 +397,408 @@ export default function OnboardingPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+              </div>
+            )}
 
+            {/* Physical Measurements */}
+            {currentStep === 'physical' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Activity className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Physical Measurements</h2>
+                  <p className="text-muted-foreground">BMI is a key longevity factor</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="height">Height (cm)</Label>
+                    <Label htmlFor="height">Height (cm) *</Label>
                     <Input 
                       id="height"
                       type="number"
                       placeholder="170"
-                      value={profileData.height}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, height: e.target.value }))}
+                      value={data.height}
+                      onChange={(e) => updateData('height', e.target.value)}
                     />
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="weight">Weight (kg)</Label>
+                    <Label htmlFor="weight">Weight (kg) *</Label>
                     <Input 
                       id="weight"
                       type="number"
                       placeholder="70"
-                      value={profileData.weight}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, weight: e.target.value }))}
+                      value={data.weight}
+                      onChange={(e) => updateData('weight', e.target.value)}
                     />
                   </div>
                 </div>
-
-                <div className="bg-muted/20 p-4 rounded-lg text-sm text-center">
-                  <Shield className="w-4 h-4 inline mr-2" />
-                  Your data stays on your device. We don't store personal information on our servers.
-                </div>
+                {data.height && data.weight && (
+                  <div className="bg-primary/10 p-3 rounded text-center">
+                    <p className="text-sm font-medium">
+                      Your BMI: {(parseFloat(data.weight) / Math.pow(parseFloat(data.height) / 100, 2)).toFixed(1)}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Permissions Step */}
-            {currentStep === 'permissions' && (
+            {/* Exercise */}
+            {currentStep === 'exercise' && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-4">Optional Integrations</h2>
-                  <p className="text-muted-foreground">
-                    Enable features for a better experience (all optional)
-                  </p>
+                  <TrendingUp className="w-12 h-12 text-success mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Exercise Habits</h2>
+                  <p className="text-muted-foreground">One of the biggest longevity factors!</p>
                 </div>
-
                 <div className="space-y-4">
-                  <div className="flex items-start space-x-3 p-4 border border-primary/20 rounded-lg">
-                    <Checkbox 
-                      id="healthkit"
-                      checked={permissions.healthKit}
-                      onCheckedChange={(checked) => 
-                        setPermissions(prev => ({ ...prev, healthKit: checked as boolean }))
-                      }
-                    />
-                    <div className="flex-1">
-                      <Label htmlFor="healthkit" className="font-medium">Health Data Sync</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Connect Apple Health or Google Fit for automatic action logging
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <Label>How often do you exercise? *</Label>
+                    <Select value={data.exerciseFrequency} onValueChange={(v) => updateData('exerciseFrequency', v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily (+5 years)</SelectItem>
+                        <SelectItem value="3-5x_week">3-5x per week (+4 years)</SelectItem>
+                        <SelectItem value="1-2x_week">1-2x per week (+2 years)</SelectItem>
+                        <SelectItem value="rarely">Rarely (-1 year)</SelectItem>
+                        <SelectItem value="never">Never (-3 years)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-
-                  <div className="flex items-start space-x-3 p-4 border border-primary/20 rounded-lg">
-                    <Checkbox 
-                      id="camera"
-                      checked={permissions.camera}
-                      onCheckedChange={(checked) => 
-                        setPermissions(prev => ({ ...prev, camera: checked as boolean }))
-                      }
-                    />
-                    <div className="flex-1">
-                      <Label htmlFor="camera" className="font-medium">Camera Access</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Verify actions with video for bonus time rewards
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Exercise intensity? *</Label>
+                    <Select value={data.exerciseIntensity} onValueChange={(v) => updateData('exerciseIntensity', v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select intensity..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">High (running, sports)</SelectItem>
+                        <SelectItem value="moderate">Moderate (brisk walking, cycling)</SelectItem>
+                        <SelectItem value="light">Light (casual walking)</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-
-                  <div className="flex items-start space-x-3 p-4 border border-primary/20 rounded-lg">
-                    <Checkbox 
-                      id="notifications"
-                      checked={permissions.notifications}
-                      onCheckedChange={(checked) => 
-                        setPermissions(prev => ({ ...prev, notifications: checked as boolean }))
-                      }
+                  <div className="space-y-2">
+                    <Label>Years of consistent exercise</Label>
+                    <Input 
+                      type="number"
+                      placeholder="0"
+                      value={data.exerciseYears}
+                      onChange={(e) => updateData('exerciseYears', e.target.value)}
                     />
-                    <div className="flex-1">
-                      <Label htmlFor="notifications" className="font-medium">Push Notifications</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Get reminders for healthy actions and achievement notifications
-                      </p>
-                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Ready Step */}
-            {currentStep === 'ready' && (
-              <div className="text-center space-y-6">
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <Smartphone className="w-12 h-12 text-success" />
-                  <Clock className="w-16 h-16 text-primary animate-pulse" />
-                  <Skull className="w-12 h-12 text-accent" />
+            {/* Diet */}
+            {currentStep === 'diet' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Apple className="w-12 h-12 text-success mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Diet & Nutrition</h2>
+                  <p className="text-muted-foreground">You are what you eat</p>
                 </div>
-                
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-bold">You're Ready!</h2>
-                  <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                    Your life clock is about to start ticking. Every action counts now.
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-r from-primary/20 to-accent/20 p-6 rounded-lg">
-                  <h3 className="font-bold text-xl mb-4">Start at 80 Years</h3>
-                  <div className="text-4xl font-bold gradient-text mb-2">
-                    {state.userData.baselineYears} Years
+                  <div className="space-y-2">
+                    <Label>Diet quality: {data.dietQuality}/10</Label>
+                    <Slider 
+                      value={[data.dietQuality]} 
+                      onValueChange={(v) => updateData('dietQuality', v[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {data.dietQuality <= 3 && "Mostly processed/fast food"}
+                      {data.dietQuality > 3 && data.dietQuality <= 6 && "Mixed - some healthy, some processed"}
+                      {data.dietQuality > 6 && data.dietQuality <= 8 && "Mostly whole foods, balanced"}
+                      {data.dietQuality > 8 && "Excellent - whole foods, Mediterranean-style"}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Your real-time countdown begins now. Make every moment count!
-                  </p>
+                  <div className="space-y-2">
+                    <Label>Dietary restrictions/preferences (optional)</Label>
+                    <Input 
+                      placeholder="e.g., vegetarian, keto, gluten-free"
+                      value={data.dietRestrictions}
+                      onChange={(e) => updateData('dietRestrictions', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sleep */}
+            {currentStep === 'sleep' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Moon className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Sleep Habits</h2>
+                  <p className="text-muted-foreground">Sleep is when your body repairs itself</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Average sleep per night: {data.sleepHours} hours</Label>
+                    <Slider 
+                      value={[data.sleepHours]} 
+                      onValueChange={(v) => updateData('sleepHours', v[0])}
+                      min={3}
+                      max={12}
+                      step={0.5}
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {data.sleepHours < 6 && "⚠️ Too little - major health impact"}
+                      {data.sleepHours >= 6 && data.sleepHours < 7 && "Below optimal"}
+                      {data.sleepHours >= 7 && data.sleepHours <= 8 && "✅ Optimal range!"}
+                      {data.sleepHours > 8 && "More than needed"}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sleep quality: {data.sleepQuality}/10</Label>
+                    <Slider 
+                      value={[data.sleepQuality]} 
+                      onValueChange={(v) => updateData('sleepQuality', v[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mental Health */}
+            {currentStep === 'mental' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Smile className="w-12 h-12 text-success mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Mental Wellness</h2>
+                  <p className="text-muted-foreground">Your mind affects your body</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Happiness level: {data.happinessScore}/10</Label>
+                    <Slider 
+                      value={[data.happinessScore]} 
+                      onValueChange={(v) => updateData('happinessScore', v[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Stress level: {data.stressLevel}/10</Label>
+                    <Slider 
+                      value={[data.stressLevel]} 
+                      onValueChange={(v) => updateData('stressLevel', v[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                    />
+                    <p className="text-xs text-muted-foreground">1 = no stress, 10 = extremely stressed</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Social connections: {data.socialScore}/10</Label>
+                    <Slider 
+                      value={[data.socialScore]} 
+                      onValueChange={(v) => updateData('socialScore', v[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                    />
+                    <p className="text-xs text-muted-foreground">Quality relationships and social support</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Life satisfaction: {data.lifeSatisfaction}/10</Label>
+                    <Slider 
+                      value={[data.lifeSatisfaction]} 
+                      onValueChange={(v) => updateData('lifeSatisfaction', v[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Lifestyle */}
+            {currentStep === 'lifestyle' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Cigarette className="w-12 h-12 text-destructive mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Substance Use</h2>
+                  <p className="text-muted-foreground">Major impact on longevity</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Smoking status *</Label>
+                    <Select value={data.smokingStatus} onValueChange={(v) => updateData('smokingStatus', v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="never">Never smoked (+2 years)</SelectItem>
+                        <SelectItem value="former">Former smoker</SelectItem>
+                        <SelectItem value="current_light">Current - light (-5 years)</SelectItem>
+                        <SelectItem value="current_heavy">Current - heavy (-10 years)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Alcohol consumption *</Label>
+                    <Select value={data.alcoholFrequency} onValueChange={(v) => updateData('alcoholFrequency', v)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="never">Never</SelectItem>
+                        <SelectItem value="rarely">Rarely (few times/year)</SelectItem>
+                        <SelectItem value="moderate">Moderate (1-2 drinks/week)</SelectItem>
+                        <SelectItem value="heavy">Heavy (daily or binge)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Health History */}
+            {currentStep === 'health' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Pill className="w-12 h-12 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Health History</h2>
+                  <p className="text-muted-foreground">Current health status</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Chronic conditions (select all that apply)</Label>
+                    <div className="space-y-2 mt-2">
+                      {['Diabetes', 'Heart Disease', 'High Blood Pressure', 'Asthma', 'Arthritis', 'None'].map(condition => (
+                        <div key={condition} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={condition}
+                            checked={data.chronicConditions.includes(condition)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                updateData('chronicConditions', [...data.chronicConditions, condition]);
+                              } else {
+                                updateData('chronicConditions', data.chronicConditions.filter(c => c !== condition));
+                              }
+                            }}
+                          />
+                          <Label htmlFor={condition} className="font-normal">{condition}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Number of regular medications</Label>
+                    <Input 
+                      type="number"
+                      placeholder="0"
+                      value={data.medications}
+                      onChange={(e) => updateData('medications', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Product Interests */}
+            {currentStep === 'products' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <Trophy className="w-12 h-12 text-success mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold">Health Interests</h2>
+                  <p className="text-muted-foreground">What products interest you?</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Select products you're interested in</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {[
+                      'Supplements',
+                      'Fitness Equipment',
+                      'Sleep Trackers',
+                      'Meditation Apps',
+                      'Meal Planning',
+                      'DNA Testing',
+                      'Wearable Tech',
+                      'Health Insurance'
+                    ].map(product => (
+                      <div key={product} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={product}
+                          checked={data.desiredProducts.includes(product)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              updateData('desiredProducts', [...data.desiredProducts, product]);
+                            } else {
+                              updateData('desiredProducts', data.desiredProducts.filter(p => p !== product));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={product} className="font-normal text-sm">{product}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-primary/10 p-3 rounded text-xs text-center">
+                  💡 This helps us show you relevant products and increases your data value!
+                </div>
+              </div>
+            )}
+
+            {/* Results */}
+            {currentStep === 'results' && calculatedResults && (
+              <div className="space-y-6 text-center">
+                <div className="flex items-center justify-center gap-3">
+                  <Heart className="w-12 h-12 text-success animate-pulse" />
+                  <Sparkles className="w-12 h-12 text-primary" />
+                </div>
+                <h2 className="text-3xl font-bold gradient-text">Your Personalized Results!</h2>
+                
+                <div className="bg-gradient-to-br from-primary/20 to-success/20 p-6 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">Your Life Expectancy</p>
+                  <div className="text-5xl font-bold gradient-text mb-2">{calculatedResults.baselineYears} Years</div>
+                  <p className="text-sm text-muted-foreground">Based on your current lifestyle</p>
                 </div>
 
-                <div className="text-sm text-muted-foreground">
-                  Ready to beat death one action at a time?
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-secondary/20 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Health Score</p>
+                    <div className="text-3xl font-bold">{calculatedResults.healthScore}/100</div>
+                  </div>
+                  <div className="bg-success/20 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Data Value</p>
+                    <div className="text-3xl font-bold">${calculatedResults.dataValue}/mo</div>
+                  </div>
+                </div>
+
+                <div className="bg-muted/20 p-4 rounded-lg text-left">
+                  <p className="font-bold mb-2">Top Impact Factors:</p>
+                  <div className="space-y-1 text-sm">
+                    {calculatedResults.factors.slice(0, 5).map((factor: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <span>{factor.category}</span>
+                        <span className={factor.impact > 0 ? 'text-success' : 'text-destructive'}>
+                          {factor.impact > 0 ? '+' : ''}{factor.impact.toFixed(1)} yrs
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-primary/10 p-4 rounded-lg">
+                  <p className="text-sm font-medium mb-2">🎯 Ready to Beat Death?</p>
+                  <p className="text-xs text-muted-foreground">
+                    Your clock starts now. Every action you take will update your life expectancy in real-time!
+                  </p>
                 </div>
               </div>
             )}
@@ -404,7 +818,7 @@ export default function OnboardingPage() {
                 onClick={handleNext}
                 disabled={!canContinue()}
               >
-                {currentStep === 'ready' ? 'Start Beating Death' : 'Next'}
+                {currentStep === 'results' ? 'Start Beating Death!' : 'Next'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
