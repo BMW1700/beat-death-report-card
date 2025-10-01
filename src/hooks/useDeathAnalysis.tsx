@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { useCommunityLearning } from './useCommunityLearning';
 import { DeathAnalysis, DetectedItem } from '@/types';
+import { analyzeImageForToxicity, generateDeathAnalysisReport, ANALYSIS_STAGES } from '@/utils/imageAnalysis';
 
 export const useDeathAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const communityLearning = useCommunityLearning();
 
   const saveAnalysis = async (analysis: DeathAnalysis, scenario?: string, imageFile?: File) => {
     if (!user) return null;
@@ -201,7 +204,7 @@ export const useDeathAnalysis = () => {
     setIsAnalyzing(true);
     
     try {
-      onProgress?.('Initializing AI', 10);
+      onProgress?.(ANALYSIS_STAGES.INITIALIZING.name, ANALYSIS_STAGES.INITIALIZING.progress);
       
       // Get user profile for personalized risk calculation
       const { data: profile } = await supabase
@@ -217,14 +220,11 @@ export const useDeathAnalysis = () => {
       let analysisResult;
       
       if (imageFile) {
-        // Image-based analysis with real AI
-        const { analyzeImageForToxicity } = await import('@/utils/imageAnalysis');
-        onProgress?.('Analyzing with AI', 30);
-        analysisResult = await analyzeImageForToxicity(imageFile);
-        onProgress?.('Processing results', 70);
+        // Image-based analysis with real AI and streaming progress
+        analysisResult = await analyzeImageForToxicity(imageFile, communityLearning, onProgress);
       } else {
         // Text-based scenario analysis
-        onProgress?.('Analyzing scenario', 50);
+        onProgress?.(ANALYSIS_STAGES.CLASSIFICATION.name, ANALYSIS_STAGES.CLASSIFICATION.progress);
         
         const mockDetection = {
           label: scenario,
@@ -242,10 +242,9 @@ export const useDeathAnalysis = () => {
         };
       }
 
-      onProgress?.('Generating report', 85);
+      onProgress?.(ANALYSIS_STAGES.GENERATING_REPORT.name, ANALYSIS_STAGES.GENERATING_REPORT.progress);
 
       // Generate comprehensive death analysis report
-      const { generateDeathAnalysisReport } = await import('@/utils/imageAnalysis');
       const report = await generateDeathAnalysisReport(
         analysisResult.detectedItems,
         userWeight
@@ -282,7 +281,7 @@ export const useDeathAnalysis = () => {
       // Save enhanced analysis to database
       await saveAnalysis(deathAnalysis, scenario, imageFile);
       
-      onProgress?.('Complete', 100);
+      onProgress?.(ANALYSIS_STAGES.COMPLETE.name, ANALYSIS_STAGES.COMPLETE.progress);
 
       toast({
         title: "🎯 Analysis Complete!",

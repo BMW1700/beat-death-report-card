@@ -11,6 +11,7 @@ import { ShareDeathReport } from "@/components/ShareDeathReport";
 import { SurvivalistModeToggle } from "@/components/SurvivalistModeToggle";
 import { FieldManual } from "@/components/FieldManual";
 import { TacticalScanner } from "@/components/TacticalScanner";
+import { StreamingAnalysisProgress } from "@/components/StreamingAnalysisProgress";
 import { Link } from "react-router-dom";
 import { UserData, DeathAnalysis } from "@/types";
 
@@ -39,6 +40,8 @@ const DeathScannerPage = () => {
     allClassificationResults?: any[];
     isFromCommunity?: boolean;
   } | null>(null);
+  const [analysisProgress, setAnalysisProgress] = useState({ stage: '', progress: 0 });
+  const [showProgress, setShowProgress] = useState(false);
 
   // Death analysis database for different scenarios
   const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
@@ -158,8 +161,13 @@ const DeathScannerPage = () => {
       return;
     }
     
+    setShowProgress(true);
+    
     try {
-      const result = await performAnalysis(scenario, imageFile);
+      const result = await performAnalysis(scenario, imageFile, (stage, progress) => {
+        console.log(`Analysis progress: ${stage} - ${progress}%`);
+        setAnalysisProgress({ stage, progress });
+      });
       if (result) {
         setAnalysis(result);
         setCurrentImageFile(imageFile || null);
@@ -167,6 +175,8 @@ const DeathScannerPage = () => {
     } catch (error) {
       console.error('Analysis error:', error);
       toast.error("Analysis failed. Please try again.");
+    } finally {
+      setTimeout(() => setShowProgress(false), 1000);
     }
   };
 
@@ -208,8 +218,16 @@ const DeathScannerPage = () => {
         <div className="grid lg:grid-cols-2 gap-6 mb-8">
           {/* Death Scanner */}
           <div className="space-y-4">
+            {showProgress && isAnalyzing && (
+              <StreamingAnalysisProgress 
+                currentStage={analysisProgress.stage}
+                progress={analysisProgress.progress}
+                isComplete={analysisProgress.progress >= 100}
+              />
+            )}
+            
             <div className="glass-card success-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <DeathAnalyzer 
+              <DeathAnalyzer
                 scenario={scenario} 
                 setScenario={setScenario} 
                 onAnalyze={handleAnalyze}

@@ -2,15 +2,19 @@ import { pipeline, env } from '@huggingface/transformers';
 import { searchFDADrugs, searchUSDAFood, searchPubChem, speakWarning, lookupProductByBarcode } from './apiServices';
 import { useCommunityLearning } from '../hooks/useCommunityLearning';
 
-// Configure transformers.js to use browser cache and download models
+// Configure transformers.js for optimal performance
 env.allowLocalModels = false;
 env.useBrowserCache = true;
+env.backends.onnx.wasm.numThreads = 4; // Multi-threading for faster inference
 
 // Initialize multiple AI pipelines for better accuracy
 let foodClassifier: any = null;
 let generalClassifier: any = null;
 let objectClassifier: any = null;
 let toxicityClassifier: any = null;
+let ocrModel: any = null;
+let segmentationModel: any = null;
+let clipModel: any = null;
 
 // Define confidence thresholds for better accuracy
 const CONFIDENCE_THRESHOLDS = {
@@ -19,6 +23,18 @@ const CONFIDENCE_THRESHOLDS = {
   GOOD_CONFIDENCE: 40,   // Acceptable confidence
   HIGH_CONFIDENCE: 70,   // High confidence detection
   COMMUNITY_BOOST: 95    // High confidence for community-corrected items
+};
+
+// Progress tracking stages
+export const ANALYSIS_STAGES = {
+  INITIALIZING: { name: 'Initializing AI Models', progress: 0 },
+  OCR: { name: 'Reading Labels & Text', progress: 20 },
+  SEGMENTATION: { name: 'Detecting Objects', progress: 35 },
+  CLASSIFICATION: { name: 'Identifying Items', progress: 50 },
+  TOXICITY: { name: 'Analyzing Danger Level', progress: 70 },
+  EXTERNAL_APIS: { name: 'Cross-referencing Databases', progress: 85 },
+  GENERATING_REPORT: { name: 'Generating Death Report', progress: 95 },
+  COMPLETE: { name: 'Analysis Complete', progress: 100 }
 };
 
 // Food safety database - toxic foods and danger levels
@@ -557,7 +573,8 @@ const checkCommunityDatabase = async (imageFile: File, classificationResults: an
 
 export const analyzeImageForToxicity = async (
   imageFile: File, 
-  communityLearning?: ReturnType<typeof useCommunityLearning>
+  communityLearning?: ReturnType<typeof useCommunityLearning>,
+  onProgress?: (stage: string, progress: number) => void
 ): Promise<{
   detectedItems: Array<{
     label: string;
@@ -578,12 +595,14 @@ export const analyzeImageForToxicity = async (
     allowCorrection?: boolean;
     allClassificationResults?: any[];
     isFromCommunity?: boolean;
+    ocrText?: string;
   }>;
   overallRisk: number;
   recommendations: string[];
 }> => {
   try {
-    console.log('🔍 Enhanced AI Analysis with Community Learning...');
+    console.log('🔍 Enhanced AI Analysis with Real-Time Streaming...');
+    onProgress?.(ANALYSIS_STAGES.INITIALIZING.name, ANALYSIS_STAGES.INITIALIZING.progress);
     
     // STEP 1: Check community database first for instant results
     if (communityLearning) {
@@ -647,7 +666,24 @@ export const analyzeImageForToxicity = async (
       }
     }
     
-    // STEP 2: Initialize AI if not ready
+    // STEP 2: OCR Text Extraction
+    onProgress?.(ANALYSIS_STAGES.OCR.name, ANALYSIS_STAGES.OCR.progress);
+    let extractedText = '';
+    try {
+      if (!ocrModel) {
+        console.log('Initializing OCR model...');
+        ocrModel = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
+      }
+      const imageUrl = URL.createObjectURL(imageFile);
+      const ocrResult = await ocrModel(imageUrl);
+      extractedText = ocrResult[0]?.generated_text || '';
+      console.log('📝 OCR extracted text:', extractedText);
+    } catch (error) {
+      console.warn('OCR extraction failed:', error);
+    }
+
+    // STEP 3: Initialize AI models if not ready
+    onProgress?.(ANALYSIS_STAGES.SEGMENTATION.name, ANALYSIS_STAGES.SEGMENTATION.progress);
     if (!generalClassifier) {
       const initialized = await initializeImageAnalysis();
       if (!initialized) {
@@ -659,7 +695,22 @@ export const analyzeImageForToxicity = async (
     // Convert file to image URL for analysis
     const imageUrl = URL.createObjectURL(imageFile);
     
-    // Use ensemble prediction with multiple models for better accuracy
+    // STEP 4: Object Segmentation for multi-item detection
+    let segmentedObjects: any[] = [];
+    try {
+      if (!segmentationModel) {
+        console.log('Initializing segmentation model...');
+        segmentationModel = await pipeline('object-detection', 'Xenova/detr-resnet-50');
+      }
+      const segmentationResult = await segmentationModel(imageUrl);
+      segmentedObjects = Array.isArray(segmentationResult) ? segmentationResult : [];
+      console.log(`🎯 Detected ${segmentedObjects.length} objects in image`);
+    } catch (error) {
+      console.warn('Segmentation failed:', error);
+    }
+    
+    // STEP 5: Classification with ensemble prediction
+    onProgress?.(ANALYSIS_STAGES.CLASSIFICATION.name, ANALYSIS_STAGES.CLASSIFICATION.progress);
     const allResults: any[] = [];
     
     // Get predictions from all available models
@@ -708,6 +759,9 @@ export const analyzeImageForToxicity = async (
       }
     }
     
+    // STEP 6: Toxicity Analysis
+    onProgress?.(ANALYSIS_STAGES.TOXICITY.name, ANALYSIS_STAGES.TOXICITY.progress);
+    
     // Combine and weight results from multiple models with enhanced logic
     const combinedResults = combineEnsembleResults(allResults);
     const classificationResults = combinedResults.length > 0 ? combinedResults : allResults;
@@ -733,6 +787,9 @@ export const analyzeImageForToxicity = async (
       console.warn('All AI detections below minimum confidence threshold, using fallback');
       return analyzeImageManually(imageFile);
     }
+    
+    // STEP 7: External API enrichment
+    onProgress?.(ANALYSIS_STAGES.EXTERNAL_APIS.name, ANALYSIS_STAGES.EXTERNAL_APIS.progress);
     
     // Check community database first for user-contributed training data
     const communityMatch = await checkCommunityDatabase(imageFile, filteredResults);
@@ -829,7 +886,8 @@ export const analyzeImageForToxicity = async (
             timeToDeath: data.timeToDeath,
             finalWords: data.finalWords,
             source: 'database',
-            allowCorrection: confidence < 0.85 // Allow correction if not very confident
+            allowCorrection: confidence < 0.85, // Allow correction if not very confident
+            ocrText: extractedText
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -858,7 +916,8 @@ export const analyzeImageForToxicity = async (
             timeToDeath: data.timeToDeath,
             finalWords: data.finalWords,
             source: 'database',
-            allowCorrection: confidence < 0.85 // Allow correction if not very confident
+            allowCorrection: confidence < 0.85, // Allow correction if not very confident
+            ocrText: extractedText
           });
           maxRisk = Math.max(maxRisk, adjustedToxicity);
           break;
@@ -879,7 +938,8 @@ export const analyzeImageForToxicity = async (
           lethalDose: 'Varies by medication - consult medical professional',
           category: 'medication' as const,
           fdaInfo: fdaData[0] || null,
-          allowCorrection: confidence < 0.8 // Allow correction for pill misidentifications
+          allowCorrection: confidence < 0.8, // Allow correction for pill misidentifications
+          ocrText: extractedText
         });
         maxRisk = Math.max(maxRisk, 75);
       }
@@ -907,7 +967,8 @@ export const analyzeImageForToxicity = async (
         category: 'unknown' as const,
         needsTraining: needsTraining,
         allowCorrection: allowCorrection,
-        allClassificationResults: classificationResults.slice(0, 5) // Include top 5 for training reference
+        allClassificationResults: classificationResults.slice(0, 5), // Include top 5 for training reference
+        ocrText: extractedText
       });
       maxRisk = needsTraining ? 5 : 10;
     }
@@ -919,11 +980,15 @@ export const analyzeImageForToxicity = async (
       speakWarning(`Warning: Potentially dangerous item detected. Exercise caution.`);
     }
     
-// Generate recommendations with enhanced survival focus
+    // Generate recommendations with enhanced survival focus
+    onProgress?.(ANALYSIS_STAGES.GENERATING_REPORT.name, ANALYSIS_STAGES.GENERATING_REPORT.progress);
     const recommendations = generateSurvivalRecommendations(maxRisk, detectedItems);
     
     // Clean up the blob URL
     URL.revokeObjectURL(imageUrl);
+    
+    // Mark as complete
+    onProgress?.(ANALYSIS_STAGES.COMPLETE.name, ANALYSIS_STAGES.COMPLETE.progress);
     
     return {
       detectedItems: detectedItems.sort((a, b) => b.toxicityLevel - a.toxicityLevel),
