@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
-import { useCommunityLearning } from './useCommunityLearning';
 import { DeathAnalysis, DetectedItem } from '@/types';
-import { analyzeImageForToxicity, generateDeathAnalysisReport, ANALYSIS_STAGES } from '@/utils/imageAnalysis';
+import { ANALYSIS_STAGES } from '@/utils/imageAnalysis';
 
 export const useDeathAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const communityLearning = useCommunityLearning();
 
   const saveAnalysis = async (analysis: DeathAnalysis, scenario?: string, imageFile?: File) => {
     if (!user) return null;
@@ -209,73 +207,89 @@ export const useDeathAnalysis = () => {
       // Get user profile for personalized risk calculation
       const { data: profile } = await supabase
         .from('profiles')
-        .select('weight, weight_unit, age, chronic_conditions, allergies')
+        .select('weight, weight_unit, age, gender, chronic_conditions, allergies')
         .eq('user_id', user?.id)
         .single();
 
-      const userWeight = profile?.weight_unit === 'kg' 
-        ? profile.weight * 2.20462 // Convert to lbs
-        : profile?.weight || 70;
+      onProgress?.('Preparing AI analysis...', 15);
 
-      let analysisResult;
-      
+      // Convert image to base64 if provided
+      let imageBase64 = null;
       if (imageFile) {
-        // Image-based analysis with real AI and streaming progress
-        analysisResult = await analyzeImageForToxicity(imageFile, communityLearning, onProgress);
-      } else {
-        // Text-based scenario analysis
-        onProgress?.(ANALYSIS_STAGES.CLASSIFICATION.name, ANALYSIS_STAGES.CLASSIFICATION.progress);
-        
-        const mockDetection = {
-          label: scenario,
-          confidence: 75,
-          toxicityLevel: 5,
-          reason: 'Scenario-based analysis',
-          lethalDose: 'Varies by individual',
-          category: 'scenario' as const
-        };
-        
-        analysisResult = {
-          detectedItems: [mockDetection],
-          overallRisk: 5,
-          recommendations: ['Exercise caution', 'Seek medical advice if concerned']
-        };
+        onProgress?.('Processing image...', 20);
+        const reader = new FileReader();
+        imageBase64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(imageFile);
+        });
       }
 
-      onProgress?.(ANALYSIS_STAGES.GENERATING_REPORT.name, ANALYSIS_STAGES.GENERATING_REPORT.progress);
+      onProgress?.(ANALYSIS_STAGES.CLASSIFICATION.name, 30);
 
-      // Generate comprehensive death analysis report
-      const report = await generateDeathAnalysisReport(
-        analysisResult.detectedItems,
-        userWeight
-      );
+      // Call the powerful AI edge function with Gemini 2.5 Pro
+      console.log('Calling advanced AI death analysis...');
+      const { data: aiAnalysis, error: aiError } = await supabase.functions.invoke('analyze-death-risk', {
+        body: {
+          imageBase64,
+          scenario: scenario || null,
+          userData: {
+            weight: profile?.weight || 150,
+            weight_unit: profile?.weight_unit || 'lbs',
+            age: profile?.age || 30,
+            gender: profile?.gender || 'unknown',
+            allergies: profile?.allergies || 'none',
+            chronic_conditions: profile?.chronic_conditions || []
+          }
+        }
+      });
 
-      const topItem = analysisResult.detectedItems[0];
-      
+      if (aiError) {
+        throw new Error(aiError.message || 'AI analysis failed');
+      }
+
+      if (!aiAnalysis) {
+        throw new Error('No analysis result received from AI');
+      }
+
+      onProgress?.(ANALYSIS_STAGES.GENERATING_REPORT.name, 80);
+
+      // Transform AI response to DeathAnalysis format
       const deathAnalysis: DeathAnalysis = {
-        item: topItem?.label || scenario || "Unknown item",
+        item: aiAnalysis.itemDetected || scenario || "Unknown hazard",
         allergyRisk: profile?.allergies ? "High" : "Moderate",
-        killRating: report.deathScore,
-        killRatingText: report.deathScore >= 8 ? "Extremely Lethal" : 
-                        report.deathScore >= 6 ? "Highly Dangerous" :
-                        report.deathScore >= 4 ? "Moderately Dangerous" : "Low Risk",
-        lethalDose: topItem?.lethalDose || "Varies",
-        timeToDeath: report.timeToImpact || topItem?.timeToDeath || "Unknown",
-        mechanism: topItem?.reason || "System failure",
-        survival: report.survivalTips?.join(' ') || topItem?.survival || analysisResult.recommendations?.join(' ') || "Seek medical attention",
-        finalWords: report.finalWords || topItem?.finalWords || "I should have used BeatDeath first...",
-        detectedItems: analysisResult.detectedItems.map((item: any) => ({
-          label: item.label,
-          confidence: item.confidence,
-          toxicityLevel: item.toxicityLevel,
-          reason: item.reason,
-          lethalDose: item.lethalDose,
-          category: item.category,
-          sources: item.sources,
-          threatLevel: item.toxicityLevel >= 7 ? 'critical' : 
-                      item.toxicityLevel >= 5 ? 'high' : 
-                      item.toxicityLevel >= 3 ? 'moderate' : 'low'
-        }))
+        killRating: aiAnalysis.killRating || 50,
+        killRatingText: aiAnalysis.killRatingText || "Moderate Risk",
+        lethalDose: aiAnalysis.lethalDose || "Varies",
+        timeToDeath: aiAnalysis.timeToImpact || "Unknown",
+        mechanism: aiAnalysis.mechanism || "Multiple factors",
+        survival: Array.isArray(aiAnalysis.survivalTips) 
+          ? aiAnalysis.survivalTips.join(' ') 
+          : aiAnalysis.survivalTips || "Seek immediate medical attention",
+        finalWords: aiAnalysis.finalWords || '"This was not on my bingo card..."',
+        detectedItems: aiAnalysis.detectedItems?.map((item: any) => ({
+          label: item.name || item.label,
+          confidence: item.confidence || aiAnalysis.confidence || 0.85,
+          toxicityLevel: item.toxicityLevel || aiAnalysis.toxicityLevel || 5,
+          reason: item.mechanism || item.reason || 'AI-detected hazard',
+          lethalDose: item.lethalDose || aiAnalysis.lethalDose,
+          category: item.category || aiAnalysis.category || 'unknown',
+          sources: item.sources || [],
+          threatLevel: (item.toxicityLevel || 5) >= 7 ? 'critical' : 
+                      (item.toxicityLevel || 5) >= 5 ? 'high' : 
+                      (item.toxicityLevel || 5) >= 3 ? 'moderate' : 'low'
+        })) || [{
+          label: aiAnalysis.itemDetected || scenario,
+          confidence: aiAnalysis.confidence || 0.85,
+          toxicityLevel: aiAnalysis.toxicityLevel || 5,
+          reason: aiAnalysis.mechanism || 'AI analysis',
+          lethalDose: aiAnalysis.lethalDose,
+          category: aiAnalysis.category || 'unknown',
+          sources: [],
+          threatLevel: (aiAnalysis.toxicityLevel || 5) >= 7 ? 'critical' : 
+                      (aiAnalysis.toxicityLevel || 5) >= 5 ? 'high' : 
+                      (aiAnalysis.toxicityLevel || 5) >= 3 ? 'moderate' : 'low'
+        }]
       };
 
       // Save enhanced analysis to database
@@ -284,8 +298,8 @@ export const useDeathAnalysis = () => {
       onProgress?.(ANALYSIS_STAGES.COMPLETE.name, ANALYSIS_STAGES.COMPLETE.progress);
 
       toast({
-        title: "🎯 Analysis Complete!",
-        description: `Detected ${analysisResult.detectedItems.length} item(s) with AI confidence`,
+        title: "🎯 AI Analysis Complete!",
+        description: `Powered by Gemini 2.5 Pro - ${deathAnalysis.detectedItems.length} hazard(s) detected`,
       });
       
       return deathAnalysis;
