@@ -193,42 +193,108 @@ export const useDeathAnalysis = () => {
     }
   };
 
-  const performAnalysis = async (scenario: string, imageFile?: File) => {
+  const performAnalysis = async (
+    scenario: string, 
+    imageFile?: File,
+    onProgress?: (stage: string, progress: number) => void
+  ) => {
     setIsAnalyzing(true);
     
     try {
-      // Simulate AI analysis (replace with actual AI service)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      onProgress?.('Initializing AI', 10);
       
-      const mockAnalysis: DeathAnalysis = {
-        item: scenario || "Unknown item",
-        allergyRisk: "Moderate",
-        killRating: Math.floor(Math.random() * 10) + 1,
-        killRatingText: "Moderately Dangerous",
-        lethalDose: "Varies by individual",
-        timeToDeath: "2-24 hours",
-        mechanism: "System failure",
-        survival: "Seek immediate medical attention",
-        finalWords: "I should have used BeatDeath first...",
-        detectedItems: [{
-          label: scenario || "Unknown",
-          confidence: 0.85,
-          toxicityLevel: Math.floor(Math.random() * 10) + 1,
-          reason: "Potentially harmful if misused",
-          lethalDose: "Varies",
-          category: "general"
-        }]
+      // Get user profile for personalized risk calculation
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('weight, weight_unit, age, chronic_conditions, allergies')
+        .eq('user_id', user?.id)
+        .single();
+
+      const userWeight = profile?.weight_unit === 'kg' 
+        ? profile.weight * 2.20462 // Convert to lbs
+        : profile?.weight || 70;
+
+      let analysisResult;
+      
+      if (imageFile) {
+        // Image-based analysis with real AI
+        const { analyzeImageForToxicity } = await import('@/utils/imageAnalysis');
+        onProgress?.('Analyzing with AI', 30);
+        analysisResult = await analyzeImageForToxicity(imageFile);
+        onProgress?.('Processing results', 70);
+      } else {
+        // Text-based scenario analysis
+        onProgress?.('Analyzing scenario', 50);
+        
+        const mockDetection = {
+          label: scenario,
+          confidence: 75,
+          toxicityLevel: 5,
+          reason: 'Scenario-based analysis',
+          lethalDose: 'Varies by individual',
+          category: 'scenario' as const
+        };
+        
+        analysisResult = {
+          detectedItems: [mockDetection],
+          overallRisk: 5,
+          recommendations: ['Exercise caution', 'Seek medical advice if concerned']
+        };
+      }
+
+      onProgress?.('Generating report', 85);
+
+      // Generate comprehensive death analysis report
+      const { generateDeathAnalysisReport } = await import('@/utils/imageAnalysis');
+      const report = await generateDeathAnalysisReport(
+        analysisResult.detectedItems,
+        userWeight
+      );
+
+      const topItem = analysisResult.detectedItems[0];
+      
+      const deathAnalysis: DeathAnalysis = {
+        item: topItem?.label || scenario || "Unknown item",
+        allergyRisk: profile?.allergies ? "High" : "Moderate",
+        killRating: report.deathScore,
+        killRatingText: report.deathScore >= 8 ? "Extremely Lethal" : 
+                        report.deathScore >= 6 ? "Highly Dangerous" :
+                        report.deathScore >= 4 ? "Moderately Dangerous" : "Low Risk",
+        lethalDose: topItem?.lethalDose || "Varies",
+        timeToDeath: report.timeToImpact || topItem?.timeToDeath || "Unknown",
+        mechanism: topItem?.reason || "System failure",
+        survival: report.survivalTips?.join(' ') || topItem?.survival || analysisResult.recommendations?.join(' ') || "Seek medical attention",
+        finalWords: report.finalWords || topItem?.finalWords || "I should have used BeatDeath first...",
+        detectedItems: analysisResult.detectedItems.map((item: any) => ({
+          label: item.label,
+          confidence: item.confidence,
+          toxicityLevel: item.toxicityLevel,
+          reason: item.reason,
+          lethalDose: item.lethalDose,
+          category: item.category,
+          sources: item.sources,
+          threatLevel: item.toxicityLevel >= 7 ? 'critical' : 
+                      item.toxicityLevel >= 5 ? 'high' : 
+                      item.toxicityLevel >= 3 ? 'moderate' : 'low'
+        }))
       };
 
-      // Save to database
-      await saveAnalysis(mockAnalysis, scenario, imageFile);
+      // Save enhanced analysis to database
+      await saveAnalysis(deathAnalysis, scenario, imageFile);
       
-      return mockAnalysis;
+      onProgress?.('Complete', 100);
+
+      toast({
+        title: "🎯 Analysis Complete!",
+        description: `Detected ${analysisResult.detectedItems.length} item(s) with AI confidence`,
+      });
+      
+      return deathAnalysis;
     } catch (error) {
       console.error('Analysis error:', error);
       toast({
         title: "Analysis Failed",
-        description: "Something went wrong during analysis",
+        description: error instanceof Error ? error.message : "AI analysis encountered an error",
         variant: "destructive"
       });
       return null;

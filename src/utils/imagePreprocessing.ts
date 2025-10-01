@@ -31,20 +31,51 @@ export const preprocessImage = async (file: File): Promise<File> => {
       // Draw and enhance image
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Apply image enhancements for better AI recognition
+      // Advanced AI-optimized image enhancement
       const imageData = ctx.getImageData(0, 0, width, height);
       const data = imageData.data;
 
-      // Enhance contrast and brightness
-      const factor = 1.1; // Slight contrast boost
-      const brightness = 5; // Slight brightness boost
-
+      // Calculate adaptive enhancement parameters
+      let avgBrightness = 0;
       for (let i = 0; i < data.length; i += 4) {
-        // Apply contrast and brightness to RGB channels
-        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * factor + 128 + brightness)); // Red
-        data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * factor + 128 + brightness)); // Green
-        data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * factor + 128 + brightness)); // Blue
-        // Alpha channel remains unchanged
+        avgBrightness += (data[i] + data[i + 1] + data[i + 2]) / 3;
+      }
+      avgBrightness /= (data.length / 4);
+
+      // Adaptive contrast and brightness based on image analysis
+      const contrastFactor = avgBrightness < 100 ? 1.3 : avgBrightness > 180 ? 1.1 : 1.2;
+      const brightnessAdjust = avgBrightness < 100 ? 15 : avgBrightness > 180 ? -10 : 5;
+
+      // Apply advanced enhancements
+      for (let i = 0; i < data.length; i += 4) {
+        // Enhanced contrast and brightness with AI-optimized parameters
+        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * contrastFactor + 128 + brightnessAdjust)); // Red
+        data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * contrastFactor + 128 + brightnessAdjust)); // Green
+        data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * contrastFactor + 128 + brightnessAdjust)); // Blue
+        
+        // Sharpen edges for better object detection
+        if (i > width * 4 && i < data.length - width * 4) {
+          const sharpness = 0.15;
+          const centerWeight = 1 + 4 * sharpness;
+          const neighborWeight = -sharpness;
+          
+          // Sharpen each color channel
+          for (let c = 0; c < 3; c++) {
+            const center = data[i + c];
+            const top = data[i - width * 4 + c];
+            const bottom = data[i + width * 4 + c];
+            const left = data[i - 4 + c];
+            const right = data[i + 4 + c];
+            
+            data[i + c] = Math.min(255, Math.max(0,
+              center * centerWeight +
+              top * neighborWeight +
+              bottom * neighborWeight +
+              left * neighborWeight +
+              right * neighborWeight
+            ));
+          }
+        }
       }
 
       ctx.putImageData(imageData, 0, 0);
