@@ -438,10 +438,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      update_trending_scores: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      update_trending_scores: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
