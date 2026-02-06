@@ -40,22 +40,24 @@ import { CollaborativeDeathMap } from "@/components/viral/CollaborativeDeathMap"
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, profile } = useAuth();
 
   // Check authentication and onboarding
   useEffect(() => {
     if (loading) return;
-    
+
     if (!user) {
       navigate('/auth');
       return;
     }
 
-    const hasOnboarded = localStorage.getItem('beatdeath_onboarded');
-    if (!hasOnboarded) {
+    const hasLocalOnboarded = localStorage.getItem('beatdeath_onboarded') === 'true';
+    const hasProfileOnboarded = Boolean(profile?.onboarding_completed_at);
+
+    if (!hasLocalOnboarded && !hasProfileOnboarded) {
       navigate('/onboarding');
     }
-  }, [navigate, user, loading]);
+  }, [navigate, user, loading, profile?.onboarding_completed_at]);
 
   // Show loading while checking auth
   if (loading) {

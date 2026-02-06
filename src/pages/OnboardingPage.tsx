@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Skull, 
-  Heart, 
-  ArrowRight, 
+import {
+  Skull,
+  Heart,
+  ArrowRight,
   ArrowLeft,
   Mail,
   DollarSign,
@@ -25,7 +25,7 @@ import {
   TrendingUp,
   Star,
   Trophy,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
@@ -77,7 +77,7 @@ interface OnboardingData {
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading, profile } = useAuth();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
   const [data, setData] = useState<OnboardingData>({
     email: '',
@@ -101,10 +101,20 @@ export default function OnboardingPage() {
     alcoholFrequency: '',
     chronicConditions: [],
     medications: '0',
-    desiredProducts: []
+    desiredProducts: [],
   });
   const [calculatedResults, setCalculatedResults] = useState<any>(null);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+
+  // If the user already completed onboarding, never show this flow again.
+  useEffect(() => {
+    const hasLocalOnboarded = localStorage.getItem('beatdeath_onboarded') === 'true';
+    const hasProfileOnboarded = Boolean(profile?.onboarding_completed_at);
+
+    if (hasLocalOnboarded || hasProfileOnboarded) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, profile?.onboarding_completed_at]);
 
   const currentStepIndex = ONBOARDING_STEPS.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / ONBOARDING_STEPS.length) * 100;
@@ -160,9 +170,14 @@ export default function OnboardingPage() {
   };
 
   const handleComplete = async () => {
+    if (loading) {
+      toast({ title: "Loading your session…", description: "Try again in a second." });
+      return;
+    }
+
     if (!user) {
       toast({ title: "Please log in first", variant: "destructive" });
-      navigate('/auth');
+      navigate('/auth', { replace: true });
       return;
     }
 
@@ -193,9 +208,9 @@ export default function OnboardingPage() {
           chronic_conditions: data.chronicConditions,
           medication_count: parseInt(data.medications),
           desired_products: data.desiredProducts,
-          calculated_baseline_years: calculatedResults.baselineYears,
-          health_score: calculatedResults.healthScore,
-          onboarding_completed_at: new Date().toISOString()
+          calculated_baseline_years: calculatedResults?.baselineYears ?? null,
+          health_score: calculatedResults?.healthScore ?? null,
+          onboarding_completed_at: new Date().toISOString(),
         })
         .eq('user_id', user.id);
 
@@ -205,10 +220,12 @@ export default function OnboardingPage() {
 
       toast({
         title: "🎉 Profile Complete!",
-        description: `Your personalized life expectancy: ${calculatedResults.baselineYears} years. Health score: ${calculatedResults.healthScore}/100`,
+        description: calculatedResults
+          ? `Your personalized life expectancy: ${calculatedResults.baselineYears} years. Health score: ${calculatedResults.healthScore}/100`
+          : "Onboarding completed successfully.",
       });
 
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({ title: "Error saving profile", variant: "destructive" });
@@ -230,6 +247,17 @@ export default function OnboardingPage() {
   const updateData = (field: keyof OnboardingData, value: any) => {
     setData(prev => ({ ...prev, [field]: value }));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-secondary-bg flex items-center justify-center p-4">
+        <div className="text-center">
+          <Skull className="w-12 h-12 text-destructive animate-death-pulse mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your deadly profile…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-secondary-bg flex items-center justify-center p-4">
