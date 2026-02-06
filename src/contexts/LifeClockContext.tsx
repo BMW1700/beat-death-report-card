@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 // Types from master prompt
 export interface UserData {
@@ -7,7 +8,7 @@ export interface UserData {
   sex: 'male' | 'female' | 'other';
   height: number; // cm
   weight: number; // kg
-  baselineYears: number; // starts at 80
+  baselineYears: number; // personalized from onboarding, fallback 80
 }
 
 export interface ActionMapping {
@@ -130,9 +131,10 @@ function calculateScientificMinutes(mapping: ActionMapping): number {
   return mapping.playful_default_minutes;
 }
 
-// Calculate baseline life expectancy at 80 years in minutes
-function calculateBaselineMinutes(userData: UserData): number {
-  return userData.baselineYears * 365 * 24 * 60; // 80 years in minutes
+// Calculate remaining life in minutes: (baselineYears - currentAge) * minutes_per_year
+function calculateRemainingMinutes(baselineYears: number, currentAge: number): number {
+  const yearsRemaining = Math.max(0, baselineYears - currentAge);
+  return yearsRemaining * 365 * 24 * 60;
 }
 
 interface LifeClockContextType {
@@ -156,22 +158,34 @@ interface LifeClockContextType {
 const LifeClockContext = createContext<LifeClockContextType | undefined>(undefined);
 
 export function LifeClockProvider({ children }: { children: ReactNode }) {
+  const { profile } = useAuth();
+  
+  // Initialize state - try to load from localStorage first for persistence
   const [state, setState] = useState<LifeClockState>(() => {
-    // Force clear localStorage and use new mappings
-    localStorage.removeItem('beatdeath_lifeclock');
+    const saved = localStorage.getItem('beatdeath_lifeclock');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Restore recentActions with proper Date objects
+        if (parsed.recentActions) {
+          parsed.recentActions = parsed.recentActions.map((a: any) => ({
+            ...a,
+            timestamp: new Date(a.timestamp)
+          }));
+        }
+        return parsed;
+      } catch {
+        // Fall through to default
+      }
+    }
     
+    // Default state (will be updated when profile loads)
     return {
-      totalLifeMinutes: calculateBaselineMinutes({ 
-        age: 25, 
-        sex: 'other', 
-        height: 170, 
-        weight: 70, 
-        baselineYears: 80 
-      }),
+      totalLifeMinutes: calculateRemainingMinutes(80, 25),
       scientificMode: false,
       userData: {
         age: 25,
-        sex: 'other',
+        sex: 'other' as const,
         height: 170,
         weight: 70,
         baselineYears: 80
@@ -183,6 +197,47 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       analyticsBuffer: []
     };
   });
+
+  // Sync state with profile data when profile loads or changes
+  useEffect(() => {
+    if (!profile) return;
+    
+    const profileBaseline = profile.calculated_baseline_years ?? 80;
+    const profileAge = profile.age ?? 25;
+    const profileGender = (profile.gender as 'male' | 'female' | 'other') ?? 'other';
+    const profileWeight = profile.weight ?? 70;
+    
+    // Only update if profile data differs from current state
+    setState(prev => {
+      const baselineChanged = prev.userData.baselineYears !== profileBaseline;
+      const ageChanged = prev.userData.age !== profileAge;
+      
+      if (!baselineChanged && !ageChanged) {
+        return prev; // No changes needed
+      }
+      
+      // Recalculate total life minutes based on profile data
+      const newRemainingMinutes = calculateRemainingMinutes(profileBaseline, profileAge);
+      
+      // Preserve any time gained/lost from actions
+      const originalBaseline = calculateRemainingMinutes(prev.userData.baselineYears, prev.userData.age);
+      const actionAdjustment = prev.totalLifeMinutes - originalBaseline;
+      
+      console.log(`[LifeClock] Syncing with profile: baseline=${profileBaseline}, age=${profileAge}, remaining=${newRemainingMinutes / (365 * 24 * 60)} years`);
+      
+      return {
+        ...prev,
+        totalLifeMinutes: newRemainingMinutes + actionAdjustment,
+        userData: {
+          ...prev.userData,
+          age: profileAge,
+          sex: profileGender,
+          weight: profileWeight,
+          baselineYears: profileBaseline
+        }
+      };
+    });
+  }, [profile?.calculated_baseline_years, profile?.age, profile?.gender, profile?.weight]);
 
   // Persist to localStorage
   useEffect(() => {
