@@ -35,7 +35,6 @@ import { calculateLifeExpectancy, getDataMonetizationValue } from '@/utils/lifeE
 
 const ONBOARDING_STEPS = [
   'welcome',
-  'email',
   'consent',
   'demographics',
   'physical',
@@ -218,8 +217,7 @@ export default function OnboardingPage() {
 
   const canContinue = () => {
     switch (currentStep) {
-      case 'welcome': return hasAcceptedTerms;
-      case 'email': return data.email.includes('@');
+      case 'welcome': return hasAcceptedTerms && data.email.includes('@');
       case 'consent': return data.consentLevel !== 'none';
       case 'demographics': return data.age && data.sex;
       case 'physical': return data.height && data.weight;
@@ -247,7 +245,7 @@ export default function OnboardingPage() {
         <Card className="glass-card">
           <CardContent className="p-8">
             
-            {/* Welcome */}
+            {/* Welcome + Email (combined) */}
             {currentStep === 'welcome' && (
               <div className="text-center space-y-6">
                 <div className="flex items-center justify-center gap-3">
@@ -264,6 +262,23 @@ export default function OnboardingPage() {
                   <p className="text-sm font-medium">We'll calculate your PERSONALIZED baseline</p>
                   <p className="text-xs text-muted-foreground mt-1">No more generic 80 years - get YOUR number!</p>
                 </div>
+                
+                {/* Email field integrated into welcome */}
+                <div className="space-y-2 text-left max-w-md mx-auto">
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-primary" />
+                    Your Email *
+                  </Label>
+                  <Input 
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={data.email}
+                    onChange={(e) => updateData('email', e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">Required to save your results</p>
+                </div>
+                
                 <div className="flex items-start space-x-2 text-sm">
                   <Checkbox 
                     id="terms" 
@@ -277,30 +292,6 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {/* Email Collection */}
-            {currentStep === 'email' && (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <Mail className="w-12 h-12 text-primary mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold">Your Email</h2>
-                  <p className="text-muted-foreground">Required to save your results and access premium features</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input 
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={data.email}
-                    onChange={(e) => updateData('email', e.target.value)}
-                  />
-                </div>
-                <div className="bg-muted/20 p-3 rounded text-sm">
-                  <p className="font-medium mb-1">🔒 Your privacy matters</p>
-                  <p className="text-xs text-muted-foreground">We use your email only for account purposes. You control your data sharing preferences next.</p>
-                </div>
-              </div>
-            )}
 
             {/* Data Consent Tiers */}
             {currentStep === 'consent' && (
