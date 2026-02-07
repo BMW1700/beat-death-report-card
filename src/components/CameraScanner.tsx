@@ -1,7 +1,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Camera, X, Scan, Zap, Brain, AlertTriangle } from "lucide-react";
+import { Camera, X, Scan, Zap, Brain, AlertTriangle, SwitchCamera } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { initializeImageAnalysis } from "@/utils/imageAnalysis";
 import { barcodeScanner } from '@/utils/barcodeScanner';
@@ -23,6 +23,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   const [isInitializingAi, setIsInitializingAi] = useState(false);
   const [barcodeMode, setBarcodeMode] = useState(false);
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   useEffect(() => {
     startCamera();
@@ -48,12 +49,17 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     }
   };
 
-  const startCamera = async () => {
+  const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
+    // Stop existing stream first
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    
     try {
       setIsLoading(true);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          facingMode: 'environment', // Use back camera on mobile
+          facingMode: facing,
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -74,6 +80,12 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
       setError('Camera access denied. Please allow camera permissions.');
       setIsLoading(false);
     }
+  };
+
+  const flipCamera = () => {
+    const newFacing = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(newFacing);
+    startCamera(newFacing);
   };
 
   const captureImage = (isScanning = false) => {
@@ -176,6 +188,14 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           className="absolute top-4 right-4 z-10 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
         >
           <X className="w-5 h-5" />
+        </button>
+
+        {/* Flip camera button */}
+        <button
+          onClick={flipCamera}
+          className="absolute top-4 right-16 z-10 bg-card/80 hover:bg-card backdrop-blur-sm text-primary-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-primary/30"
+        >
+          <SwitchCamera className="w-5 h-5" />
         </button>
 
         {/* Camera feed */}
