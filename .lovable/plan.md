@@ -1,28 +1,39 @@
 
 
-# Fix: Make Camera Flip Button Always Visible and Prominent
+# Fix: Camera Disappears When Toggling Fullscreen
 
-## The Problem
+## Root Cause
 
-Two issues are hiding the flip camera button:
+The component has **two completely separate return blocks** -- one for fullscreen (line 365) and one for inline (line 383). Both render `{cameraFeed}` which contains the `<video ref={videoRef}>` element.
 
-1. **Detection fails**: The `checkMultipleCameras()` function runs on component mount, but many mobile browsers don't report multiple cameras via `enumerateDevices()` until AFTER the user grants camera permission. Since the check runs simultaneously with (or before) the permission prompt, it finds 0-1 cameras and `hasMultipleCameras` stays `false` -- the button never renders.
-
-2. **Poor placement**: Even when it does render, the button is a small circle overlaid on the video feed at `top-4 right-16`, easily missed or covered by the scanning overlay.
+When you click "Full Screen", React sees two entirely different DOM trees and **destroys the old video element and creates a new one**. The new video element has no stream attached to it (`srcObject` is lost), so the camera feed vanishes. This is a React unmount/remount problem.
 
 ## The Fix
 
-### 1. Always show the flip button -- remove the conditional
+**Merge into a single return** that conditionally applies fullscreen styling. The `<video>` element stays mounted the entire time -- only the wrapper's CSS classes change.
 
-Remove the `hasMultipleCameras` gate entirely. The button should always be visible. If the device only has one camera, tapping flip simply does nothing (the fallback in `startCamera` handles this gracefully). This is the standard pattern used by camera apps everywhere.
+### How it works
 
-### 2. Move the button to the bottom controls area
+Instead of:
+```text
+if (isFullscreen) {
+  return <div fixed>...<video/>...</div>    // video element A
+}
+return <Card>...<video/>...</Card>           // video element B (different!)
+```
 
-Instead of a tiny overlay circle on the video, add a proper "Flip Camera" button in the bottom control bar alongside "AI Death Scan", "Take Photo", and "Scan Barcode". This makes it impossible to miss.
+It becomes:
+```text
+return (
+  <div className={isFullscreen ? "fixed inset-0 z-50..." : ""}>
+    <Card className={isFullscreen ? "h-full rounded-none..." : "glass-card..."}>
+      ...<video/>...                          // SAME video element always
+    </Card>
+  </div>
+)
+```
 
-### 3. Re-check cameras after permission is granted
-
-As a bonus, re-run `checkMultipleCameras()` after the camera stream is successfully obtained (inside `startCamera`), since device info becomes accurate post-permission. This can be used to show/hide a label or indicator.
+The video element never gets destroyed, so the camera stream stays connected.
 
 ## Technical Details
 
@@ -30,8 +41,11 @@ As a bonus, re-run `checkMultipleCameras()` after the camera stream is successfu
 
 | Change | Details |
 |--------|---------|
-| Remove conditional render | Delete the `hasMultipleCameras &&` wrapper around the flip button (line 229) |
-| Move button to controls | Add a "Flip" button in the bottom control bar (inside the `div` at line 305) alongside the other action buttons |
-| Re-check after permission | Call `checkMultipleCameras()` inside `startCamera` after successfully obtaining the stream |
-| Add active camera label | Show "Front" or "Rear" text on the button so users know which camera is active |
+| Remove dual returns | Delete the `if (isFullscreen)` early return block (lines 365-381) |
+| Single wrapper div | Wrap the existing Card return in a `div` that toggles between `fixed inset-0 z-50 bg-background flex flex-col` (fullscreen) and empty string (inline) |
+| Conditional Card styling | Toggle Card classes: fullscreen uses `h-full rounded-none border-none shadow-none flex flex-col`, inline keeps existing `glass-card purple-glow overflow-hidden` |
+| Conditional CardContent styling | Fullscreen adds `flex-1 flex flex-col` so the video container can stretch |
+| Conditional video container | Fullscreen: `relative flex-1 min-h-0 overflow-hidden` (fills space). Inline: `relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden` (fixed aspect ratio) |
+| Canvas stays once | Single `<canvas>` at the end, never duplicated |
 
+This is a CSS-only toggle -- no DOM destruction, no stream loss, no glitch.
