@@ -1,7 +1,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Camera, X, Scan, Zap, Brain, AlertTriangle, SwitchCamera } from "lucide-react";
+import { Camera, X, Scan, Zap, Brain, AlertTriangle, SwitchCamera, Maximize, Minimize } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { initializeImageAnalysis } from "@/utils/imageAnalysis";
 import { barcodeScanner } from '@/utils/barcodeScanner';
@@ -25,6 +25,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     startCamera('environment');
@@ -219,20 +220,26 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   }
 
   return (
-    <Card className="glass-card purple-glow overflow-hidden">
-      <CardContent className="p-0 relative">
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 z-10 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Flip camera button removed from overlay - now in bottom controls */}
+    <Card className={`glass-card purple-glow overflow-hidden transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-50 rounded-none border-none' : ''}`}>
+      <CardContent className={`p-0 relative ${isFullscreen ? 'h-full flex flex-col' : ''}`}>
+        {/* Top controls */}
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="bg-card/80 hover:bg-card backdrop-blur-sm text-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-border"
+          >
+            {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+          </button>
+          <button
+            onClick={handleClose}
+            className="bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Camera feed */}
-        <div className="relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden">
+        <div className={`relative bg-card/50 border border-border overflow-hidden ${isFullscreen ? 'flex-1' : 'aspect-video rounded-lg'}`}>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center gradient-dark-bg">
               <div className="text-center text-primary-foreground">
