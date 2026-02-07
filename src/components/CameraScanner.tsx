@@ -89,6 +89,8 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         }
       }
       setIsLoading(false);
+      // Re-check cameras after permission granted (device labels become available)
+      checkMultipleCameras();
     } catch (err) {
       // If exact constraint fails (e.g., desktop with one camera), fall back to non-exact
       console.warn(`Exact facingMode '${facing}' failed, falling back...`, err);
@@ -101,7 +103,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           }
         });
         
-        streamRef.current = mediaStream;
+      streamRef.current = mediaStream;
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
           try {
@@ -111,6 +113,8 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           }
         }
         setIsLoading(false);
+        // Re-check cameras after permission granted
+        checkMultipleCameras();
       } catch (fallbackErr) {
         console.error('Error accessing camera:', fallbackErr);
         setError('Camera access denied. Please allow camera permissions.');
@@ -225,15 +229,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           <X className="w-5 h-5" />
         </button>
 
-        {/* Flip camera button - only show when multiple cameras available */}
-        {hasMultipleCameras && (
-          <button
-            onClick={flipCamera}
-            className="absolute top-4 right-16 z-10 bg-card/80 hover:bg-card backdrop-blur-sm text-primary-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-primary/30"
-          >
-            <SwitchCamera className="w-5 h-5" />
-          </button>
-        )}
+        {/* Flip camera button removed from overlay - now in bottom controls */}
 
         {/* Camera feed */}
         <div className="relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden">
@@ -302,7 +298,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
 
         {/* Control buttons */}
         <div className="p-4 gradient-dark-bg">
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-3">
             <Button
               onClick={() => captureImage(true)}
               disabled={isLoading}
@@ -329,6 +325,15 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
             >
               <Camera className="w-5 h-5 mr-2" />
               Take Photo
+            </Button>
+
+            <Button
+              onClick={flipCamera}
+              variant="outline"
+              className="border-accent text-accent hover:bg-accent hover:text-accent-foreground px-4 py-3 rounded-xl transition-all duration-200"
+            >
+              <SwitchCamera className="w-5 h-5 mr-2" />
+              {facingMode === 'environment' ? 'Front' : 'Rear'}
             </Button>
 
             {!barcodeMode ? (
