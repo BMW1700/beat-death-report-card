@@ -23,12 +23,13 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   const [isInitializingAi, setIsInitializingAi] = useState(false);
   const [barcodeMode, setBarcodeMode] = useState(false);
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [activeDeviceIndex, setActiveDeviceIndex] = useState(0);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
   useEffect(() => {
-    initCameraDevices();
+    startCamera('environment');
     initializeAI();
+    checkMultipleCameras();
     return () => {
       stopStream();
     };
@@ -38,6 +39,16 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+    }
+  };
+
+  const checkMultipleCameras = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cameras = devices.filter(d => d.kind === 'videoinput');
+      setHasMultipleCameras(cameras.length > 1);
+    } catch {
+      // ignore
     }
   };
   
@@ -55,41 +66,14 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     }
   };
 
-  const initCameraDevices = async () => {
-    try {
-      // First request camera access so enumerateDevices returns labels/ids
-      await startCameraWithConstraints({ facingMode: 'environment' });
-
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const cameras = devices.filter(d => d.kind === 'videoinput');
-      console.log('Available cameras:', cameras.map(c => ({ label: c.label, id: c.deviceId })));
-      setVideoDevices(cameras);
-
-      // Try to find the environment/rear camera as default
-      const envIndex = cameras.findIndex(c =>
-        c.label.toLowerCase().includes('back') ||
-        c.label.toLowerCase().includes('rear') ||
-        c.label.toLowerCase().includes('environment')
-      );
-      if (envIndex >= 0) {
-        setActiveDeviceIndex(envIndex);
-        await startCameraWithConstraints({ deviceId: { exact: cameras[envIndex].deviceId } });
-      }
-    } catch (err) {
-      console.error('Failed to init camera devices:', err);
-      setError('Camera access denied. Please allow camera permissions.');
-      setIsLoading(false);
-    }
-  };
-
-  const startCameraWithConstraints = async (videoConstraints: MediaTrackConstraints) => {
+  const startCamera = async (facing: 'environment' | 'user') => {
     stopStream();
     
     try {
       setIsLoading(true);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          ...videoConstraints,
+        video: { 
+          facingMode: { exact: facing },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -101,27 +85,44 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         try {
           await videoRef.current.play();
         } catch (e) {
-          // Autoplay policies may block play; video has autoPlay attribute as fallback
+          // Autoplay policies may block play
         }
       }
       setIsLoading(false);
     } catch (err) {
-      console.error('Error accessing camera:', err);
-      setError('Camera access denied. Please allow camera permissions.');
-      setIsLoading(false);
+      // If exact constraint fails (e.g., desktop with one camera), fall back to non-exact
+      console.warn(`Exact facingMode '${facing}' failed, falling back...`, err);
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { 
+            facingMode: facing,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+        
+        streamRef.current = mediaStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          try {
+            await videoRef.current.play();
+          } catch (e) {
+            // Autoplay fallback
+          }
+        }
+        setIsLoading(false);
+      } catch (fallbackErr) {
+        console.error('Error accessing camera:', fallbackErr);
+        setError('Camera access denied. Please allow camera permissions.');
+        setIsLoading(false);
+      }
     }
   };
 
   const flipCamera = async () => {
-    if (videoDevices.length < 2) {
-      console.warn('Only one camera available, cannot flip');
-      return;
-    }
-    const nextIndex = (activeDeviceIndex + 1) % videoDevices.length;
-    setActiveDeviceIndex(nextIndex);
-    const nextDevice = videoDevices[nextIndex];
-    console.log('Switching to camera:', nextDevice.label, nextDevice.deviceId);
-    await startCameraWithConstraints({ deviceId: { exact: nextDevice.deviceId } });
+    const newFacing = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(newFacing);
+    await startCamera(newFacing);
   };
 
   const captureImage = (isScanning = false) => {
@@ -225,7 +226,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         </button>
 
         {/* Flip camera button - only show when multiple cameras available */}
-        {videoDevices.length > 1 && (
+        {hasMultipleCameras && (
           <button
             onClick={flipCamera}
             className="absolute top-4 right-16 z-10 bg-card/80 hover:bg-card backdrop-blur-sm text-primary-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-primary/30"
