@@ -204,12 +204,14 @@ const DeathScannerPage = () => {
             </h1>
             <Calculator className="w-12 h-12 text-primary drop-shadow-lg" />
           </div>
-          <div className="flex justify-center mt-3">
+          <div className="flex flex-col items-center mt-4 gap-1">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Scans Remaining</span>
             <ScanCreditsBadge
               freeScansLeft={scanCredits.freeScansLeft}
               creditsRemaining={scanCredits.creditsRemaining}
               isSubscriber={scanCredits.isSubscriber}
               onClick={() => setShowPaywall(true)}
+              size="lg"
             />
           </div>
           <p className="text-xl font-playfair text-muted-foreground max-w-2xl mx-auto text-balance">

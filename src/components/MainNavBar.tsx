@@ -88,6 +88,15 @@ export function MainNavBar() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
+            {/* Scan Credits Badge - Always Visible */}
+            <ScanCreditsBadge
+              freeScansLeft={scanCredits.freeScansLeft}
+              creditsRemaining={scanCredits.creditsRemaining}
+              isSubscriber={scanCredits.isSubscriber}
+              onClick={() => setShowPaywall(true)}
+              size="md"
+            />
+
             {/* User Info */}
             <div className="hidden sm:flex items-center gap-2 bg-card/20 px-3 py-1 rounded-lg border border-primary/20">
               <User className="w-4 h-4 text-primary" />
@@ -103,12 +112,6 @@ export function MainNavBar() {
                     </span>
                   </div>
                 )}
-                <ScanCreditsBadge
-                  freeScansLeft={scanCredits.freeScansLeft}
-                  creditsRemaining={scanCredits.creditsRemaining}
-                  isSubscriber={scanCredits.isSubscriber}
-                  onClick={() => setShowPaywall(true)}
-                />
               </div>
             </div>
 
@@ -145,8 +148,19 @@ export function MainNavBar() {
       {/* Mobile Menu Overlay */}
       {showMobileMenu && user && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-card/95 backdrop-blur-xl border-b border-primary/30 p-4 space-y-3">
+          {/* Scan Credits - Prominent at top of mobile menu */}
+          <div className="flex justify-center p-3 bg-primary/10 rounded-lg border border-primary/20">
+            <ScanCreditsBadge
+              freeScansLeft={scanCredits.freeScansLeft}
+              creditsRemaining={scanCredits.creditsRemaining}
+              isSubscriber={scanCredits.isSubscriber}
+              onClick={() => { setShowPaywall(true); setShowMobileMenu(false); }}
+              size="lg"
+            />
+          </div>
+
           {/* User Info Mobile */}
-          <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+          <div className="flex items-center gap-3 p-3 bg-card/20 rounded-lg border border-primary/10">
             <User className="w-8 h-8 text-primary" />
             <div className="flex-1">
               <div className="font-medium text-card-foreground">
@@ -165,14 +179,6 @@ export function MainNavBar() {
                   )}
                 </div>
               )}
-              <div className="mt-2">
-                <ScanCreditsBadge
-                  freeScansLeft={scanCredits.freeScansLeft}
-                  creditsRemaining={scanCredits.creditsRemaining}
-                  isSubscriber={scanCredits.isSubscriber}
-                  onClick={() => { setShowPaywall(true); setShowMobileMenu(false); }}
-                />
-              </div>
             </div>
           </div>
 
