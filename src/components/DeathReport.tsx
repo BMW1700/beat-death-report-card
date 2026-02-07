@@ -168,10 +168,17 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
   return (
     <Card className="glass-card danger-glow">
       <CardHeader>
-        <CardTitle className="text-card-foreground flex items-center gap-2">
-          <FileText className="w-5 h-5 text-success" />
-          Death Scanner Report
-        </CardTitle>
+        <div className="flex flex-col gap-1">
+          <CardTitle className="text-card-foreground flex items-center gap-2">
+            <FileText className="w-5 h-5 text-success" />
+            Death Scanner Report
+          </CardTitle>
+          {analysis.item && (
+            <p className="text-sm text-muted-foreground pl-7">
+              Scanned: <span className="text-primary font-medium">{analysis.item}</span>
+            </p>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Kill Rating Badge */}
