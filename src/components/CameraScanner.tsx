@@ -363,7 +363,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   );
 
   return (
-    <div className={isFullscreen ? "fixed inset-0 z-50 bg-background flex flex-col" : ""}>
+    <div className={isFullscreen ? "fixed inset-0 z-[100] bg-background flex flex-col" : ""}>
       <Card className={isFullscreen
         ? "h-full rounded-none border-none shadow-none flex flex-col bg-background"
         : "glass-card purple-glow overflow-hidden"
