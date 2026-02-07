@@ -23,17 +23,23 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   const [isInitializingAi, setIsInitializingAi] = useState(false);
   const [barcodeMode, setBarcodeMode] = useState(false);
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [activeDeviceIndex, setActiveDeviceIndex] = useState(0);
 
   useEffect(() => {
-    startCamera();
+    initCameraDevices();
     initializeAI();
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
+      stopStream();
     };
   }, []);
+
+  const stopStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
   
   const initializeAI = async () => {
     if (!aiReady && !isInitializingAi) {
@@ -49,17 +55,41 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     }
   };
 
-  const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
-    // Stop existing stream first
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+  const initCameraDevices = async () => {
+    try {
+      // First request camera access so enumerateDevices returns labels/ids
+      await startCameraWithConstraints({ facingMode: 'environment' });
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cameras = devices.filter(d => d.kind === 'videoinput');
+      console.log('Available cameras:', cameras.map(c => ({ label: c.label, id: c.deviceId })));
+      setVideoDevices(cameras);
+
+      // Try to find the environment/rear camera as default
+      const envIndex = cameras.findIndex(c =>
+        c.label.toLowerCase().includes('back') ||
+        c.label.toLowerCase().includes('rear') ||
+        c.label.toLowerCase().includes('environment')
+      );
+      if (envIndex >= 0) {
+        setActiveDeviceIndex(envIndex);
+        await startCameraWithConstraints({ deviceId: { exact: cameras[envIndex].deviceId } });
+      }
+    } catch (err) {
+      console.error('Failed to init camera devices:', err);
+      setError('Camera access denied. Please allow camera permissions.');
+      setIsLoading(false);
     }
+  };
+
+  const startCameraWithConstraints = async (videoConstraints: MediaTrackConstraints) => {
+    stopStream();
     
     try {
       setIsLoading(true);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: facing,
+        video: {
+          ...videoConstraints,
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -82,10 +112,16 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     }
   };
 
-  const flipCamera = () => {
-    const newFacing = facingMode === 'environment' ? 'user' : 'environment';
-    setFacingMode(newFacing);
-    startCamera(newFacing);
+  const flipCamera = async () => {
+    if (videoDevices.length < 2) {
+      console.warn('Only one camera available, cannot flip');
+      return;
+    }
+    const nextIndex = (activeDeviceIndex + 1) % videoDevices.length;
+    setActiveDeviceIndex(nextIndex);
+    const nextDevice = videoDevices[nextIndex];
+    console.log('Switching to camera:', nextDevice.label, nextDevice.deviceId);
+    await startCameraWithConstraints({ deviceId: { exact: nextDevice.deviceId } });
   };
 
   const captureImage = (isScanning = false) => {
@@ -121,9 +157,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   };
 
   const handleClose = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
+    stopStream();
     if (barcodeMode) {
       barcodeScanner.stopScanning();
     }
@@ -190,13 +224,15 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
           <X className="w-5 h-5" />
         </button>
 
-        {/* Flip camera button */}
-        <button
-          onClick={flipCamera}
-          className="absolute top-4 right-16 z-10 bg-card/80 hover:bg-card backdrop-blur-sm text-primary-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-primary/30"
-        >
-          <SwitchCamera className="w-5 h-5" />
-        </button>
+        {/* Flip camera button - only show when multiple cameras available */}
+        {videoDevices.length > 1 && (
+          <button
+            onClick={flipCamera}
+            className="absolute top-4 right-16 z-10 bg-card/80 hover:bg-card backdrop-blur-sm text-primary-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-primary/30"
+          >
+            <SwitchCamera className="w-5 h-5" />
+          </button>
+        )}
 
         {/* Camera feed */}
         <div className="relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden">
