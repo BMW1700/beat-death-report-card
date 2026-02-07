@@ -1,151 +1,38 @@
 
 
-# Scan Pack Monetization - UI & Frontend Implementation
+# Fix Scan Credits Badge Visibility
 
-Build all the UI components, hooks, and database infrastructure for the scan credit system. Stripe checkout will be wired up later -- for now, buttons will show placeholder behavior with toast messages.
+## The Problem
 
-## What Gets Built
+The ScanCreditsBadge exists in the code but is practically invisible:
 
-### 1. Database Migration: `scan_credits` table + profile columns
+1. **Navbar**: The badge is crammed inside a tiny nested `<div>` underneath the username text, inside a `hidden sm:flex` container. It blends in and is way too small to notice.
+2. **Scanner Page**: The badge sits between the page title and description paragraph -- easy to scroll past without seeing it.
 
-Add a new `scan_credits` table to track purchased scan packs, and add columns to `profiles` for tracking free scan usage and subscription tier.
+## The Fix
 
-```sql
-CREATE TABLE public.scan_credits (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  credits_remaining INTEGER NOT NULL DEFAULT 0,
-  credits_purchased INTEGER NOT NULL DEFAULT 0,
-  source TEXT NOT NULL DEFAULT 'free',
-  stripe_payment_id TEXT,
-  purchased_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
+### 1. MainNavBar -- Make the badge its own standalone element
 
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS subscription_active BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS free_scans_used INTEGER DEFAULT 0;
-```
+Move the `ScanCreditsBadge` OUT of the nested user info div and place it as its own top-level element in the navbar's right-side controls, right next to the user info pill. This makes it immediately visible as a separate, clickable element.
 
-RLS policies:
-- Users can view their own credits
-- Users can update their own credits (for decrementing)
-- System/service role can manage all
+**Desktop**: Badge appears as its own pill between the nav links and user info, always visible.
+**Mobile menu**: Badge appears prominently at the top of the mobile menu overlay, not buried inside the user card.
 
-### 2. New Hook: `useScanCredits.ts`
+### 2. Scanner Page -- Make the badge bigger and more prominent
 
-Central hook managing all scan credit logic:
+On the Death Scanner page, increase the badge size and add surrounding context so users know exactly what it means. Add a label like "Scans remaining" next to it or increase the badge styling to make it stand out against the page header.
 
-- **State**: `creditsRemaining`, `freeScansLeft` (out of 3), `isSubscriber`, `subscriptionTier`
-- **Computed**: `canScan` (true if any credits available OR subscriber OR free scans left)
-- **Methods**:
-  - `deductScan()` -- decrements appropriate counter after a successful scan
-  - `purchaseScanPack()` -- placeholder that shows toast "Stripe coming soon", will later trigger Stripe checkout
-  - `purchaseSubscription(tier)` -- same placeholder pattern
-  - `refreshCredits()` -- re-fetches from Supabase
-- Loads data from `profiles` (free_scans_used, subscription_tier, subscription_active) and `scan_credits` table on mount
+### 3. Show free scan count clearly
 
-### 3. New Component: `ScanPaywall.tsx`
-
-A modal/overlay that appears when the user runs out of scans. Dark-themed, on-brand with BeatDeath's aesthetic:
-
-- Animated skull icon at top
-- "You've used all your free scans!" message
-- Scan count display showing "0 scans remaining"
-- Two purchase options:
-  - **"40 Scans - $1.99"** card with "Best Value" badge (one-time purchase button)
-  - **"Unlimited Scans - $9.99/mo"** card with "Most Popular" badge (subscription button)
-- Both buttons show "Coming Soon - Stripe Setup Required" toast for now
-- "Watch an ad for 1 free scan" teaser (greyed out, future feature)
-- Close button to dismiss
-
-### 4. New Component: `ScanCreditsBadge.tsx`
-
-A small badge/pill component showing remaining scans, used in the navbar and scanner page:
-
-- Shows skull icon + "X scans" or "Unlimited" for subscribers
-- Color-coded: green (5+), yellow (2-4), red (0-1), purple gradient (unlimited)
-- Clicking it opens the `ScanPaywall` modal
-- Compact enough to fit in the navbar next to XP display
-
-### 5. Update: `DeathAnalyzer.tsx`
-
-Before running analysis, check if the user can scan:
-- Import and use `useScanCredits` hook
-- Before `handleAnalyze()`, check `canScan`
-- If `canScan` is false, show the `ScanPaywall` modal instead of running analysis
-- After successful analysis, call `deductScan()`
-- Show `ScanCreditsBadge` in the card header next to "Death Scanner & Analysis"
-
-### 6. Update: `DeathScannerPage.tsx`
-
-- Integrate `useScanCredits` hook
-- Pass `canScan` and scan deduction logic down to `DeathAnalyzer`
-- Show `ScanCreditsBadge` prominently near the page header
-- After analysis completes, trigger credit deduction
-
-### 7. Update: `PremiumUpsell.tsx`
-
-Replace the current simulated subscription flow:
-- Remove the fake Supabase URL/key constants
-- Add the "$1.99 Scan Pack" as a new card at the top (positioned as the impulse buy)
-- Keep the 3 subscription tiers but mark buttons as "Coming Soon" until Stripe is set up
-- Show current scan balance at the top
-- Use `useScanCredits` hook for purchase actions
-
-### 8. Update: `InAppPurchases.tsx`
-
-Replace the "COMING SOON" placeholder:
-- Show the scan pack purchase option ($1.99 for 40 scans)
-- Show current balance
-- Quick-buy button that triggers `purchaseScanPack()`
-
-### 9. Update: `MainNavBar.tsx`
-
-- Add `ScanCreditsBadge` next to the XP display in both desktop and mobile views
-- Shows at-a-glance how many scans remain
-
-### 10. Update: `analyze-death-risk` Edge Function
-
-Add scan credit verification before running AI:
-- Accept an optional `isPremium` flag in the request body
-- Switch between `google/gemini-2.5-pro` (for subscribers) and `google/gemini-2.5-flash` (for free/pack users)
-- This model-switching logic is the only backend change -- actual credit deduction happens client-side for now, will move to server-side when Stripe is integrated
+Update the `ScanCreditsBadge` to differentiate between free scans and purchased credits when displaying the count (e.g., "3 free scans" vs "40 scans"), so new users clearly understand they get 3 free scans.
 
 ## Technical Details
 
-### File Changes Summary
+### Files to modify:
 
-| File | Action | Description |
-|------|--------|-------------|
-| `supabase/migrations/` | New | scan_credits table + profile columns |
-| `src/hooks/useScanCredits.ts` | New | Scan credit management hook |
-| `src/components/ScanPaywall.tsx` | New | Out-of-scans upsell modal |
-| `src/components/ScanCreditsBadge.tsx` | New | Compact scan count display |
-| `src/components/DeathAnalyzer.tsx` | Update | Add scan check before analysis |
-| `src/pages/DeathScannerPage.tsx` | Update | Integrate scan credits |
-| `src/components/PremiumUpsell.tsx` | Update | Real pricing + scan packs |
-| `src/components/InAppPurchases.tsx` | Update | Scan pack quick-buy |
-| `src/components/MainNavBar.tsx` | Update | Show scan badge |
-| `supabase/functions/analyze-death-risk/index.ts` | Update | Model switching (Pro vs Flash) |
-
-### What's Deferred (Until Stripe Setup)
-
-- Actual Stripe checkout sessions for scan pack purchases
-- Stripe webhook for verifying payments and crediting scans
-- Subscription billing via Stripe
-- The `purchase-scan-pack` and `verify-scan-purchase` edge functions
-- Server-side credit enforcement (currently trust-based client-side)
-
-### Architecture: Scan Check Flow
-
-```text
-User clicks "Scan" 
-  --> useScanCredits.canScan? 
-    --> YES: Run analysis, then deductScan()
-    --> NO: Show ScanPaywall modal
-              --> "40 Scans $1.99" (toast: Stripe coming soon)
-              --> "Unlimited $9.99/mo" (toast: Stripe coming soon)
-```
+| File | Change |
+|------|--------|
+| `src/components/MainNavBar.tsx` | Move ScanCreditsBadge out of nested user div, make it a standalone element in the navbar controls area |
+| `src/components/ScanCreditsBadge.tsx` | Add "free" label when showing free scans, slightly increase default size |
+| `src/pages/DeathScannerPage.tsx` | Add more prominent badge display with label text below the page title |
 
