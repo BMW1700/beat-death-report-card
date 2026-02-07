@@ -220,26 +220,27 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   }
 
   return (
-    <Card className={`glass-card purple-glow overflow-hidden transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-50 rounded-none border-none' : ''}`}>
-      <CardContent className={`p-0 relative ${isFullscreen ? 'h-full flex flex-col' : ''}`}>
-        {/* Top controls */}
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="bg-card/80 hover:bg-card backdrop-blur-sm text-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-border"
-          >
-            {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-          </button>
-          <button
-            onClick={handleClose}
-            className="bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <div className={isFullscreen ? 'fixed inset-0 z-50 bg-background flex flex-col' : ''}>
+      <Card className={`glass-card purple-glow overflow-hidden ${isFullscreen ? 'rounded-none border-none h-full flex flex-col' : ''}`}>
+        <CardContent className={`p-0 relative ${isFullscreen ? 'flex-1 flex flex-col min-h-0' : ''}`}>
+          {/* Top controls */}
+          <div className="absolute top-4 right-4 z-10 flex gap-2">
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="bg-card/80 hover:bg-card backdrop-blur-sm text-foreground rounded-full p-2 transition-all duration-200 hover:scale-105 border border-border"
+            >
+              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={handleClose}
+              className="bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-        {/* Camera feed */}
-        <div className={`relative bg-card/50 border border-border overflow-hidden ${isFullscreen ? 'flex-1' : 'aspect-video rounded-lg'}`}>
+          {/* Camera feed */}
+          <div className={`relative bg-card/50 border border-border overflow-hidden ${isFullscreen ? 'flex-1 min-h-0' : 'aspect-video rounded-lg'}`}>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center gradient-dark-bg">
               <div className="text-center text-primary-foreground">
@@ -388,5 +389,6 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         <canvas ref={canvasRef} className="hidden" />
       </CardContent>
     </Card>
+    </div>
   );
 };
