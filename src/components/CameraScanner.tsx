@@ -16,7 +16,7 @@ interface CameraScannerProps {
 export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiReady, setAiReady] = useState(false);
@@ -29,8 +29,8 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     startCamera();
     initializeAI();
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
@@ -51,8 +51,8 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
 
   const startCamera = async (facing: 'environment' | 'user' = facingMode) => {
     // Stop existing stream first
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
     }
     
     try {
@@ -65,7 +65,7 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
         }
       });
       
-      setStream(mediaStream);
+      streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         try {
@@ -121,8 +121,8 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
   };
 
   const handleClose = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
     }
     if (barcodeMode) {
       barcodeScanner.stopScanning();
