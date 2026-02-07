@@ -259,6 +259,7 @@ export type Database = {
           exercise_history_years: number | null
           exercise_intensity: string | null
           family_health_history: Json | null
+          free_scans_used: number | null
           gender: string | null
           happiness_score: number | null
           health_score: number | null
@@ -276,6 +277,8 @@ export type Database = {
           smoking_status: string | null
           social_connections_score: number | null
           stress_level: number | null
+          subscription_active: boolean | null
+          subscription_tier: string | null
           substance_use: string | null
           supplements: Json | null
           survival_streak: number | null
@@ -307,6 +310,7 @@ export type Database = {
           exercise_history_years?: number | null
           exercise_intensity?: string | null
           family_health_history?: Json | null
+          free_scans_used?: number | null
           gender?: string | null
           happiness_score?: number | null
           health_score?: number | null
@@ -324,6 +328,8 @@ export type Database = {
           smoking_status?: string | null
           social_connections_score?: number | null
           stress_level?: number | null
+          subscription_active?: boolean | null
+          subscription_tier?: string | null
           substance_use?: string | null
           supplements?: Json | null
           survival_streak?: number | null
@@ -355,6 +361,7 @@ export type Database = {
           exercise_history_years?: number | null
           exercise_intensity?: string | null
           family_health_history?: Json | null
+          free_scans_used?: number | null
           gender?: string | null
           happiness_score?: number | null
           health_score?: number | null
@@ -372,6 +379,8 @@ export type Database = {
           smoking_status?: string | null
           social_connections_score?: number | null
           stress_level?: number | null
+          subscription_active?: boolean | null
+          subscription_tier?: string | null
           substance_use?: string | null
           supplements?: Json | null
           survival_streak?: number | null
@@ -382,6 +391,39 @@ export type Database = {
           username?: string | null
           weight?: number | null
           weight_unit?: string | null
+        }
+        Relationships: []
+      }
+      scan_credits: {
+        Row: {
+          credits_purchased: number
+          credits_remaining: number
+          id: string
+          purchased_at: string | null
+          source: string
+          stripe_payment_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          credits_purchased?: number
+          credits_remaining?: number
+          id?: string
+          purchased_at?: string | null
+          source?: string
+          stripe_payment_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          credits_purchased?: number
+          credits_remaining?: number
+          id?: string
+          purchased_at?: string | null
+          source?: string
+          stripe_payment_id?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

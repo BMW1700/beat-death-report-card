@@ -14,6 +14,9 @@ import { TacticalScanner } from "@/components/TacticalScanner";
 import { StreamingAnalysisProgress } from "@/components/StreamingAnalysisProgress";
 import { Link } from "react-router-dom";
 import { UserData, DeathAnalysis } from "@/types";
+import { useScanCredits } from "@/hooks/useScanCredits";
+import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
+import { ScanPaywall } from "@/components/ScanPaywall";
 
 const DeathScannerPage = () => {
   console.log("DeathScannerPage component is rendering");
@@ -42,6 +45,8 @@ const DeathScannerPage = () => {
   } | null>(null);
   const [analysisProgress, setAnalysisProgress] = useState({ stage: '', progress: 0 });
   const [showProgress, setShowProgress] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const scanCredits = useScanCredits();
 
   // Death analysis database for different scenarios
   const getAnalysisForScenario = (item: string, userData: UserData): DeathAnalysis => {
@@ -171,6 +176,8 @@ const DeathScannerPage = () => {
       if (result) {
         setAnalysis(result);
         setCurrentImageFile(imageFile || null);
+        // Deduct scan credit after successful analysis
+        await scanCredits.deductScan();
       }
     } catch (error) {
       console.error('Analysis error:', error);
@@ -196,6 +203,14 @@ const DeathScannerPage = () => {
               Death Scanner
             </h1>
             <Calculator className="w-12 h-12 text-primary drop-shadow-lg" />
+          </div>
+          <div className="flex justify-center mt-3">
+            <ScanCreditsBadge
+              freeScansLeft={scanCredits.freeScansLeft}
+              creditsRemaining={scanCredits.creditsRemaining}
+              isSubscriber={scanCredits.isSubscriber}
+              onClick={() => setShowPaywall(true)}
+            />
           </div>
           <p className="text-xl font-playfair text-muted-foreground max-w-2xl mx-auto text-balance">
             Scan any item or scenario to discover its death potential. AI-powered analysis reveals how common objects could kill you.
@@ -238,6 +253,8 @@ const DeathScannerPage = () => {
                 onCorrection={handleCorrection}
                 showCorrectionModal={showCorrectionModal}
                 lastDetection={lastDetection}
+                canScan={scanCredits.canScan}
+                onPaywallOpen={() => setShowPaywall(true)}
               />
             </div>
             <TacticalScanner 
@@ -292,6 +309,16 @@ const DeathScannerPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Scan Paywall Modal */}
+      <ScanPaywall
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        onPurchasePack={scanCredits.purchaseScanPack}
+        onPurchaseSubscription={scanCredits.purchaseSubscription}
+        freeScansLeft={scanCredits.freeScansLeft}
+        creditsRemaining={scanCredits.creditsRemaining}
+      />
     </div>
   );
 };

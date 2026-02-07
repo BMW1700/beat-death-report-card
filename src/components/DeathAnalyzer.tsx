@@ -30,6 +30,8 @@ interface DeathAnalyzerProps {
     allClassificationResults?: any[];
     isFromCommunity?: boolean;
   };
+  canScan?: boolean;
+  onPaywallOpen?: () => void;
 }
 
 export const DeathAnalyzer = ({ 
@@ -42,7 +44,9 @@ export const DeathAnalyzer = ({
   onCommunityTraining,
   onCorrection,
   showCorrectionModal = false,
-  lastDetection
+  lastDetection,
+  canScan = true,
+  onPaywallOpen,
 }: DeathAnalyzerProps) => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -231,6 +235,12 @@ export const DeathAnalyzer = ({
   };
 
   const handleAnalyze = async () => {
+    // Check scan credits before proceeding
+    if (!canScan) {
+      onPaywallOpen?.();
+      return;
+    }
+
     if (uploadedImage) {
       // Check cache first
       const cachedResult = await getCachedResult(uploadedImage);

@@ -1,78 +1,90 @@
-
-import { useState } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gem, Shield, Zap, Crown } from "lucide-react";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Gem, Shield, Zap, Crown, Skull } from "lucide-react";
+import { useScanCredits } from "@/hooks/useScanCredits";
+import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
 
-// Note: Replace with your actual Supabase client or use environment variables
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-// Initialize Supabase client (this will be configured with your actual project)
-let supabase: any = null;
-
-const plans = [
+const subscriptionPlans = [
   {
     name: "Survival Pro",
     price: "$9.99/mo",
-    priceId: "price_survival_pro", // Replace with actual Stripe price ID
     icon: Shield,
-    features: ["Unlimited scans", "Advanced survival tips", "Expert content", "Priority support"],
-    color: "text-primary"
+    features: ["Unlimited scans", "Premium AI model (Gemini Pro)", "Advanced survival tips", "Priority support"],
+    color: "text-primary",
+    tier: "survival_pro",
   },
   {
-    name: "Prepper Premium", 
+    name: "Prepper Premium",
     price: "$19.99/mo",
-    priceId: "price_prepper_premium", // Replace with actual Stripe price ID
     icon: Zap,
     features: ["Everything in Pro", "Custom survival plans", "Group challenges", "Wilderness scanner", "Emergency prep tools"],
-    color: "text-warning"
+    color: "text-warning",
+    tier: "prepper_premium",
   },
   {
     name: "Immortal Mode",
-    price: "$49.99/mo", 
-    priceId: "price_immortal_mode", // Replace with actual Stripe price ID
+    price: "$49.99/mo",
     icon: Crown,
     features: ["Everything in Premium", "AI survival coach", "1-on-1 expert consultation", "Exclusive content", "VIP community access"],
-    color: "text-success"
-  }
+    color: "text-success",
+    tier: "immortal_mode",
+  },
 ];
 
 export const PremiumUpsell = () => {
-  const [loading, setLoading] = useState<string | null>(null);
-
-  const handleSubscribe = async (plan: typeof plans[0]) => {
-    setLoading(plan.name);
-    
-    try {
-      // For now, simulate subscription flow
-      // TODO: Replace with actual Supabase client once configured
-      
-      toast.success(`Starting ${plan.name} subscription...`);
-      
-      // Simulate loading time
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // This will be replaced with actual Stripe checkout
-      toast.success(`${plan.name} subscription activated! 🎉`);
-      
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast.error("Failed to start subscription. Please try again.");
-    } finally {
-      setLoading(null);
-    }
-  };
+  const { freeScansLeft, creditsRemaining, isSubscriber, purchaseScanPack, purchaseSubscription } = useScanCredits();
 
   return (
     <div className="space-y-4">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold gradient-text mb-2">🚀 Level Up Your Survival Game</h2>
         <p className="text-muted-foreground">Join thousands of survivors mastering the art of beating death</p>
+        <div className="flex justify-center mt-3">
+          <ScanCreditsBadge
+            freeScansLeft={freeScansLeft}
+            creditsRemaining={creditsRemaining}
+            isSubscriber={isSubscriber}
+          />
+        </div>
       </div>
-      
-      {plans.map((plan) => {
+
+      {/* Scan Pack - impulse buy at the top */}
+      <Card className="glass-card border-primary/40 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+        <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground text-[10px]">
+          Best Value
+        </Badge>
+        <CardTitle className="p-3 flex items-center gap-2 text-primary">
+          <Skull className="w-5 h-5" />
+          40 Scan Pack
+          <span className="ml-auto text-lg font-bold">$1.99</span>
+        </CardTitle>
+        <CardContent className="space-y-3">
+          <ul className="space-y-1 text-sm">
+            <li className="flex items-center gap-2 text-muted-foreground">
+              <Gem className="w-3 h-3 text-primary" />
+              40 death scans (~$0.05 each)
+            </li>
+            <li className="flex items-center gap-2 text-muted-foreground">
+              <Gem className="w-3 h-3 text-primary" />
+              Never expires
+            </li>
+            <li className="flex items-center gap-2 text-muted-foreground">
+              <Gem className="w-3 h-3 text-primary" />
+              One-time purchase
+            </li>
+          </ul>
+          <Button
+            onClick={purchaseScanPack}
+            className="w-full gradient-bg hover:scale-105 transition-transform"
+          >
+            Get 40 Scans — $1.99
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Subscription tiers */}
+      {subscriptionPlans.map((plan) => {
         const IconComponent = plan.icon;
         return (
           <Card key={plan.name} className="glass-card border-warning/30 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
@@ -90,12 +102,11 @@ export const PremiumUpsell = () => {
                   </li>
                 ))}
               </ul>
-              <Button 
-                onClick={() => handleSubscribe(plan)}
-                disabled={loading === plan.name}
+              <Button
+                onClick={() => purchaseSubscription(plan.name)}
                 className="w-full gradient-bg hover:scale-105 transition-transform"
               >
-                {loading === plan.name ? "Loading..." : `Get ${plan.name}`}
+                Get {plan.name}
               </Button>
             </CardContent>
           </Card>

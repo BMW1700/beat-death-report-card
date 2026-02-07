@@ -227,12 +227,22 @@ export const useDeathAnalysis = () => {
 
       onProgress?.(ANALYSIS_STAGES.CLASSIFICATION.name, 30);
 
-      // Call the powerful AI edge function with Gemini 2.5 Pro
-      console.log('Calling advanced AI death analysis...');
+      // Check if user is a subscriber for premium model
+      const { data: subProfile } = await supabase
+        .from('profiles')
+        .select('subscription_active')
+        .eq('user_id', user?.id)
+        .single();
+
+      const isPremium = subProfile?.subscription_active === true;
+
+      // Call the powerful AI edge function
+      console.log('Calling advanced AI death analysis...', { isPremium });
       const { data: aiAnalysis, error: aiError } = await supabase.functions.invoke('analyze-death-risk', {
         body: {
           imageBase64,
           scenario: scenario || null,
+          isPremium,
           userData: {
             weight: profile?.weight || 150,
             weight_unit: profile?.weight_unit || 'lbs',

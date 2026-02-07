@@ -12,8 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, scenario, userData } = await req.json();
-    console.log('Analyzing death risk with advanced AI...');
+    const { imageBase64, scenario, userData, isPremium } = await req.json();
+    console.log('Analyzing death risk with advanced AI...', { isPremium });
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -103,9 +103,11 @@ Be thorough, scientifically accurate, and entertainingly dark.`;
       throw new Error('Either image or scenario must be provided');
     }
 
-    console.log('Calling Lovable AI with Gemini 2.5 Pro for multimodal analysis...');
+    console.log(`Calling Lovable AI with ${isPremium ? 'Gemini 2.5 Pro' : 'Gemini 2.5 Flash'} for multimodal analysis...`);
 
-    // Use Gemini 2.5 Pro for superior multimodal reasoning (FREE during promo)
+    // Use Gemini 2.5 Pro for subscribers, Flash for free/pack users
+    const model = isPremium ? 'google/gemini-2.5-pro' : 'google/gemini-2.5-flash';
+
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -113,7 +115,7 @@ Be thorough, scientifically accurate, and entertainingly dark.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro', // Most powerful vision + reasoning model
+        model,
         messages: [
           { 
             role: 'system', 

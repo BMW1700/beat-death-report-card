@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useScanCredits } from "@/hooks/useScanCredits";
+import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
+import { ScanPaywall } from "@/components/ScanPaywall";
 
 const navItems = [
   {
@@ -42,6 +45,8 @@ export function MainNavBar() {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const scanCredits = useScanCredits();
 
   // Don't show navbar on auth page
   if (location.pathname === '/auth') {
@@ -98,6 +103,12 @@ export function MainNavBar() {
                     </span>
                   </div>
                 )}
+                <ScanCreditsBadge
+                  freeScansLeft={scanCredits.freeScansLeft}
+                  creditsRemaining={scanCredits.creditsRemaining}
+                  isSubscriber={scanCredits.isSubscriber}
+                  onClick={() => setShowPaywall(true)}
+                />
               </div>
             </div>
 
@@ -154,6 +165,14 @@ export function MainNavBar() {
                   )}
                 </div>
               )}
+              <div className="mt-2">
+                <ScanCreditsBadge
+                  freeScansLeft={scanCredits.freeScansLeft}
+                  creditsRemaining={scanCredits.creditsRemaining}
+                  isSubscriber={scanCredits.isSubscriber}
+                  onClick={() => { setShowPaywall(true); setShowMobileMenu(false); }}
+                />
+              </div>
             </div>
           </div>
 
@@ -190,6 +209,15 @@ export function MainNavBar() {
           </Button>
         </div>
       )}
+      {/* Scan Paywall Modal */}
+      <ScanPaywall
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        onPurchasePack={scanCredits.purchaseScanPack}
+        onPurchaseSubscription={scanCredits.purchaseSubscription}
+        freeScansLeft={scanCredits.freeScansLeft}
+        creditsRemaining={scanCredits.creditsRemaining}
+      />
     </nav>
   );
 }
