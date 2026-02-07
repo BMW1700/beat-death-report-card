@@ -1,5 +1,5 @@
-
 import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Camera, X, Scan, Zap, Brain, AlertTriangle, SwitchCamera, Maximize, Minimize } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +35,14 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
       stopStream();
     };
   }, []);
+
+  // Re-attach stream when fullscreen toggles (portal causes remount)
+  useEffect(() => {
+    if (videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isFullscreen]);
 
   const stopStream = () => {
     if (streamRef.current) {
@@ -362,32 +370,43 @@ export const CameraScanner = ({ onCapture, onClose, onScan }: CameraScannerProps
     </div>
   );
 
-  return (
-    <div className={isFullscreen ? "fixed inset-0 z-[100] bg-background flex flex-col" : ""}>
-      <Card className={isFullscreen
-        ? "h-full rounded-none border-none shadow-none flex flex-col bg-background"
-        : "glass-card purple-glow overflow-hidden"
-      }>
-        <CardContent className={isFullscreen
-          ? "p-0 relative flex-1 flex flex-col"
-          : "p-0 relative"
-        }>
-          <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 z-10 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className={isFullscreen
-            ? "relative flex-1 min-h-0 overflow-hidden"
-            : "relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden"
-          }>
-            {cameraFeed}
-          </div>
-          {controlButtons}
-          <canvas ref={canvasRef} className="hidden" />
-        </CardContent>
-      </Card>
+  const fullscreenContent = (
+    <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
+      <button
+        onClick={handleClose}
+        className="absolute top-4 right-4 z-10 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
+      >
+        <X className="w-5 h-5" />
+      </button>
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        {cameraFeed}
+      </div>
+      {controlButtons}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
+
+  const inlineContent = (
+    <Card className="glass-card purple-glow overflow-hidden">
+      <CardContent className="p-0 relative">
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 z-10 bg-destructive hover:bg-destructive/80 text-destructive-foreground rounded-full p-2 transition-all duration-200 hover:scale-105"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="relative bg-card/50 aspect-video border border-border rounded-lg overflow-hidden">
+          {cameraFeed}
+        </div>
+        {controlButtons}
+        <canvas ref={canvasRef} className="hidden" />
+      </CardContent>
+    </Card>
+  );
+
+  if (isFullscreen) {
+    return createPortal(fullscreenContent, document.body);
+  }
+
+  return inlineContent;
 };
