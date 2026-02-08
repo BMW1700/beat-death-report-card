@@ -203,7 +203,7 @@ const DeathScannerPage = () => {
             <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Scans Remaining</span>
             <ScanCreditsBadge freeScansLeft={scanCredits.freeScansLeft} creditsRemaining={scanCredits.creditsRemaining} isSubscriber={scanCredits.isSubscriber} onClick={() => setShowPaywall(true)} size="lg" />
           </div>
-          <p className="text-xl font-playfair text-muted-foreground max-w-2xl mx-auto text-balance">Scan any item or scenario to discover its death potential. Our AI-powered analysis reveals how common objects could kill you and how to survive them.</p>
+          <p className="text-xl font-playfair text-muted-foreground max-w-2xl mx-auto text-balance">Scan any item or scenario to discover its death potential. AI-powered analysis reveals how common objects could kill you and how to survive them.</p>
           <div className="flex items-center justify-center gap-2 mt-4 text-warning">
             <AlertTriangle className="w-5 h-5" />
             <span className="text-sm font-medium">For Entertainment Only - Not Medical Advice</span>
