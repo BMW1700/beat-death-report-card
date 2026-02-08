@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Eye, EyeOff, Skull, Heart, TrendingUp, Info } from 'lucide-react';
+import { Clock, Eye, EyeOff, Skull, Heart, TrendingUp, Info, CalendarClock } from 'lucide-react';
 import { useLifeClock } from '@/contexts/LifeClockContext';
 import { AnimatedGrimReaper } from '@/components/AnimatedGrimReaper';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 export const LifeClock = () => {
   const { state, toggleScientificMode, getTimeRemaining } = useLifeClock();
@@ -59,6 +60,25 @@ export const LifeClock = () => {
   };
 
   const timeDisplay = formatTime();
+
+  // Projected death date
+  const projectedDeathDate = new Date(Date.now() + state.totalLifeMinutes * 60 * 1000);
+  const formattedDeathDate = format(projectedDeathDate, 'MMMM d, yyyy');
+
+  // Track date changes for color flash feedback
+  const prevDateRef = useRef(formattedDeathDate);
+  const [dateFlash, setDateFlash] = useState<'positive' | 'negative' | null>(null);
+
+  useEffect(() => {
+    if (prevDateRef.current !== formattedDeathDate) {
+      const prevDate = new Date(prevDateRef.current);
+      const newDate = projectedDeathDate;
+      setDateFlash(newDate > prevDate ? 'positive' : 'negative');
+      prevDateRef.current = formattedDeathDate;
+      const timeout = setTimeout(() => setDateFlash(null), 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [formattedDeathDate]);
 
   return (
     <Card className={cn(
@@ -130,6 +150,13 @@ export const LifeClock = () => {
           </div>
           <div className="text-2xl font-mono text-muted-foreground">
             {timeDisplay.secondary}
+          </div>
+          <div className={cn(
+            "flex items-center justify-center gap-2 text-lg transition-colors duration-500",
+            dateFlash === 'positive' ? "text-success" : dateFlash === 'negative' ? "text-destructive" : "text-muted-foreground"
+          )}>
+            <CalendarClock className="w-4 h-4" />
+            <span>Projected to: <span className="font-semibold">{formattedDeathDate}</span></span>
           </div>
           <div className="text-sm text-muted-foreground">
             Time remaining based on current lifestyle
