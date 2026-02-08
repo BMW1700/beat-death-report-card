@@ -24,6 +24,20 @@ export interface DetectedItem {
   fdaInfo?: any;
 }
 
+export interface NutritionInfo {
+  isFood: boolean;
+  calories: number;
+  servingSize: string;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  sugar: number;
+  sodium: number;
+  healthRating: "healthy" | "moderate" | "unhealthy";
+  warnings: string[];
+}
+
 export interface DeathAnalysis {
   item: string;
   allergyRisk: string;
@@ -35,4 +49,5 @@ export interface DeathAnalysis {
   survival: string;
   finalWords: string;
   detectedItems?: DetectedItem[];
+  nutritionInfo?: NutritionInfo | null;
 }

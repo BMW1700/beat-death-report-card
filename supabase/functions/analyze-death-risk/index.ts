@@ -67,8 +67,23 @@ RESPONSE FORMAT (JSON):
     }
   ],
   "finalWords": "darkly humorous last words",
-  "medicalAdvice": "when to seek immediate help"
+  "medicalAdvice": "when to seek immediate help",
+  "nutritionInfo": {
+    "isFood": true or false,
+    "calories": number (per serving, 0 if not food),
+    "servingSize": "e.g. 1 cup, 100g, 1 piece",
+    "protein": number (grams),
+    "carbs": number (grams),
+    "fat": number (grams),
+    "fiber": number (grams),
+    "sugar": number (grams),
+    "sodium": number (mg),
+    "healthRating": "healthy|moderate|unhealthy",
+    "warnings": ["high sugar", "processed", "high sodium", etc.]
+  }
 }
+
+IMPORTANT: If the item is a food, beverage, or consumable, you MUST set nutritionInfo.isFood to true and provide accurate calorie and macro data. For non-food items, set isFood to false and zeros for all numeric fields.
 
 Be thorough, scientifically accurate, and entertainingly dark.`;
 
@@ -173,7 +188,8 @@ Be thorough, scientifically accurate, and entertainingly dark.`;
       finalWords: analysisData.finalWords || '"Well, this was unexpected..."',
       itemDetected: analysisData.detectedItems?.[0]?.name || analysisData.overallRisk?.primaryThreat || 'Unknown hazard',
       category: analysisData.detectedItems?.[0]?.category || 'unknown',
-      medicalAdvice: analysisData.medicalAdvice || 'Seek immediate medical attention if symptoms develop'
+      medicalAdvice: analysisData.medicalAdvice || 'Seek immediate medical attention if symptoms develop',
+      nutritionInfo: analysisData.nutritionInfo || null
     };
 
     return new Response(

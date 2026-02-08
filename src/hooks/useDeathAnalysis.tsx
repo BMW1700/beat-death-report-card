@@ -277,6 +277,7 @@ export const useDeathAnalysis = () => {
           ? aiAnalysis.survivalTips.join(' ') 
           : aiAnalysis.survivalTips || "Seek immediate medical attention",
         finalWords: aiAnalysis.finalWords || '"This was not on my bingo card..."',
+        nutritionInfo: aiAnalysis.nutritionInfo || null,
         detectedItems: aiAnalysis.detectedItems?.map((item: any) => ({
           label: item.name || item.label,
           confidence: item.confidence || aiAnalysis.confidence || 0.85,
