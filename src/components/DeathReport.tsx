@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { DeathAnalysis, UserData } from "@/types";
 import { ItemCorrectionModal } from "@/components/ItemCorrectionModal";
+import { NutritionFacts } from "@/components/NutritionFacts";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -199,6 +200,11 @@ export const DeathReport = ({ analysis, userData, isAnalyzing, imageFile, onCorr
               </div>
             </div>
           </div>
+        )}
+
+        {/* Nutrition Facts - show when food is detected */}
+        {analysis.nutritionInfo?.isFood && (
+          <NutritionFacts nutritionInfo={analysis.nutritionInfo} itemName={analysis.item} />
         )}
 
         {reportItems.map((item, index) => {
