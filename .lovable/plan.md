@@ -1,120 +1,119 @@
 
 
-# Platform Review and Nutrition/Calorie Tracking Feature
+# Professional UI Overhaul for BeatDeath
 
-## Honest Design Review
+## The Problem
 
-### What Looks Good
-- The **purple gradient dark theme** is cohesive and distinctive -- it gives BeatDeath a strong visual identity
-- The **Death Scanner Report** layout (right panel) is clean with clear sections, color-coded kill ratings, and well-organized data
-- The **glass-card** design system with glows (purple, danger, success) is consistent across pages
-- The **navigation bar** is functional with clear icons and labels
-- Auth page is clean and simple
+The dashboard (Index page) crams **20+ components** into a 3-column grid with no visual hierarchy. Every card has a `hover:scale-[1.01]` effect, competing glows (`purple-glow`, `danger-glow`, `success-glow`), and inconsistent card nesting (some components render their own glass-card AND get wrapped in another glass-card). The result looks chaotic rather than polished.
 
-### What Needs Improvement for "Professional" Polish
+Secondary pages (Wellness, Science, API Platform) are static mockups with fabricated stats and fake institutional partnerships that undermine trust.
 
-1. **Dashboard is overloaded** -- The Index page has 20+ components crammed into a 3-column grid. It feels like every feature was dumped onto one page with no visual hierarchy. A professional app would have a cleaner dashboard with progressive disclosure (show key metrics, let users drill in).
-
-2. **Placeholder/static pages** -- The Wellness, Science, and API Platform pages are essentially static mockups with fake data ("2.3M+ scenarios", "MIT Safety Lab", "Johns Hopkins Medicine"). These claim partnerships that don't exist, which hurts credibility.
-
-3. **Inconsistent spacing and card nesting** -- Some components wrap in `glass-card` at the page level AND inside themselves, creating double borders. The hover scale effects (`hover:scale-[1.01]`) on every single card feels jittery rather than polished.
-
-4. **No calorie/nutrition data in scan results** -- Despite the memory saying "doubles as a nutrition tracker," the AI prompt and the DeathReport component have **zero nutrition fields**. When you scan food (like the Tic Tac in the screenshot), you get death risk info but NO calories, macros, or nutrition data.
-
-5. **Double `pt-16`** -- App.tsx wraps all routes in `<div className="pt-16">`, AND most pages also have `pt-16` on their root div, causing double top padding (128px total).
-
-## Implementation Plan: Add Nutrition/Calorie Tracking to Scanner
-
-This plan focuses on the **calorie/nutrition tracking** feature since it was specifically requested. The design improvements noted above can be tackled separately.
-
-### Step 1: Update the AI Edge Function Prompt
-
-**File: `supabase/functions/analyze-death-risk/index.ts`**
-
-Add a `nutritionInfo` section to the JSON response format in the system prompt so the AI returns calorie and macro data for food items:
-
-```text
-Add to the response format:
-"nutritionInfo": {
-  "isFood": true/false,
-  "calories": number (per serving),
-  "servingSize": "description",
-  "protein": number (grams),
-  "carbs": number (grams),
-  "fat": number (grams),
-  "fiber": number (grams),
-  "sugar": number (grams),
-  "sodium": number (mg),
-  "healthRating": "healthy|moderate|unhealthy",
-  "warnings": ["high sugar", "processed", etc.]
-}
-```
-
-Also update the transform at the bottom of the function to pass `nutritionInfo` through to the response.
-
-### Step 2: Update TypeScript Types
-
-**File: `src/types/index.ts`**
-
-Add a `NutritionInfo` interface and add an optional `nutritionInfo` field to `DeathAnalysis`:
-
-```text
-interface NutritionInfo {
-  isFood: boolean;
-  calories: number;
-  servingSize: string;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
-  healthRating: string;
-  warnings: string[];
-}
-```
-
-### Step 3: Update the Death Report to Display Nutrition Data
-
-**File: `src/components/DeathReport.tsx`**
-
-Add a **"Nutrition Facts" section** that only shows when `analysis.nutritionInfo?.isFood` is true. This will display:
-
-- Calorie count (large, prominent)
-- Macro breakdown (protein, carbs, fat) with a simple bar chart or badges
-- Serving size
-- Health rating badge (color-coded: green for healthy, yellow for moderate, red for unhealthy)
-- Dietary warnings (high sugar, processed, etc.)
-
-This section will appear between the Kill Rating and the Item/Scenario sections, visually distinct with a green-tinted card (health/nutrition color).
-
-### Step 4: Update the useDeathAnalysis Hook
-
-**File: `src/hooks/useDeathAnalysis.tsx`**
-
-Pass the `nutritionInfo` from the AI response through to the `DeathAnalysis` object so it reaches the DeathReport component.
-
-### Step 5: Add "Log to Daily Tracker" Button
-
-**File: `src/components/DeathReport.tsx`**
-
-When nutrition data is present, add a "Log to Health Tracker" button that saves the food item, calories, and macros to localStorage-based daily log (no new database table needed initially). This provides the "health tracking" angle.
-
-### Step 6: Fix Double Padding Bug
-
-**File: `src/App.tsx`**
-
-Remove the `pt-16` from the wrapper `<div>` in App.tsx since each page already handles its own top padding. This fixes the double top padding issue.
+The navbar works but is cramped on desktop, and several nav items use wrong icons (e.g., Settings icon for "Science", Bell for "Wellness").
 
 ---
 
-### Summary of Files to Change
+## What Changes
+
+### 1. Drastically Simplify the Dashboard
+
+Replace the 20+ card wall-of-content with a **focused 4-section layout**:
+
+**Section A -- Hero + Quick Actions** (top)
+- Keep the BeatDeath title, but reduce from `text-7xl` to `text-5xl`
+- Remove the two flanking skull icons (one is enough)
+- Keep the "Scan for Death Now" CTA button
+- Remove the long subtitle paragraph, replace with a single punchy tagline
+
+**Section B -- Life Clock + Daily Stats** (full-width row)
+- Keep the LifeClock component as-is (it's the strongest visual element)
+- Place ActionLogger next to it in a 2-column row (already exists, just cleaner)
+- Remove TimeMarketplace from this section entirely
+
+**Section C -- Featured Content** (2-column grid, max 4 cards)
+- **Daily Death Fact** (keep, clean up)
+- **Trending Deaths** (keep, clean up)
+- **Death Spin Wheel** (keep, it's fun and engaging)
+- **Your Death Score** (keep, shows progress)
+
+**Section D -- Community & More** (collapsed/hidden behind a "Show More" toggle)
+- Move ALL of these into a collapsible section with a "View Community & More" button:
+  - ViralChallengeHub, ViralSharingHub, LiveGlobalFeed, CollaborativeDeathMap
+  - Leaderboard, CommunityLeaderboard, UserStories, DeathDuel
+  - ImmortalModeCopilot, SurvivalStreakTracker, DeathTrendsDashboard
+  - EnhancedAchievements, WildernessScanner, FieldManual
+  - SurvivalistModeToggle, PremiumUpsell, InAppPurchases, SurvivalGearMarketplace
+
+- Remove the random referral code block entirely (it generates a new code on every render and looks spammy)
+
+### 2. Remove the Jittery Hover Effects
+
+- Remove ALL `hover:scale-[1.01]` from the dashboard. Replace with subtle `hover:border-primary/40` transitions that feel refined instead of jittery.
+- Remove competing glow classes from cards. Only the Life Clock and the main CTA should glow.
+
+### 3. Fix the Navbar
+
+**File: `src/components/MainNavBar.tsx`**
+
+- Fix misleading nav icons:
+  - Wellness: `Bell` -> `Heart`
+  - Science: `Settings` -> `FlaskConical`
+  - API Platform: `Share` -> `Code`
+  - Survival Map: `Star` -> `Map`
+- Reduce icon size from `w-6 h-6` to `w-5 h-5` for a cleaner look
+- Tighten padding for a slimmer navbar
+
+### 4. Clean Up Secondary Pages
+
+**File: `src/pages/SciencePage.tsx`**
+
+Remove all fabricated statistics and fake institutional partnerships:
+- Remove "2.3M+ scenarios", "847 papers", "12.4K scientists", "156 universities"
+- Remove the "Global Collaborations" card claiming MIT Safety Lab, Johns Hopkins, CDC, WHO partnerships
+- Replace with honest "Coming Soon" content explaining the vision for citizen science and research
+
+**File: `src/pages/WellnessPage.tsx`**
+
+- Add "Coming Soon" badges to the integration cards (Apple Health, Google Fit, etc.) since none of these integrations actually work
+- Remove the "Insurance Partners" card with fake insurance discount claims
+
+**File: `src/pages/ApiPlatformPage.tsx`**
+
+- This page is already honest with "Coming Soon" -- just clean up spacing
+
+### 5. Polish Shared Styles
+
+**File: `src/index.css`**
+
+- Remove the duplicate glass-card wrapping issue by making `glass-card` padding optional (some components add their own padding, causing double borders)
+- Reduce the intensity of glow effects globally (they're overpowering on smaller screens)
+
+### 6. Remove Unused CSS
+
+**File: `src/App.css`**
+
+- This file contains Vite boilerplate CSS (`.logo`, `.card`, `.read-the-docs`) that isn't used anywhere in the app. Delete or clear its contents.
+
+---
+
+## Summary of Files to Change
 
 | File | Change |
 |------|--------|
-| `supabase/functions/analyze-death-risk/index.ts` | Add nutritionInfo to AI prompt and response transform |
-| `src/types/index.ts` | Add NutritionInfo interface |
-| `src/components/DeathReport.tsx` | Add Nutrition Facts card and Log button |
-| `src/hooks/useDeathAnalysis.tsx` | Pass nutritionInfo through from AI response |
-| `src/App.tsx` | Remove duplicate `pt-16` padding |
+| `src/pages/Index.tsx` | Restructure from 20+ card chaos to focused 4-section layout with collapsible community section |
+| `src/components/MainNavBar.tsx` | Fix wrong icons, reduce icon sizes, slim padding |
+| `src/pages/SciencePage.tsx` | Remove fabricated stats and fake partnerships |
+| `src/pages/WellnessPage.tsx` | Add "Coming Soon" badges, remove fake insurance claims |
+| `src/index.css` | Tone down glow intensities |
+| `src/App.css` | Remove unused Vite boilerplate styles |
+
+---
+
+## What This Does NOT Change
+
+- The core Death Scanner page -- it's already the strongest page in the app
+- The auth page -- clean and functional
+- The onboarding flow -- comprehensive and well-structured
+- The DeathReport component -- well-organized with good visual hierarchy
+- The LifeClock component -- the best visual element in the app
+- The color scheme / design system -- the purple gradient theme is distinctive and works well
 
