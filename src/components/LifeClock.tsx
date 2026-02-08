@@ -156,7 +156,7 @@ export const LifeClock = () => {
             dateFlash === 'positive' ? "text-success" : dateFlash === 'negative' ? "text-destructive" : "text-muted-foreground"
           )}>
             <CalendarClock className="w-4 h-4" />
-            <span>Projected to: <span className="font-semibold">{formattedDeathDate}</span></span>
+            <span>Projected to: <span className="font-semibold">{formattedDeathDate}</span> <span className="opacity-70">(age {state.userData.age + timeRemaining.years})</span></span>
           </div>
           <div className="text-sm text-muted-foreground">
             Time remaining based on current lifestyle
