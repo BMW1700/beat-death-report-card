@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 // Core components
 import { LifeClock } from "@/components/LifeClock";
+import { LifeTracker } from "@/components/LifeTracker";
 import { ActionLogger } from "@/components/ActionLogger";
 import { TrendingDeaths } from "@/components/TrendingDeaths";
 import { DeathScore } from "@/components/DeathScore";
@@ -116,9 +117,13 @@ const Index = () => {
           </p>
         </section>
 
-        {/* ── Section B: Life Clock + Daily Stats ── */}
+        {/* ── Section B: Life Clock + Tracker + Daily Stats ── */}
         <section className="mb-8">
           <LifeClock />
+        </section>
+
+        <section className="mb-8">
+          <LifeTracker />
         </section>
 
         <section className="grid md:grid-cols-2 gap-6 mb-8">
