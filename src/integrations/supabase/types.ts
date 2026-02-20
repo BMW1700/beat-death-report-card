@@ -238,6 +238,39 @@ export type Database = {
         }
         Relationships: []
       }
+      life_actions: {
+        Row: {
+          action_id: string
+          category: string
+          description: string
+          id: string
+          logged_at: string | null
+          method: string | null
+          minutes_impact: number
+          user_id: string
+        }
+        Insert: {
+          action_id: string
+          category: string
+          description: string
+          id?: string
+          logged_at?: string | null
+          method?: string | null
+          minutes_impact: number
+          user_id: string
+        }
+        Update: {
+          action_id?: string
+          category?: string
+          description?: string
+          id?: string
+          logged_at?: string | null
+          method?: string | null
+          minutes_impact?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null

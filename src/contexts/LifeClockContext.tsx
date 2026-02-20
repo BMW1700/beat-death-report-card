@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 // Types from master prompt
 export interface UserData {
@@ -244,7 +245,8 @@ interface LifeClockContextType {
 const LifeClockContext = createContext<LifeClockContextType | undefined>(undefined);
 
 export function LifeClockProvider({ children }: { children: ReactNode }) {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
+  const hydratedRef = useRef(false);
   
   // Initialize state - try to load from localStorage first for persistence
   const [state, setState] = useState<LifeClockState>(() => {
@@ -330,6 +332,55 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('beatdeath_lifeclock', JSON.stringify(state));
   }, [state]);
 
+  // Hydrate from Supabase on mount (once, when user is authenticated)
+  useEffect(() => {
+    if (!user || hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    const hydrate = async () => {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data, error } = await supabase
+        .from('life_actions')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('logged_at', thirtyDaysAgo.toISOString())
+        .order('logged_at', { ascending: false });
+
+      if (error || !data || data.length === 0) return;
+
+      // Rebuild recentActions and recalculate time delta from DB
+      const dbActions: ActionLog[] = data.map((row: any) => ({
+        id: row.id,
+        action_id: row.action_id,
+        timestamp: new Date(row.logged_at),
+        method: row.method || 'self',
+        scientific_minutes: 0,
+        playful_minutes: row.minutes_impact,
+        was_verified: row.method === 'verified'
+      }));
+
+      const totalDbMinutes = data.reduce((sum: number, row: any) => sum + row.minutes_impact, 0);
+
+      setState(prev => {
+        // Calculate what local actions contributed
+        const localMinutes = prev.recentActions.reduce((sum, a) => sum + a.playful_minutes, 0);
+        // Replace local actions with DB actions, adjust total
+        const baselineMinutes = prev.totalLifeMinutes - localMinutes;
+        return {
+          ...prev,
+          recentActions: dbActions.slice(0, 50),
+          totalLifeMinutes: Math.max(0, baselineMinutes + totalDbMinutes)
+        };
+      });
+
+      console.log(`[LifeClock] Hydrated ${data.length} actions from Supabase`);
+    };
+
+    hydrate();
+  }, [user]);
+
   // Real-time countdown (every second) - FIXED TO ACTUALLY COUNT DOWN
   useEffect(() => {
     const interval = setInterval(() => {
@@ -405,6 +456,21 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
         analyticsBuffer: [analyticsEvent, ...prev.analyticsBuffer.slice(0, 999)] // Keep last 1000
       };
     });
+
+    // Fire-and-forget Supabase sync
+    if (user) {
+      supabase.from('life_actions').insert({
+        user_id: user.id,
+        action_id: actionId,
+        category: mapping.category,
+        description: mapping.description,
+        minutes_impact: Math.round(playfulMinutes),
+        method,
+        logged_at: new Date().toISOString()
+      } as any).then(({ error }) => {
+        if (error) console.error('[LifeClock] Supabase sync error:', error);
+      });
+    }
 
     // Show feedback
     const isPositive = playfulMinutes > 0;
