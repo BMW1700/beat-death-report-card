@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 // Core components
 import { LifeClock } from "@/components/LifeClock";
 import { LifeTracker } from "@/components/LifeTracker";
-import { ActionLogger } from "@/components/ActionLogger";
+import { TodaySummary } from "@/components/TodaySummary";
 import { TrendingDeaths } from "@/components/TrendingDeaths";
 import { DeathScore } from "@/components/DeathScore";
 import { DailyDeathFact } from "@/components/DailyDeathFact";
@@ -17,7 +17,7 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 // Community & extras (collapsible)
 import { EnhancedAchievements } from "@/components/EnhancedAchievements";
-import { Leaderboard } from "@/components/Leaderboard";
+
 import { UserStories } from "@/components/UserStories";
 import { DeathTrendsDashboard } from "@/components/DeathTrendsDashboard";
 import { DeathDuel } from "@/components/DeathDuel";
@@ -123,11 +123,14 @@ const Index = () => {
         </section>
 
         <section className="mb-8">
+          <TodaySummary />
+        </section>
+
+        <section className="mb-8">
           <LifeTracker />
         </section>
 
-        <section className="grid md:grid-cols-2 gap-6 mb-8">
-          <ActionLogger />
+        <section className="mb-8">
           <div className="glass-card">
             <DailyDeathFact />
           </div>
@@ -179,7 +182,6 @@ const Index = () => {
               <LiveGlobalFeed />
               <CollaborativeDeathMap />
               <ImmortalModeCopilot />
-              <Leaderboard />
               <CommunityLeaderboard />
               <UserStories />
               <DeathDuel />
