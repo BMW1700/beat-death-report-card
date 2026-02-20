@@ -1,146 +1,163 @@
 
+# Full Beat Death Audit Fix — Everything
 
-# Massively Expand Action Mappings with Scientifically Accurate Time Impacts
+This implements all five critical fixes from the audit in one pass: data persistence to Supabase, merging the duplicate trackers, replacing fake data in Streak/Leaderboard, fixing the Leaderboard component, and adding a Today's Summary card.
 
-## Overview
+---
 
-Expand the current ~55 actions to **120+ actions** across all 5 categories, each with time impacts grounded in real epidemiological research. The current system uses a base unit where 20 push-ups = 8 hours (480 minutes). All new entries will follow this same scale and format.
+## What Gets Fixed
 
-## What Gets Added
+### 1. Data Persistence — Life Clock Actions Saved to Supabase
 
-### Exercise (18 new actions)
+Right now, every action logged only lives in `localStorage`. If the user clears their browser, switches devices, or logs out, everything is gone. This is the biggest structural problem.
 
-| Action | Time Impact | Scientific Basis |
-|--------|-------------|------------------|
-| Jump rope 10 min | +720m | High-intensity cardio, comparable to running |
-| Dance workout 30 min | +960m | Moderate-vigorous activity with cognitive benefits |
-| Rock climbing session 1 hr | +1920m | Full-body strength + cardio |
-| Rowing machine 20 min | +1200m | Full-body low-impact cardio |
-| Martial arts class 1 hr | +1920m | Intense physical + mental discipline |
-| Play a sport (basketball, soccer, etc.) 30 min | +1440m | Vigorous intermittent activity |
-| Hiking 1 hour | +1440m | Moderate cardio with nature exposure benefits |
-| Heavy weightlifting session 45 min | +1680m | Resistance training longevity benefits |
-| Pilates 30 min | +480m | Core strength and flexibility |
-| Jumping jacks 100 reps | +480m | Moderate cardio burst |
-| Dead hang 1 min | +120m | Grip strength (linked to longevity) |
-| Foam rolling / self-massage 10 min | +120m | Recovery and circulation |
-| Standing desk use (1 hour) | +120m | Reduces sedentary time |
-| Walk 10,000 steps in a day | +1440m | Major longevity marker in step-count studies |
-| Tai chi 20 min | +480m | Balance, stress reduction, fall prevention |
-| Tennis / racquet sport 30 min | +1680m | One of top longevity-linked sports |
-| Sprint intervals 10 min | +1200m | VO2-max improvement, high intensity |
-| Ski / snowboard 1 hour | +1440m | Full-body demanding activity |
+**Fix:** Create a new `life_actions` Supabase table. When the user logs an action, it saves to both `localStorage` (for instant offline feedback) and Supabase (for permanence). On load, if the user is authenticated, we hydrate from Supabase instead of just `localStorage`.
 
-### Diet & Nutrition (20 new actions)
+New table:
+```text
+life_actions
+- id (uuid)
+- user_id (uuid, FK to profiles)
+- action_id (text)
+- category (text)
+- description (text)
+- minutes_impact (integer)  -- positive or negative
+- method (text)             -- 'self' | 'verified' | 'wearable'
+- logged_at (timestamp)
+```
 
-| Action | Time Impact | Scientific Basis |
-|--------|-------------|------------------|
-| Eat fatty fish (salmon, sardines) | +360m | Omega-3s reduce cardiovascular mortality |
-| Handful of nuts (almonds, walnuts) | +240m | Nut consumption linked to reduced all-cause mortality |
-| Eat fermented food (yogurt, kimchi) | +240m | Gut microbiome health |
-| Drink green tea | +120m | Antioxidants and cardiovascular benefits |
-| Eat whole grains (oats, brown rice) | +120m | Fiber reduces heart disease risk |
-| Eat beans/legumes serving | +240m | Blue Zone staple, linked to longevity |
-| Eat berries (blueberries, strawberries) | +180m | Antioxidant-rich, cognitive benefits |
-| Extra virgin olive oil with meal | +120m | Mediterranean diet cornerstone |
-| Dark chocolate (small portion) | +60m | Flavonoids, moderate cardiovascular benefit |
-| Eat processed red meat (hot dog, bacon) | -360m | Classified carcinogen, cardiovascular risk |
-| Eat red meat (steak, burger patty) | -180m | Moderate association with colorectal cancer |
-| Eat deep-fried food | -240m | Trans fats, cardiovascular risk |
-| Excess added sugar (candy, pastry) | -180m | Insulin resistance, inflammation |
-| Ultra-processed snack (chips, packaged cookies) | -180m | Linked to increased all-cause mortality |
-| Skip a meal entirely | -120m | Irregular eating linked to metabolic issues |
-| Drink 8 glasses of water today | +240m | Adequate hydration linked to reduced chronic disease |
-| Eat a home-cooked meal | +180m | Better nutrient control vs. restaurant food |
-| Intermittent fasting day (16:8) | +240m | Autophagy and metabolic health benefits |
-| Excess caffeine (5+ cups coffee) | -120m | Anxiety, sleep disruption, cardiac stress |
-| Probiotic supplement taken | +60m | Gut health support |
+RLS: users can only read/write their own rows.
 
-### Substances (10 new actions -- all negative)
+The `LifeClockContext` gets a `syncToSupabase()` call inside `logAction()` — fire-and-forget, so it never slows down the UI. On mount, `loadFromSupabase()` is called once and rebuilds `recentActions` and the total minute delta from real data.
 
-| Action | Time Impact | Scientific Basis |
-|--------|-------------|------------------|
-| Smoke a cigar | -1200m | Less frequent but higher tar exposure |
-| Use chewing tobacco | -720m | Oral cancer and cardiovascular risk |
-| Recreational drug use (single instance) | -1440m | Acute toxicity and chronic health risk |
-| Secondhand smoke exposure (1 hour) | -240m | 25-30% increased heart disease risk |
-| Energy drink consumption | -180m | Cardiac arrhythmia risk, excess stimulant |
-| Prescription painkiller misuse | -1920m | Opioid crisis data, overdose risk |
-| Cannabis smoking (1 session) | -240m | Lung irritation, though less than tobacco |
-| Excessive caffeine pill use | -360m | Cardiac risk from concentrated caffeine |
-| Hookah session (1 hour) | -960m | Equivalent smoke volume of ~100 cigarettes |
-| Alcohol past midnight (late-night drinking) | -360m | Disrupts sleep architecture + alcohol damage |
+---
 
-### Behavior & Wellness (20 new actions)
+### 2. Merge ActionLogger + LifeTracker — One Unified Component
 
-| Action | Time Impact | Scientific Basis |
-|--------|-------------|------------------|
-| Read for 30 min | +240m | Cognitive engagement reduces dementia risk |
-| Socialize with friends (1 hour) | +480m | Social connection is top longevity predictor |
-| Call / video chat a loved one | +240m | Reduces isolation, comparable to in-person |
-| Journal / gratitude writing 10 min | +120m | Stress reduction, improved mental health |
-| Spend 30 min in nature | +360m | Cortisol reduction, immune function boost |
-| Learn something new (skill, language) | +240m | Cognitive reserve building |
-| Volunteer / help someone | +480m | Volunteering linked to lower mortality |
-| Laugh heartily (comedy, jokes) | +60m | Stress hormone reduction, vascular function |
-| Practice deep breathing 5 min | +60m | Vagus nerve activation, stress reduction |
-| Floss teeth | +60m | Gum disease linked to heart disease |
-| Apply sunscreen before going out | +120m | Skin cancer prevention |
-| Get 15 min of morning sunlight | +120m | Circadian rhythm, vitamin D synthesis |
-| Sleep less than 5 hours (negative) | -720m | Strong association with mortality increase |
-| Stayed up past 2 AM (negative) | -360m | Circadian disruption, poor sleep quality |
-| Sedentary for 8+ hours straight (negative) | -480m | "Sitting is the new smoking" research |
-| Mindless phone scrolling 2+ hours (negative) | -240m | Displaces movement, social time, sleep |
-| Skip sunscreen on sunny day (negative) | -120m | UV exposure and skin cancer risk |
-| Road rage / aggressive driving (negative) | -360m | Accident risk + cortisol spike |
-| Unprotected hearing exposure (loud concert) | -120m | Cumulative hearing damage |
-| Brush teeth twice today | +60m | Oral health linked to cardiovascular health |
+Both `ActionLogger` and `LifeTracker` let users log the same actions. This is confusing and wastes screen space. The `LifeTracker` (voice + text search) is strictly superior, so:
 
-### Preparedness (8 new actions)
+- **Remove** `<ActionLogger />` from `Index.tsx`
+- **Enhance** `LifeTracker` to include a "Browse by category" tab below the search bar — this preserves the full browsable grid from ActionLogger without duplicating the entire component on the page
+- The tab bar uses category icons (Exercise / Diet / Substances / Behavior / Preparedness) and shows all actions for that category, identical to what ActionLogger does today — just combined into one card
 
-| Action | Time Impact | Scientific Basis |
-|--------|-------------|------------------|
-| Create emergency evacuation plan | +1440m | Disaster preparedness saves lives |
-| Learn to swim (if non-swimmer) | +2880m | Drowning is a leading cause of accidental death |
-| Install carbon monoxide detector | +960m | CO poisoning prevention |
-| Earthquake / disaster drill practice | +480m | Preparedness reduces injury rates |
-| Store 3-day clean water supply | +960m | Dehydration is fast-acting in emergencies |
-| Learn basic self-defense | +960m | Injury prevention in assault scenarios |
-| Check tire pressure / car maintenance | +240m | Vehicle maintenance reduces accident risk |
-| Secure heavy furniture to walls | +480m | Earthquake and child safety |
+---
+
+### 3. Replace Fake Data in SurvivalStreakTracker
+
+`SurvivalStreakTracker` currently has hardcoded data:
+```typescript
+currentStreak: 7,    // FAKE
+longestStreak: 23,   // FAKE
+totalScans: 156,     // FAKE
+```
+
+**Fix:** Rewrite it to read real data from two sources:
+- The `life_actions` Supabase table — counts real logged actions per day to calculate genuine streaks
+- The `profiles` table — reads `survival_streak` and `total_xp` columns that already exist
+
+The streak is calculated by looking at distinct days with at least one logged action, counting consecutive days backwards from today.
+
+---
+
+### 4. Fix Fake Leaderboard (`Leaderboard.tsx`)
+
+The old `Leaderboard` component in the community section uses hardcoded fake names:
+```typescript
+{ name: "DeathLord42", xp: 999 },  // FAKE
+```
+
+This component is pointless since `CommunityLeaderboard` already pulls real data from Supabase. **Fix:** Remove `<Leaderboard />` from `Index.tsx` and remove the import — `CommunityLeaderboard` already handles this correctly with real data.
+
+---
+
+### 5. Add Today's Summary Card
+
+A new `TodaySummary` component sits between the Life Clock and the LifeTracker. It shows:
+- All actions logged today (from `recentActions` filtered to today's date)
+- Total time gained/lost today
+- A motivational one-liner based on whether the day is net positive or negative
+- Count of actions logged
+
+This closes the "habit loop" — users see a clear daily summary that rewards them for coming back.
+
+---
+
+## Files to Create / Change
+
+| File | Action | What Changes |
+|------|--------|--------------|
+| `supabase/migrations/new.sql` | Create | New `life_actions` table + RLS policies |
+| `src/contexts/LifeClockContext.tsx` | Edit | Add Supabase sync on logAction + hydrate from DB on load |
+| `src/components/LifeTracker.tsx` | Edit | Add "Browse by category" tabs below the search bar, making ActionLogger redundant |
+| `src/components/TodaySummary.tsx` | Create | New card showing today's logged actions and net time impact |
+| `src/components/SurvivalStreakTracker.tsx` | Edit | Replace hardcoded fake data with real data from `life_actions` table |
+| `src/pages/Index.tsx` | Edit | Remove ActionLogger, add TodaySummary, remove fake Leaderboard import |
+
+---
 
 ## Technical Details
 
-### File Changed
+### Database Migration
 
-**`src/contexts/LifeClockContext.tsx`** -- Add ~76 new entries to the `DEFAULT_ACTION_MAPPINGS` array, following the exact same `ActionMapping` format already used.
+```sql
+CREATE TABLE public.life_actions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid NOT NULL,
+  action_id text NOT NULL,
+  category text NOT NULL,
+  description text NOT NULL,
+  minutes_impact integer NOT NULL,
+  method text DEFAULT 'self',
+  logged_at timestamp with time zone DEFAULT now()
+);
 
-### Format (unchanged)
+ALTER TABLE public.life_actions ENABLE ROW LEVEL SECURITY;
 
-Each entry follows:
-```typescript
-{ action_id: 'string_id', category: 'exercise'|'diet'|'substances'|'behavior'|'preparedness', description: 'Human-readable text', HYG: number, scientific_formula: 'Units * 8 hours', playful_default_minutes: number, verification_bonus_pct: number, max_per_day: number }
+CREATE POLICY "Users can insert their own actions"
+  ON public.life_actions FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own actions"
+  ON public.life_actions FOR SELECT
+  USING (auth.uid() = user_id);
 ```
 
-### Verification Bonus
+### Supabase Sync in LifeClockContext
 
-- Positive actions: `verification_bonus_pct: 50` (50% bonus when verified via photo/wearable)
-- Negative actions: `verification_bonus_pct: 0` (no bonus for bad habits)
+The `logAction` function gets one additional async call after the local state update:
+```typescript
+// Fire and forget — never blocks the UI
+if (user) {
+  supabase.from('life_actions').insert({
+    user_id: user.id,
+    action_id: actionId,
+    category: mapping.category,
+    description: mapping.description,
+    minutes_impact: Math.round(playfulMinutes),
+    method,
+    logged_at: new Date().toISOString()
+  });
+}
+```
 
-### Daily Caps
+On initial load (when user is authenticated), a one-time fetch pulls all `life_actions` for the last 30 days and reconstructs the `recentActions` array and total minute delta. This ensures the Life Clock reflects real saved data even after a browser refresh or device switch.
 
-- Small repeatable habits (water, sunscreen, teeth): `max_per_day: 1-3`
-- Moderate activities (exercise, meals): `max_per_day: 2-3`
-- Substance use: `max_per_day: 999` (tracked honestly, no artificial limit)
-- One-time preparedness items: `max_per_day: 1`
+### Real Streak Calculation
 
-### Fuzzy Matcher Compatibility
+The streak is calculated from actual `life_actions` rows:
+```typescript
+// Get all distinct logged dates
+const dates = rows.map(r => new Date(r.logged_at).toDateString());
+const uniqueDates = [...new Set(dates)];
+// Count consecutive days backwards from today
+let streak = 0;
+let checkDate = new Date();
+while (uniqueDates.includes(checkDate.toDateString())) {
+  streak++;
+  checkDate.setDate(checkDate.getDate() - 1);
+}
+```
 
-No changes needed to `fuzzyActionMatcher.ts` -- it already matches against `description`, `action_id`, and `category` fields. More actions simply means more potential matches, which improves the voice/text tracker experience.
+### Today's Summary Card
 
-## Summary
-
-| File | Change |
-|------|--------|
-| `src/contexts/LifeClockContext.tsx` | Add ~76 new scientifically-grounded action mappings to DEFAULT_ACTION_MAPPINGS |
-
+Reads directly from `state.recentActions` (already in memory) — no additional DB calls needed. Filters to `timestamp.toDateString() === today`, sums minutes, lists each action with its impact color-coded green/red.
