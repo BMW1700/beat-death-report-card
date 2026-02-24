@@ -513,6 +513,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_xp: {
+        Args: { p_user_id: string; p_xp: number }
+        Returns: undefined
+      }
       update_trending_scores: { Args: never; Returns: undefined }
     }
     Enums: {
