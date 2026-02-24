@@ -245,7 +245,7 @@ interface LifeClockContextType {
 const LifeClockContext = createContext<LifeClockContextType | undefined>(undefined);
 
 export function LifeClockProvider({ children }: { children: ReactNode }) {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const hydratedRef = useRef(false);
   
   // Initialize state - try to load from localStorage first for persistence
@@ -475,6 +475,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       const xpGained = Math.max(1, Math.round(Math.abs(playfulMinutes) / 10));
       (supabase.rpc as any)('increment_xp', { p_user_id: user.id, p_xp: xpGained }).then(({ error }: any) => {
         if (error) console.error('[LifeClock] XP increment error:', error);
+        else refreshProfile();
       });
     }
 

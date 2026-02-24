@@ -45,9 +45,11 @@ export const LifeClock = () => {
   // Format time display
   const formatTime = () => {
     if (state.scientificMode) {
+      const totalHours = Math.floor(state.totalLifeMinutes / 60);
+      const decimalYears = (state.totalLifeMinutes / (365.25 * 24 * 60)).toFixed(4);
       return {
-        primary: `${timeRemaining.years}y ${timeRemaining.months}m ${timeRemaining.days}d`,
-        secondary: `${timeRemaining.hours}h ${timeRemaining.minutes}m ${timeRemaining.seconds}s`,
+        primary: `${decimalYears} years`,
+        secondary: `${totalHours.toLocaleString()} hours remaining`,
         mode: "Scientific Mode"
       };
     } else {
