@@ -14,6 +14,7 @@ import { DeathScore } from "@/components/DeathScore";
 import { DailyDeathFact } from "@/components/DailyDeathFact";
 import { DeathSpinWheel } from "@/components/DeathSpinWheel";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { WeeklyProgressChart } from "@/components/WeeklyProgressChart";
 
 // Community & extras (collapsible)
 import { EnhancedAchievements } from "@/components/EnhancedAchievements";
@@ -124,6 +125,10 @@ const Index = () => {
 
         <section className="mb-8">
           <TodaySummary />
+        </section>
+
+        <section className="mb-8">
+          <WeeklyProgressChart />
         </section>
 
         <section className="mb-8">
