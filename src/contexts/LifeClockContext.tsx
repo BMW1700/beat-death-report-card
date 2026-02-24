@@ -457,7 +457,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       };
     });
 
-    // Fire-and-forget Supabase sync
+    // Fire-and-forget Supabase sync + XP increment
     if (user) {
       supabase.from('life_actions').insert({
         user_id: user.id,
@@ -469,6 +469,12 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
         logged_at: new Date().toISOString()
       } as any).then(({ error }) => {
         if (error) console.error('[LifeClock] Supabase sync error:', error);
+      });
+
+      // Increment XP: abs(minutes) / 10, minimum 1 XP per action
+      const xpGained = Math.max(1, Math.round(Math.abs(playfulMinutes) / 10));
+      supabase.rpc('increment_xp', { p_user_id: user.id, p_xp: xpGained } as any).then(({ error }) => {
+        if (error) console.error('[LifeClock] XP increment error:', error);
       });
     }
 

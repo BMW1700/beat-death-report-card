@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Skull, Code, Map, Heart, FlaskConical, User, LogOut, Trophy, Menu, X } from "lucide-react";
+import { Home, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -20,24 +20,9 @@ const navItems = [
     label: "Death Scanner",
   },
   {
-    path: "/api-platform",
-    icon: <Code className="w-5 h-5" />,
-    label: "API Platform",
-  },
-  {
     path: "/survival-map",
     icon: <Map className="w-5 h-5" />,
     label: "Survival Map",
-  },
-  {
-    path: "/wellness",
-    icon: <Heart className="w-5 h-5" />,
-    label: "Wellness",
-  },
-  {
-    path: "/science",
-    icon: <FlaskConical className="w-5 h-5" />,
-    label: "Science",
   },
 ];
 
