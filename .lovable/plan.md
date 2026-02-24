@@ -1,163 +1,104 @@
 
-# Full Beat Death Audit Fix — Everything
 
-This implements all five critical fixes from the audit in one pass: data persistence to Supabase, merging the duplicate trackers, replacing fake data in Streak/Leaderboard, fixing the Leaderboard component, and adding a Today's Summary card.
+# Fix the 7 Remaining BeatDeath Issues
 
----
-
-## What Gets Fixed
-
-### 1. Data Persistence — Life Clock Actions Saved to Supabase
-
-Right now, every action logged only lives in `localStorage`. If the user clears their browser, switches devices, or logs out, everything is gone. This is the biggest structural problem.
-
-**Fix:** Create a new `life_actions` Supabase table. When the user logs an action, it saves to both `localStorage` (for instant offline feedback) and Supabase (for permanence). On load, if the user is authenticated, we hydrate from Supabase instead of just `localStorage`.
-
-New table:
-```text
-life_actions
-- id (uuid)
-- user_id (uuid, FK to profiles)
-- action_id (text)
-- category (text)
-- description (text)
-- minutes_impact (integer)  -- positive or negative
-- method (text)             -- 'self' | 'verified' | 'wearable'
-- logged_at (timestamp)
-```
-
-RLS: users can only read/write their own rows.
-
-The `LifeClockContext` gets a `syncToSupabase()` call inside `logAction()` — fire-and-forget, so it never slows down the UI. On mount, `loadFromSupabase()` is called once and rebuilds `recentActions` and the total minute delta from real data.
+Addresses every critical, high, and medium priority issue found in the audit.
 
 ---
 
-### 2. Merge ActionLogger + LifeTracker — One Unified Component
+## 1. Fix LiveGlobalFeed (RLS blocks cross-user reads)
 
-Both `ActionLogger` and `LifeTracker` let users log the same actions. This is confusing and wastes screen space. The `LifeTracker` (voice + text search) is strictly superior, so:
+The `life_actions` table has RLS: `auth.uid() = user_id` for SELECT. The LiveGlobalFeed tries to read ALL users' actions but only gets the current user's.
 
-- **Remove** `<ActionLogger />` from `Index.tsx`
-- **Enhance** `LifeTracker` to include a "Browse by category" tab below the search bar — this preserves the full browsable grid from ActionLogger without duplicating the entire component on the page
-- The tab bar uses category icons (Exercise / Diet / Substances / Behavior / Preparedness) and shows all actions for that category, identical to what ActionLogger does today — just combined into one card
-
----
-
-### 3. Replace Fake Data in SurvivalStreakTracker
-
-`SurvivalStreakTracker` currently has hardcoded data:
-```typescript
-currentStreak: 7,    // FAKE
-longestStreak: 23,   // FAKE
-totalScans: 156,     // FAKE
-```
-
-**Fix:** Rewrite it to read real data from two sources:
-- The `life_actions` Supabase table — counts real logged actions per day to calculate genuine streaks
-- The `profiles` table — reads `survival_streak` and `total_xp` columns that already exist
-
-The streak is calculated by looking at distinct days with at least one logged action, counting consecutive days backwards from today.
-
----
-
-### 4. Fix Fake Leaderboard (`Leaderboard.tsx`)
-
-The old `Leaderboard` component in the community section uses hardcoded fake names:
-```typescript
-{ name: "DeathLord42", xp: 999 },  // FAKE
-```
-
-This component is pointless since `CommunityLeaderboard` already pulls real data from Supabase. **Fix:** Remove `<Leaderboard />` from `Index.tsx` and remove the import — `CommunityLeaderboard` already handles this correctly with real data.
-
----
-
-### 5. Add Today's Summary Card
-
-A new `TodaySummary` component sits between the Life Clock and the LifeTracker. It shows:
-- All actions logged today (from `recentActions` filtered to today's date)
-- Total time gained/lost today
-- A motivational one-liner based on whether the day is net positive or negative
-- Count of actions logged
-
-This closes the "habit loop" — users see a clear daily summary that rewards them for coming back.
-
----
-
-## Files to Create / Change
-
-| File | Action | What Changes |
-|------|--------|--------------|
-| `supabase/migrations/new.sql` | Create | New `life_actions` table + RLS policies |
-| `src/contexts/LifeClockContext.tsx` | Edit | Add Supabase sync on logAction + hydrate from DB on load |
-| `src/components/LifeTracker.tsx` | Edit | Add "Browse by category" tabs below the search bar, making ActionLogger redundant |
-| `src/components/TodaySummary.tsx` | Create | New card showing today's logged actions and net time impact |
-| `src/components/SurvivalStreakTracker.tsx` | Edit | Replace hardcoded fake data with real data from `life_actions` table |
-| `src/pages/Index.tsx` | Edit | Remove ActionLogger, add TodaySummary, remove fake Leaderboard import |
-
----
-
-## Technical Details
-
-### Database Migration
+**Fix:** Add a new RLS policy that allows reading all rows but only exposes non-sensitive columns. Create a database view or simply add a permissive SELECT policy:
 
 ```sql
-CREATE TABLE public.life_actions (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id uuid NOT NULL,
-  action_id text NOT NULL,
-  category text NOT NULL,
-  description text NOT NULL,
-  minutes_impact integer NOT NULL,
-  method text DEFAULT 'self',
-  logged_at timestamp with time zone DEFAULT now()
-);
-
-ALTER TABLE public.life_actions ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can insert their own actions"
-  ON public.life_actions FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can view their own actions"
+CREATE POLICY "Anyone can view recent actions for feed"
   ON public.life_actions FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (true);
 ```
 
-### Supabase Sync in LifeClockContext
+Then drop the old restrictive SELECT policy and replace it with a policy that allows public reads (the table only has category/description/minutes -- no PII). Alternatively, keep the restrictive policy and add this as a permissive one (but since existing is RESTRICTIVE, we need to change approach).
 
-The `logAction` function gets one additional async call after the local state update:
+Since the existing policy is RESTRICTIVE (not permissive), we need to either:
+- Drop it and create two PERMISSIVE policies (own rows full access + all rows read), OR
+- Create a database view that uses SECURITY DEFINER
+
+**Recommended approach:** Drop the existing restrictive SELECT policy and create a permissive one that allows anyone to read all actions. Users still can only INSERT their own.
+
+**Migration:**
+```sql
+DROP POLICY "Users can view their own actions" ON public.life_actions;
+CREATE POLICY "Users can view all actions"
+  ON public.life_actions FOR SELECT
+  USING (true);
+```
+
+---
+
+## 2. Fix CommunityLeaderboard user highlight
+
+Line 156 compares `entry.id` (profiles table PK) with `user?.id` (auth user ID). These are different UUIDs.
+
+**Fix in CommunityLeaderboard.tsx:**
+- Change the SELECT to also include `user_id` from profiles
+- Compare `entry.user_id === user?.id` instead of `entry.id === user?.id`
+
+---
+
+## 3. Sync survival_streak back to profiles
+
+When `SurvivalStreakTracker` calculates the real streak, it should also update `profiles.survival_streak` so the `CommunityLeaderboard` streak tab shows real data.
+
+**Fix in SurvivalStreakTracker.tsx:**
+- After calculating `currentStreak`, fire an update:
 ```typescript
-// Fire and forget — never blocks the UI
-if (user) {
-  supabase.from('life_actions').insert({
-    user_id: user.id,
-    action_id: actionId,
-    category: mapping.category,
-    description: mapping.description,
-    minutes_impact: Math.round(playfulMinutes),
-    method,
-    logged_at: new Date().toISOString()
-  });
-}
+supabase.from('profiles')
+  .update({ survival_streak: currentStreak })
+  .eq('user_id', user.id);
 ```
 
-On initial load (when user is authenticated), a one-time fetch pulls all `life_actions` for the last 30 days and reconstructs the `recentActions` array and total minute delta. This ensures the Life Clock reflects real saved data even after a browser refresh or device switch.
+---
 
-### Real Streak Calculation
+## 4. Re-fetch profile after XP increment
 
-The streak is calculated from actual `life_actions` rows:
-```typescript
-// Get all distinct logged dates
-const dates = rows.map(r => new Date(r.logged_at).toDateString());
-const uniqueDates = [...new Set(dates)];
-// Count consecutive days backwards from today
-let streak = 0;
-let checkDate = new Date();
-while (uniqueDates.includes(checkDate.toDateString())) {
-  streak++;
-  checkDate.setDate(checkDate.getDate() - 1);
-}
-```
+After logging an action, the navbar XP badge stays stale.
 
-### Today's Summary Card
+**Fix:** In `useAuth.tsx`, expose a `refreshProfile` function. In `LifeClockContext.tsx`, after the XP RPC call succeeds, call `refreshProfile()`. This will make the navbar XP update immediately.
 
-Reads directly from `state.recentActions` (already in memory) — no additional DB calls needed. Filters to `timestamp.toDateString() === today`, sums minutes, lists each action with its impact color-coded green/red.
+---
+
+## 5. Remove dead stub page routes
+
+Remove imports and routes for `ApiPlatformPage`, `WellnessPage`, and `SciencePage` from `App.tsx`. The nav already doesn't link to them.
+
+---
+
+## 6. Make Scientific Mode visually different
+
+In `LifeClock.tsx`, the `formatTime()` function returns identical output for both modes. 
+
+**Fix:** In scientific mode, show the time as total remaining hours or a decimal-year format (e.g., "42.37 years remaining") instead of the same y/m/d/h/m/s breakdown. This makes the toggle actually do something visible.
+
+---
+
+## 7. Replace hardcoded TrendingDeaths with real data
+
+Query `death_analyses` table (which has `is_public = true` data) to show actual recent scans from the community, instead of the static mock array.
+
+---
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/new.sql` | Drop restrictive SELECT on life_actions, add permissive public read |
+| `src/components/LiveGlobalFeed.tsx` | No code changes needed (RLS fix handles it) |
+| `src/components/CommunityLeaderboard.tsx` | Add user_id to select, fix comparison |
+| `src/components/SurvivalStreakTracker.tsx` | Sync streak to profiles table |
+| `src/hooks/useAuth.tsx` | Expose refreshProfile function |
+| `src/contexts/LifeClockContext.tsx` | Call refreshProfile after XP increment |
+| `src/App.tsx` | Remove 3 stub page imports and routes |
+| `src/components/LifeClock.tsx` | Differentiate scientific vs playful display |
+| `src/components/TrendingDeaths.tsx` | Replace mock data with death_analyses query |
+
