@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 type LeaderboardEntry = {
   id: string;
+  user_id: string;
   display_name: string;
   username: string;
   total_xp: number;
@@ -51,7 +52,7 @@ export const CommunityLeaderboard = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, username, total_xp, survival_streak')
+        .select('id, user_id, display_name, username, total_xp, survival_streak')
         .order(orderBy, { ascending: false })
         .limit(10);
 
@@ -133,7 +134,7 @@ export const CommunityLeaderboard = () => {
             <div 
               key={entry.id} 
               className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                entry.id === user?.id 
+                entry.user_id === user?.id 
                   ? 'bg-primary/20 border border-primary/30' 
                   : 'bg-card/30 hover:bg-card/50'
               }`}
@@ -153,7 +154,7 @@ export const CommunityLeaderboard = () => {
               <span className="text-success font-mono text-sm whitespace-nowrap">
                 {getScoreDisplay(entry)}
               </span>
-              {entry.id === user?.id && (
+              {entry.user_id === user?.id && (
                 <span className="text-xs text-primary font-medium">You</span>
               )}
             </div>

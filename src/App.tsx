@@ -6,10 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import ApiPlatformPage from "./pages/ApiPlatformPage";
 import SurvivalistMapPage from "./pages/SurvivalistMapPage";
-import WellnessPage from "./pages/WellnessPage";
-import SciencePage from "./pages/SciencePage";
 import DeathScannerPage from "./pages/DeathScannerPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import { MainNavBar } from "@/components/MainNavBar";
@@ -34,10 +31,7 @@ const App = () => (
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/death-scanner" element={<DeathScannerPage />} />
-                <Route path="/api-platform" element={<ApiPlatformPage />} />
                 <Route path="/survival-map" element={<SurvivalistMapPage />} />
-                <Route path="/wellness" element={<WellnessPage />} />
-                <Route path="/science" element={<SciencePage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

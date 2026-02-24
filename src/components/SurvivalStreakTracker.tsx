@@ -80,6 +80,14 @@ export const SurvivalStreakTracker = () => {
       const weeklyCount = data.filter((r: any) => new Date(r.logged_at) >= weekAgo).length;
 
       setStreak({ currentStreak, longestStreak, totalActions, weeklyCount });
+
+      // Sync streak back to profiles for leaderboard
+      supabase.from('profiles')
+        .update({ survival_streak: currentStreak })
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) console.error('[Streak] Sync error:', error);
+        });
     };
 
     fetchStreak();
