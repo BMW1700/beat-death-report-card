@@ -31,12 +31,23 @@ export const LiveGlobalFeed = () => {
         return;
       }
 
-      // Get usernames for these users
+      // Get usernames for these users (using public view)
       const userIds = [...new Set(data.map(d => d.user_id))];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_public' as any)
         .select('user_id, username, display_name')
         .in('user_id', userIds);
+
+      // Filter out users who opted out of data sharing
+      const { data: consentProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, data_consent_level')
+        .in('user_id', userIds);
+      const noConsentUsers = new Set(
+        (consentProfiles || [])
+          .filter(p => p.data_consent_level === 'none')
+          .map(p => p.user_id)
+      );
 
       const profileMap = new Map(
         (profiles || []).map(p => [p.user_id, p.display_name || p.username || 'Anonymous'])
