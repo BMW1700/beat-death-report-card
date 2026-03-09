@@ -9,6 +9,8 @@ import NotFound from "./pages/NotFound";
 import SurvivalistMapPage from "./pages/SurvivalistMapPage";
 import DeathScannerPage from "./pages/DeathScannerPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import { MainNavBar } from "@/components/MainNavBar";
 import { LifeClockProvider } from "@/contexts/LifeClockContext";
 import { AuthProvider } from "@/hooks/useAuth";
