@@ -54,7 +54,7 @@ export const LiveGlobalFeed = () => {
       );
 
       // Anonymize: show first 3 chars + ***
-      const feedItems: FeedItem[] = data.map(d => {
+      const feedItems: FeedItem[] = data.filter(d => !noConsentUsers.has(d.user_id)).map(d => {
         const name = profileMap.get(d.user_id) || 'Anonymous';
         const anonymized = name.length > 3 ? name.slice(0, 3) + '***' : name;
         return {

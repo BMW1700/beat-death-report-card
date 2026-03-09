@@ -34,6 +34,8 @@ const App = () => (
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/death-scanner" element={<DeathScannerPage />} />
                 <Route path="/survival-map" element={<SurvivalistMapPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
