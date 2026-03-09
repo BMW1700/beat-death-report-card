@@ -304,6 +304,8 @@ export type Database = {
           mental_health_score: number | null
           onboarding_completed_at: string | null
           premium_user: boolean | null
+          referral_code: string | null
+          referred_by: string | null
           sleep_disorders: string | null
           sleep_hours_avg: number | null
           sleep_quality_score: number | null
@@ -355,6 +357,8 @@ export type Database = {
           mental_health_score?: number | null
           onboarding_completed_at?: string | null
           premium_user?: boolean | null
+          referral_code?: string | null
+          referred_by?: string | null
           sleep_disorders?: string | null
           sleep_hours_avg?: number | null
           sleep_quality_score?: number | null
@@ -406,6 +410,8 @@ export type Database = {
           mental_health_score?: number | null
           onboarding_completed_at?: string | null
           premium_user?: boolean | null
+          referral_code?: string | null
+          referred_by?: string | null
           sleep_disorders?: string | null
           sleep_hours_avg?: number | null
           sleep_quality_score?: number | null
@@ -553,6 +559,7 @@ export type Database = {
     Functions: {
       consume_scan_credit: { Args: { p_user_id: string }; Returns: boolean }
       deduct_free_scan: { Args: { p_user_id: string }; Returns: boolean }
+      generate_referral_code: { Args: never; Returns: string }
       get_global_feed: {
         Args: { p_limit?: number }
         Returns: {
@@ -585,6 +592,7 @@ export type Database = {
         Args: { p_challenge_id: string }
         Returns: boolean
       }
+      process_referral: { Args: { p_referral_code: string }; Returns: boolean }
       share_viral_challenge: {
         Args: { p_challenge_id: string }
         Returns: boolean
