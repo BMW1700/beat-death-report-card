@@ -185,31 +185,44 @@ const DeathScannerPage = () => {
             {showProgress && isAnalyzing && <StreamingAnalysisProgress currentStage={analysisProgress.stage} progress={analysisProgress.progress} isComplete={analysisProgress.progress >= 100} />}
             
             <div className="glass-card success-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <DeathAnalyzer scenario={scenario} setScenario={setScenario} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} canAnalyze={true} needsCommunityTraining={needsCommunityTraining} onCommunityTraining={handleCommunityTraining} onCorrection={handleCorrection} showCorrectionModal={showCorrectionModal} lastDetection={lastDetection} canScan={scanCredits.canScan} onPaywallOpen={() => setShowPaywall(true)} />
+              <DeathAnalyzer
+                scenario={scenario}
+                setScenario={setScenario}
+                onAnalyze={handleAnalyze}
+                isAnalyzing={isAnalyzing}
+                canAnalyze={true}
+                needsCommunityTraining={needsCommunityTraining}
+                onCommunityTraining={() => {}}
+                onCorrection={() => {}}
+                showCorrectionModal={showCorrectionModal}
+                lastDetection={lastDetection}
+                canScan={scanCredits.canScan}
+                onPaywallOpen={() => setShowPaywall(true)}
+              />
             </div>
-            <TacticalScanner isScanning={isAnalyzing} detectionResults={analysis?.detectedItems?.map(item => ({
-            item: item.label,
-            confidence: item.confidence,
-            threatLevel: item.confidence > 80 ? 'high' : item.confidence > 60 ? 'moderate' : item.confidence > 40 ? 'low' : 'low',
-            category: item.category || 'Detection',
-            sources: [item.source || 'AI']
-          })) || []} onQuickScan={() => {
-            if (currentImageFile) {
-              handleAnalyze(currentImageFile);
-            } else {
-              toast.info("Upload an image first to use quick scan");
-            }
-          }} />
+            <TacticalScanner
+              isScanning={isAnalyzing}
+              detectionResults={analysis?.detectedItems?.map(item => ({
+                item: item.label,
+                confidence: item.confidence,
+                threatLevel: item.confidence > 80 ? 'high' : item.confidence > 60 ? 'moderate' : 'low',
+                category: item.category || 'Detection',
+                sources: [item.source || 'AI']
+              })) || []}
+              onQuickScan={handleAnalyze}
+            />
           </div>
 
           {/* Death Report */}
           <div className="space-y-4">
             <div className="glass-card shadow-2xl border-primary/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-              <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} imageFile={currentImageFile} />
+              <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} imageFile={null} />
             </div>
-            {analysis && <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+            {analysis && (
+              <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                 <ShareDeathReport deathReport={`${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"`} />
-              </div>}
+              </div>
+            )}
           </div>
         </div>
 
