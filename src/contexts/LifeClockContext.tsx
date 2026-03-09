@@ -288,7 +288,8 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
     };
   });
 
-  // Sync state with profile data when profile loads or changes
+  // When profile loads, ALWAYS prefer profile baseline over localStorage values
+  // This fixes the race condition where stale localStorage defaults override onboarding data
   useEffect(() => {
     if (!profile) return;
     
@@ -297,16 +298,8 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
     const profileGender = (profile.gender as 'male' | 'female' | 'other') ?? 'other';
     const profileWeight = profile.weight ?? 70;
     
-    // Only update if profile data differs from current state
     setState(prev => {
-      const baselineChanged = prev.userData.baselineYears !== profileBaseline;
-      const ageChanged = prev.userData.age !== profileAge;
-      
-      if (!baselineChanged && !ageChanged) {
-        return prev; // No changes needed
-      }
-      
-      // Recalculate total life minutes based on profile data
+      // Always recalculate from profile data (not just when different)
       const newRemainingMinutes = calculateRemainingMinutes(profileBaseline, profileAge);
       
       // Preserve any time gained/lost from actions
