@@ -221,6 +221,16 @@ export default function OnboardingPage() {
 
       localStorage.setItem('beatdeath_onboarded', 'true');
 
+      // Process referral code if provided
+      if (data.referralCode.trim()) {
+        const { data: referralResult } = await supabase.rpc('process_referral', {
+          p_referral_code: data.referralCode.trim(),
+        });
+        if (referralResult) {
+          toast({ title: "🎁 Referral Applied!", description: "You and your friend both got 5 free scans!" });
+        }
+      }
+
       toast({
         title: "🎉 Profile Complete!",
         description: calculatedResults
