@@ -74,45 +74,18 @@ export const useDeathAnalysis = () => {
     }
   };
 
-  const awardXP = async (xp: number, reason: string) => {
+  const awardXP = async (xp: number, _reason: string) => {
     if (!user) return;
 
     try {
-      // Update user's total XP
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('total_xp')
-        .eq('user_id', user.id)
-        .single();
+      const { error } = await supabase.rpc('increment_xp', {
+        p_user_id: user.id,
+        p_xp: xp
+      });
 
-      const newXP = (currentProfile?.total_xp || 0) + xp;
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          total_xp: newXP
-        })
-        .eq('user_id', user.id);
-
-      if (profileError) {
-        console.error('Error updating XP:', profileError);
+      if (error) {
+        console.error('Error incrementing XP:', error);
         return;
-      }
-
-      // Create achievement record
-      const { error: achievementError } = await supabase
-        .from('achievements')
-        .insert({
-          user_id: user.id,
-          achievement_type: reason,
-          achievement_name: `Earned ${xp} XP`,
-          description: `Received ${xp} XP for ${reason.replace('_', ' ')}`,
-          xp_reward: xp,
-          rarity: 'common'
-        });
-
-      if (achievementError) {
-        console.error('Error creating achievement:', achievementError);
       }
 
       toast({
