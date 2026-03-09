@@ -9,7 +9,7 @@ export const DeathDuel = () => {
 
   return (
     <>
-      <Card className="bg-slate-800 border-slate-700 hover:shadow-xl transition duration-200">
+      <Card className="bg-card border-border hover:shadow-xl transition duration-200">
         <button
           onClick={() => setOpen(true)}
           className="w-full text-left focus:outline-none"
