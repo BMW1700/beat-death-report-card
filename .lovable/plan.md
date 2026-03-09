@@ -1,91 +1,104 @@
 
 
-# BRUTAL TRUTH: BeatDeath Is NOT Perfect Yet
+# Fix the 7 Remaining BeatDeath Issues
 
-## The Last "Fix" Round Was a Lie
-
-The previous implementation **claimed** to fix 5 security vulnerabilities but **only created `deduct_free_scan`**. The migration comment literally says "The previous migration already applied fixes 1-5 successfully" — but a fresh security scan + direct DB queries confirm **NONE of them were applied**:
-
-| Claimed Fix | Actually Applied? |
-|---|---|
-| `protect_subscription_columns` trigger on profiles | **NO** — function doesn't exist |
-| Drop `scan_credits` INSERT policy | **NO** — still active |
-| Drop `achievements` INSERT policy | **NO** — still active |
-| `submit_duel_response` RPC for death_duels | **NO** — doesn't exist |
-| `grant_scan_credits` RPC | **NO** — doesn't exist |
-| `join/like/share_viral_challenge` RPCs | **NO** — none exist |
-| Restrict `viral_challenges` UPDATE | **NO** — still unrestricted |
-
-**Result: Every security vulnerability from the last assessment is still wide open.**
+Addresses every critical, high, and medium priority issue found in the audit.
 
 ---
 
-## What's Actually Exploitable RIGHT NOW
+## 1. Fix LiveGlobalFeed (RLS blocks cross-user reads)
 
-### 1. Premium for Free (CRITICAL)
-Any user can run:
+The `life_actions` table has RLS: `auth.uid() = user_id` for SELECT. The LiveGlobalFeed tries to read ALL users' actions but only gets the current user's.
+
+**Fix:** Add a new RLS policy that allows reading all rows but only exposes non-sensitive columns. Create a database view or simply add a permissive SELECT policy:
+
 ```sql
-UPDATE profiles SET premium_user = true, subscription_active = true WHERE user_id = auth.uid()
+CREATE POLICY "Anyone can view recent actions for feed"
+  ON public.life_actions FOR SELECT
+  USING (true);
 ```
 
-### 2. Infinite Scan Credits (CRITICAL)
-Any user can run:
+Then drop the old restrictive SELECT policy and replace it with a policy that allows public reads (the table only has category/description/minutes -- no PII). Alternatively, keep the restrictive policy and add this as a permissive one (but since existing is RESTRICTIVE, we need to change approach).
+
+Since the existing policy is RESTRICTIVE (not permissive), we need to either:
+- Drop it and create two PERMISSIVE policies (own rows full access + all rows read), OR
+- Create a database view that uses SECURITY DEFINER
+
+**Recommended approach:** Drop the existing restrictive SELECT policy and create a permissive one that allows anyone to read all actions. Users still can only INSERT their own.
+
+**Migration:**
 ```sql
-INSERT INTO scan_credits (user_id, credits_remaining, credits_purchased) VALUES (auth.uid(), 999999, 999999)
+DROP POLICY "Users can view their own actions" ON public.life_actions;
+CREATE POLICY "Users can view all actions"
+  ON public.life_actions FOR SELECT
+  USING (true);
 ```
 
-### 3. Fake Achievements + XP (HIGH)
-Any user can insert achievements with arbitrary `xp_reward`.
+---
 
-### 4. Duel Score Manipulation (MEDIUM)
-Either participant can overwrite `winner_id` and scores.
+## 2. Fix CommunityLeaderboard user highlight
 
-### 5. Challenge Metric Inflation (MEDIUM)
-Creators can set `likes_count = 999999`.
+Line 156 compares `entry.id` (profiles table PK) with `user?.id` (auth user ID). These are different UUIDs.
+
+**Fix in CommunityLeaderboard.tsx:**
+- Change the SELECT to also include `user_id` from profiles
+- Compare `entry.user_id === user?.id` instead of `entry.id === user?.id`
 
 ---
 
-## What IS Actually Working Well
+## 3. Sync survival_streak back to profiles
 
-- Auth flow, onboarding, profile sync — solid
-- LifeClock with profile-first hydration — fixed
-- CommunityLeaderboard using `profiles_public` — fixed
-- UserStories persisted to DB — fixed
-- Death Scanner using AI edge function — fixed
-- `life_actions` SELECT restricted to owner — fixed
-- Leaderboard entries locked to RPC-only — fixed
-- ErrorBoundary wraps app — done
-- Privacy/Terms footer links — done
-- `refreshProfile` closure bug — fixed
+When `SurvivalStreakTracker` calculates the real streak, it should also update `profiles.survival_streak` so the `CommunityLeaderboard` streak tab shows real data.
 
----
-
-## Is This Game-Changing Viral Perfect?
-
-**No.** It's a genuinely creative concept with solid gamification, but:
-1. **5 exploitable security holes** mean any technical user can hack premium, credits, and leaderboards in seconds
-2. **Monetization is placeholder** — PremiumUpsell, InAppPurchases, SurvivalGearMarketplace all show "Coming Soon"
-3. **No Stripe connected** — zero revenue capability
-4. **DeathDuel is client-only mock logic** — doesn't use the DB duel system at all, just random math
-5. **16 components crammed into the community section** — overwhelming UX
-
-**Viral potential: HIGH.** The concept is unique, the scanner is compelling, the gamification loop is good. But you can't ship with exploitable premium bypass and fake leaderboards.
+**Fix in SurvivalStreakTracker.tsx:**
+- After calculating `currentStreak`, fire an update:
+```typescript
+supabase.from('profiles')
+  .update({ survival_streak: currentStreak })
+  .eq('user_id', user.id);
+```
 
 ---
 
-## The Real Fix (For Real This Time)
+## 4. Re-fetch profile after XP increment
 
-### Single Migration — All 5 Security Fixes
+After logging an action, the navbar XP badge stays stale.
 
-1. **Profiles protection trigger**: Block client-side writes to `premium_user`, `subscription_active`, `subscription_tier`
-2. **Drop `scan_credits` INSERT policy**: No client inserts. Create `grant_scan_credits` SECURITY DEFINER RPC
-3. **Drop `achievements` INSERT policy**: `unlock_achievement` RPC already handles it server-side
-4. **Drop `death_duels` UPDATE policy**: Create `submit_duel_response` SECURITY DEFINER RPC
-5. **Restrict `viral_challenges` UPDATE**: Add WITH CHECK that only allows title/description changes, create SECURITY DEFINER RPCs for counter increments
+**Fix:** In `useAuth.tsx`, expose a `refreshProfile` function. In `LifeClockContext.tsx`, after the XP RPC call succeeds, call `refreshProfile()`. This will make the navbar XP update immediately.
 
-### Code Changes
-- `src/components/viral/ViralChallengeHub.tsx`: Use new RPCs for join/like/share
-- Verify `DeathDuelModal.tsx` doesn't do direct DB updates (it's client-only mock — fine for now)
+---
 
-### Total Effort: ~20 minutes (it's just one migration + one component update)
+## 5. Remove dead stub page routes
+
+Remove imports and routes for `ApiPlatformPage`, `WellnessPage`, and `SciencePage` from `App.tsx`. The nav already doesn't link to them.
+
+---
+
+## 6. Make Scientific Mode visually different
+
+In `LifeClock.tsx`, the `formatTime()` function returns identical output for both modes. 
+
+**Fix:** In scientific mode, show the time as total remaining hours or a decimal-year format (e.g., "42.37 years remaining") instead of the same y/m/d/h/m/s breakdown. This makes the toggle actually do something visible.
+
+---
+
+## 7. Replace hardcoded TrendingDeaths with real data
+
+Query `death_analyses` table (which has `is_public = true` data) to show actual recent scans from the community, instead of the static mock array.
+
+---
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/new.sql` | Drop restrictive SELECT on life_actions, add permissive public read |
+| `src/components/LiveGlobalFeed.tsx` | No code changes needed (RLS fix handles it) |
+| `src/components/CommunityLeaderboard.tsx` | Add user_id to select, fix comparison |
+| `src/components/SurvivalStreakTracker.tsx` | Sync streak to profiles table |
+| `src/hooks/useAuth.tsx` | Expose refreshProfile function |
+| `src/contexts/LifeClockContext.tsx` | Call refreshProfile after XP increment |
+| `src/App.tsx` | Remove 3 stub page imports and routes |
+| `src/components/LifeClock.tsx` | Differentiate scientific vs playful display |
+| `src/components/TrendingDeaths.tsx` | Replace mock data with death_analyses query |
 
