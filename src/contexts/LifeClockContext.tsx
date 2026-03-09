@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useAchievements } from "@/hooks/useAchievements";
 
 // Types from master prompt
 export interface UserData {
