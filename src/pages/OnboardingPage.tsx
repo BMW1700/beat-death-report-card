@@ -103,6 +103,7 @@ export default function OnboardingPage() {
     chronicConditions: [],
     medications: '0',
     desiredProducts: [],
+    referralCode: '',
   });
   const [calculatedResults, setCalculatedResults] = useState<any>(null);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
