@@ -459,7 +459,7 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       };
     });
 
-    // Fire-and-forget Supabase sync + XP increment
+    // Fire-and-forget Supabase sync + XP increment + achievements
     if (user) {
       supabase.from('life_actions').insert({
         user_id: user.id,
@@ -475,9 +475,19 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
 
       // Increment XP: abs(minutes) / 10, minimum 1 XP per action
       const xpGained = Math.max(1, Math.round(Math.abs(playfulMinutes) / 10));
-      (supabase.rpc as any)('increment_xp', { p_user_id: user.id, p_xp: xpGained }).then(({ error }: any) => {
-        if (error) console.error('[LifeClock] XP increment error:', error);
-        else refreshProfile();
+      (supabase.rpc as any)('increment_xp', { p_user_id: user.id, p_xp: xpGained }).then(async ({ error }: any) => {
+        if (error) { console.error('[LifeClock] XP increment error:', error); return; }
+        await refreshProfile();
+
+        // Fetch updated stats for achievement checks
+        const [actionsRes, profileRes] = await Promise.all([
+          supabase.from('life_actions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+          supabase.from('profiles').select('total_xp, survival_streak').eq('user_id', user.id).single()
+        ]);
+        const totalActions = actionsRes.count ?? 1;
+        const currentStreak = profileRes.data?.survival_streak ?? 0;
+        const totalXp = (profileRes.data?.total_xp ?? 0) + xpGained;
+        checkAfterAction(user.id, totalActions, currentStreak, totalXp);
       });
     }
 
