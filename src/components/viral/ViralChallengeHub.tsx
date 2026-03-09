@@ -1,67 +1,107 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Trophy, Users, TrendingUp, Skull, Share, Timer } from "lucide-react";
+import { Flame, Trophy, Users, TrendingUp, Skull, Share, Timer, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { formatDistanceToNow } from "date-fns";
 
-const VIRAL_CHALLENGES = [
-  {
-    id: 1,
-    title: "Deadliest Kitchen Challenge",
-    description: "Scan 5 kitchen items and share your death scores! Tag #KitchenKills",
-    reward: "Death Master Badge",
-    difficulty: "Easy",
-    timeLeft: "2d 14h",
-    participants: 12847,
-    trending: true
-  },
-  {
-    id: 2,
-    title: "Bathroom Death Derby",
-    description: "Find the deadliest bathroom item! Winner gets featured!",
-    reward: "Viral Star Badge + Feature",
-    difficulty: "Medium", 
-    timeLeft: "1d 8h",
-    participants: 8394,
-    trending: true
-  },
-  {
-    id: 3,
-    title: "Office Death Hunt",
-    description: "Scan office supplies and create a death tier list! Share on social!",
-    reward: "Corporate Killer Badge",
-    difficulty: "Hard",
-    timeLeft: "4d 2h",
-    participants: 5672,
-    trending: false
-  }
-];
+interface Challenge {
+  id: string;
+  title: string;
+  description: string | null;
+  challenge_type: string;
+  participants_count: number | null;
+  likes_count: number | null;
+  shares_count: number | null;
+  trending_score: number | null;
+  expires_at: string | null;
+  is_featured: boolean | null;
+}
 
 export const ViralChallengeHub = () => {
-  const [joinedChallenges, setJoinedChallenges] = useState<number[]>([]);
+  const { user } = useAuth();
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [joinedChallenges, setJoinedChallenges] = useState<string[]>([]);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const handleJoinChallenge = (challengeId: number) => {
-    setJoinedChallenges(prev => [...prev, challengeId]);
-    toast.success("Challenge joined! 🔥", {
-      description: "Start scanning to climb the leaderboard!"
-    });
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+  const fetchChallenges = async () => {
+    const { data, error } = await supabase
+      .from("viral_challenges")
+      .select("*")
+      .order("trending_score", { ascending: false })
+      .limit(5);
+
+    if (!error && data) {
+      setChallenges(data);
+    }
+    setLoading(false);
   };
 
-  const handleShareChallenge = (challenge: any) => {
-    const shareText = `Join the ${challenge.title} on BeatDeath! Can you find deadlier items than me? 💀 #BeatDeath #${challenge.title.replace(/\s+/g, '')}`;
-    
+  const handleJoinChallenge = async (challengeId: string) => {
+    if (!user) { toast.error("Sign in to join challenges"); return; }
+    setActionLoading(challengeId);
+    const { data } = await supabase.rpc("join_viral_challenge", { p_challenge_id: challengeId });
+    if (data) {
+      setJoinedChallenges(prev => [...prev, challengeId]);
+      setChallenges(prev => prev.map(c => c.id === challengeId ? { ...c, participants_count: (c.participants_count || 0) + 1 } : c));
+      toast.success("Challenge joined! 🔥");
+    }
+    setActionLoading(null);
+  };
+
+  const handleShareChallenge = async (challenge: Challenge) => {
+    const shareText = `Join the ${challenge.title} on BeatDeath! 💀 #BeatDeath`;
     if (navigator.share) {
-      navigator.share({
-        title: challenge.title,
-        text: shareText,
-        url: window.location.href
-      });
+      navigator.share({ title: challenge.title, text: shareText, url: window.location.href });
     } else {
       navigator.clipboard.writeText(shareText);
-      toast.success("Challenge shared! 📱");
+      toast.success("Challenge link copied! 📱");
+    }
+    if (user) {
+      await supabase.rpc("share_viral_challenge", { p_challenge_id: challenge.id });
+      setChallenges(prev => prev.map(c => c.id === challenge.id ? { ...c, shares_count: (c.shares_count || 0) + 1 } : c));
     }
   };
+
+  const getTimeLeft = (expiresAt: string | null) => {
+    if (!expiresAt) return "No limit";
+    const d = new Date(expiresAt);
+    return d > new Date() ? formatDistanceToNow(d, { addSuffix: false }) + " left" : "Expired";
+  };
+
+  if (loading) {
+    return (
+      <Card className="glass-card border-destructive/30">
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (challenges.length === 0) {
+    return (
+      <Card className="glass-card border-destructive/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Flame className="w-6 h-6" />
+            Viral Death Challenges
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground text-center py-4">No active challenges yet. Be the first to create one!</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="glass-card border-destructive/30 danger-glow">
@@ -73,13 +113,13 @@ export const ViralChallengeHub = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {VIRAL_CHALLENGES.map((challenge) => (
+        {challenges.map((challenge) => (
           <div key={challenge.id} className="p-4 rounded-lg bg-card/30 border border-primary/20">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-foreground">{challenge.title}</h3>
-                  {challenge.trending && (
+                  {(challenge.trending_score || 0) > 10 && (
                     <Badge className="bg-destructive text-destructive-foreground text-xs">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       TRENDING
@@ -90,15 +130,15 @@ export const ViralChallengeHub = () => {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Timer className="w-3 h-3" />
-                    {challenge.timeLeft}
+                    {getTimeLeft(challenge.expires_at)}
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="w-3 h-3" />
-                    {challenge.participants.toLocaleString()}
+                    {(challenge.participants_count || 0).toLocaleString()}
                   </div>
                   <div className="flex items-center gap-1">
                     <Trophy className="w-3 h-3" />
-                    {challenge.reward}
+                    {challenge.challenge_type}
                   </div>
                 </div>
               </div>
@@ -115,8 +155,13 @@ export const ViralChallengeHub = () => {
                   size="sm" 
                   className="flex-1 gradient-bg"
                   onClick={() => handleJoinChallenge(challenge.id)}
+                  disabled={actionLoading === challenge.id}
                 >
-                  <Skull className="w-4 h-4 mr-2" />
+                  {actionLoading === challenge.id ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Skull className="w-4 h-4 mr-2" />
+                  )}
                   Join Challenge
                 </Button>
               )}
