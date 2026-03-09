@@ -100,7 +100,7 @@ export function MainNavBar() {
                   {profile?.display_name || profile?.username || 'User'}
                 </span>
                 {profile?.total_xp !== undefined && (
-                  <div className="flex items-center gap-1">
+                  <div className="relative flex items-center gap-1">
                     <Trophy className="w-3 h-3 text-warning" />
                     <span className="text-[10px] text-warning font-mono">
                       {profile.total_xp} XP
