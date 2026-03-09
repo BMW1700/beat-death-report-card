@@ -126,7 +126,7 @@ export const useDeathAnalysis = () => {
         .from('death_analyses')
         .select(`
           *,
-          profiles (
+          profiles_public (
             display_name,
             username
           )

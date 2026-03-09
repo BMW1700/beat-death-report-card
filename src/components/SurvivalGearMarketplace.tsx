@@ -116,18 +116,8 @@ const categoryColors = {
 export const SurvivalGearMarketplace = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const handlePurchase = (item: GearItem) => {
-    // Simulate affiliate click tracking
-    toast.success(`Opening ${item.name} purchase page...`);
-    
-    // In a real implementation, this would track the affiliate click
-    // and redirect to the actual product page
-    console.log(`Affiliate link clicked: ${item.name}`);
-    
-    // Simulate opening external link (in real app, would be actual affiliate URL)
-    setTimeout(() => {
-      toast.info("Affiliate partner opened! Happy shopping! 🛒");
-    }, 1000);
+  const handlePurchase = (_item: GearItem) => {
+    toast.info("🚧 Coming Soon — Affiliate store launching soon!");
   };
 
   const filteredGear = selectedCategory 

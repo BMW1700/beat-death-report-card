@@ -27,11 +27,11 @@ export const InAppPurchases = () => {
             <p className="text-xs text-muted-foreground">~$0.05 per scan · Never expires</p>
           </div>
           <Button
-            onClick={purchaseScanPack}
             size="sm"
-            className="gradient-bg text-primary-foreground font-semibold hover:scale-105 transition-transform flex-shrink-0"
+            className="gradient-bg text-primary-foreground font-semibold flex-shrink-0"
+            disabled
           >
-            $1.99
+            Soon
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center">

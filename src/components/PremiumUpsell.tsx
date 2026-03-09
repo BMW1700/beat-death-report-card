@@ -77,8 +77,9 @@ export const PremiumUpsell = () => {
           <Button
             onClick={purchaseScanPack}
             className="w-full gradient-bg hover:scale-105 transition-transform"
+            disabled
           >
-            Get 40 Scans — $1.99
+            Coming Soon — $1.99
           </Button>
         </CardContent>
       </Card>
