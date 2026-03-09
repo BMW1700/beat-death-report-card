@@ -21,14 +21,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<any>(null);
   const { toast } = useToast();
 
-  const refreshProfile = async () => {
-    if (!user) return;
+  const refreshProfile = async (userId?: string) => {
+    const uid = userId || user?.id;
+    if (!uid) return;
     
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', uid)
         .single();
       
       if (error) {
@@ -49,9 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetch to avoid potential deadlocks
           setTimeout(() => {
-            refreshProfile();
+            refreshProfile(session.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (session?.user) {
         setTimeout(() => {
-          refreshProfile();
+          refreshProfile(session.user.id);
         }, 0);
       }
       setLoading(false);
