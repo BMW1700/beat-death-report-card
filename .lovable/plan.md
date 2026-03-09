@@ -1,86 +1,90 @@
 
 
-# BeatDeath — Everything Left (Excluding Stripe)
+# Fix the 7 Remaining BeatDeath Issues
 
-## Current State: Solid Foundation, Needs Cleanup + Growth Features
-
-Security is locked down. Core loops work. What remains is **dashboard UX cleanup**, **referral system**, **enhanced sharing**, and **polish**.
+Addresses every critical, high, and medium priority issue found in the audit.
 
 ---
 
-## What's Done and Working
+## 1. Fix LiveGlobalFeed (RLS blocks cross-user reads)
 
-- Auth, onboarding, profile sync
-- LifeClock with scientific/playful modes (properly differentiated)
-- Death Scanner with AI edge function + deduct-before-analyze
-- Scan credits system (free scans + purchased credits RPCs)
-- All RLS locked down with SECURITY DEFINER triggers/RPCs
-- CommunityLeaderboard using `profiles_public` view with `user_id` comparison (fixed)
-- SurvivalStreakTracker syncing back to profiles (fixed)
-- XP increment → refreshProfile after action (fixed)
-- TrendingDeaths querying real `death_analyses` (fixed)
-- LiveGlobalFeed using `get_global_feed` RPC (fixed)
-- ViralChallengeHub wired to DB with RPCs (fixed)
-- DeathDuel labeled "Demo Mode" (honest)
-- Counter manipulation trigger on viral_challenges (fixed)
+The `life_actions` table has RLS: `auth.uid() = user_id` for SELECT. The LiveGlobalFeed tries to read ALL users' actions but only gets the current user's.
 
-## What Needs to Be Done (Non-Stripe)
+**Fix:** Add a new RLS policy that allows reading all rows but only exposes non-sensitive columns. Create a database view or simply add a permissive SELECT policy:
 
-### 1. Curate Community Section (16 → 8 cards)
+```sql
+CREATE POLICY "Anyone can view recent actions for feed"
+  ON public.life_actions FOR SELECT
+  USING (true);
+```
 
-The community section dumps 16 components in a grid — overwhelming. Plan:
+Then drop the old restrictive SELECT policy and replace it with a policy that allows public reads (the table only has category/description/minutes -- no PII). Alternatively, keep the restrictive policy and add this as a permissive one (but since existing is RESTRICTIVE, we need to change approach).
 
-**Keep in community toggle (8 cards):**
-- CommunityLeaderboard, LiveGlobalFeed, ViralChallengeHub, EnhancedAchievements
-- UserStories, DeathDuel, DeathTrendsDashboard, SurvivalStreakTracker (move from featured section C)
+Since the existing policy is RESTRICTIVE (not permissive), we need to either:
+- Drop it and create two PERMISSIVE policies (own rows full access + all rows read), OR
+- Create a database view that uses SECURITY DEFINER
 
-**Remove from dashboard entirely** (these are either placeholder, redundant, or belong on sub-pages):
-- SurvivalistModeToggle (already on scanner page)
-- FieldManual (already on scanner page)  
-- WildernessScanner (hardcoded mock data, no real scanner)
-- CollaborativeDeathMap (placeholder, no real data flow)
-- ImmortalModeCopilot (fake AI with canned responses)
-- ViralSharingHub (redundant — ShareDeathReport already exists)
-- PremiumUpsell (disabled buttons — move to paywall modal only)
-- InAppPurchases (disabled buttons — move to paywall modal only)
-- SurvivalGearMarketplace (affiliate placeholder, no real links)
+**Recommended approach:** Drop the existing restrictive SELECT policy and create a permissive one that allows anyone to read all actions. Users still can only INSERT their own.
 
-**Update Section C** (Featured Content): Replace SurvivalStreakTracker with a new **ReferralCard** component.
+**Migration:**
+```sql
+DROP POLICY "Users can view their own actions" ON public.life_actions;
+CREATE POLICY "Users can view all actions"
+  ON public.life_actions FOR SELECT
+  USING (true);
+```
 
-### 2. Build Referral System
+---
 
-**Database migration:**
-- Add `referral_code` (unique text, auto-generated) and `referred_by` (uuid, nullable) to `profiles`
-- Create `generate_referral_code()` function
-- Update `handle_new_user()` trigger to auto-assign codes
-- Create `process_referral(p_referral_code)` SECURITY DEFINER RPC that grants 5 credits to referrer via `grant_scan_credits`
+## 2. Fix CommunityLeaderboard user highlight
 
-**Frontend:**
-- New `ReferralCard.tsx` component showing the user's referral code with copy/share buttons
-- Place it in Section C (Featured Content) grid
-- Add referral code input to onboarding flow (optional field)
+Line 156 compares `entry.id` (profiles table PK) with `user?.id` (auth user ID). These are different UUIDs.
 
-### 3. Enhanced Social Sharing
+**Fix in CommunityLeaderboard.tsx:**
+- Change the SELECT to also include `user_id` from profiles
+- Compare `entry.user_id === user?.id` instead of `entry.id === user?.id`
 
-Update `ShareDeathReport.tsx`:
-- Generate a richer share text with emojis and formatting
-- Include a call-to-action with referral code if available
-- Use `navigator.share` with proper title/text/url
-- Fallback: copy formatted text + toast notification instead of `alert()`
+---
 
-### 4. Footer Enhancement
+## 3. Sync survival_streak back to profiles
 
-Replace the minimal 1-line footer with a proper footer:
-- App version, social links placeholders, support email
-- Privacy/Terms links (existing)
-- "Made with 💀 by BeatDeath" branding
+When `SurvivalStreakTracker` calculates the real streak, it should also update `profiles.survival_streak` so the `CommunityLeaderboard` streak tab shows real data.
 
-### 5. Empty State Improvements
+**Fix in SurvivalStreakTracker.tsx:**
+- After calculating `currentStreak`, fire an update:
+```typescript
+supabase.from('profiles')
+  .update({ survival_streak: currentStreak })
+  .eq('user_id', user.id);
+```
 
-Add proper empty states with skull illustrations and CTAs for:
-- TrendingDeaths (already has basic empty state — enhance with CTA)
-- CommunityLeaderboard (already has basic — enhance)
-- LiveGlobalFeed (already has basic — enhance)
+---
+
+## 4. Re-fetch profile after XP increment
+
+After logging an action, the navbar XP badge stays stale.
+
+**Fix:** In `useAuth.tsx`, expose a `refreshProfile` function. In `LifeClockContext.tsx`, after the XP RPC call succeeds, call `refreshProfile()`. This will make the navbar XP update immediately.
+
+---
+
+## 5. Remove dead stub page routes
+
+Remove imports and routes for `ApiPlatformPage`, `WellnessPage`, and `SciencePage` from `App.tsx`. The nav already doesn't link to them.
+
+---
+
+## 6. Make Scientific Mode visually different
+
+In `LifeClock.tsx`, the `formatTime()` function returns identical output for both modes. 
+
+**Fix:** In scientific mode, show the time as total remaining hours or a decimal-year format (e.g., "42.37 years remaining") instead of the same y/m/d/h/m/s breakdown. This makes the toggle actually do something visible.
+
+---
+
+## 7. Replace hardcoded TrendingDeaths with real data
+
+Query `death_analyses` table (which has `is_public = true` data) to show actual recent scans from the community, instead of the static mock array.
 
 ---
 
@@ -88,25 +92,13 @@ Add proper empty states with skull illustrations and CTAs for:
 
 | File | Change |
 |------|--------|
-| `supabase/migrations/new.sql` | Add referral_code, referred_by to profiles; generate_referral_code(); update handle_new_user(); process_referral() RPC |
-| `src/pages/Index.tsx` | Curate community section from 16→8 cards; add ReferralCard to Section C; enhance footer |
-| `src/components/ReferralCard.tsx` | New component — show referral code, copy/share, stats |
-| `src/components/ShareDeathReport.tsx` | Better share formatting, toast instead of alert, referral code integration |
-| `src/pages/OnboardingPage.tsx` | Add optional referral code input field |
-
----
-
-## What's NOT Game-Changing Yet (But Can't Be Fixed Without Stripe)
-
-- **Monetization**: All purchase buttons disabled. Needs Stripe.
-- **Image scanning**: Camera UI exists but routes to text-only edge function. Would need vision AI integration.
-- **Push notifications**: PWA manifest exists but no push subscription logic.
-
-## What IS Game-Changing
-
-- The core "scan anything, see how it kills you" concept — genuinely novel
-- Personalized life clock with real-time countdown — addictive
-- Gamification loop (XP, streaks, achievements, leaderboard) — well-designed
-- The referral system (once built) provides organic growth
-- Scientific vs playful mode toggle — educational AND entertaining
+| `supabase/migrations/new.sql` | Drop restrictive SELECT on life_actions, add permissive public read |
+| `src/components/LiveGlobalFeed.tsx` | No code changes needed (RLS fix handles it) |
+| `src/components/CommunityLeaderboard.tsx` | Add user_id to select, fix comparison |
+| `src/components/SurvivalStreakTracker.tsx` | Sync streak to profiles table |
+| `src/hooks/useAuth.tsx` | Expose refreshProfile function |
+| `src/contexts/LifeClockContext.tsx` | Call refreshProfile after XP increment |
+| `src/App.tsx` | Remove 3 stub page imports and routes |
+| `src/components/LifeClock.tsx` | Differentiate scientific vs playful display |
+| `src/components/TrendingDeaths.tsx` | Replace mock data with death_analyses query |
 

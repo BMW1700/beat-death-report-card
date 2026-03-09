@@ -26,6 +26,7 @@ import {
   Star,
   Trophy,
   Sparkles,
+  Gift,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
@@ -73,6 +74,7 @@ interface OnboardingData {
   chronicConditions: string[];
   medications: string;
   desiredProducts: string[];
+  referralCode: string;
 }
 
 export default function OnboardingPage() {
@@ -102,6 +104,7 @@ export default function OnboardingPage() {
     chronicConditions: [],
     medications: '0',
     desiredProducts: [],
+    referralCode: '',
   });
   const [calculatedResults, setCalculatedResults] = useState<any>(null);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
@@ -218,6 +221,16 @@ export default function OnboardingPage() {
 
       localStorage.setItem('beatdeath_onboarded', 'true');
 
+      // Process referral code if provided
+      if (data.referralCode.trim()) {
+        const { data: referralResult } = await supabase.rpc('process_referral', {
+          p_referral_code: data.referralCode.trim(),
+        });
+        if (referralResult) {
+          toast({ title: "🎁 Referral Applied!", description: "You and your friend both got 5 free scans!" });
+        }
+      }
+
       toast({
         title: "🎉 Profile Complete!",
         description: calculatedResults
@@ -305,6 +318,24 @@ export default function OnboardingPage() {
                     onChange={(e) => updateData('email', e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">Required to save your results</p>
+                </div>
+
+                {/* Referral code input */}
+                <div className="space-y-2 text-left max-w-md mx-auto">
+                  <Label htmlFor="referral" className="flex items-center gap-2">
+                    <Gift className="w-4 h-4 text-primary" />
+                    Referral Code (optional)
+                  </Label>
+                  <Input 
+                    id="referral"
+                    type="text"
+                    placeholder="e.g. ABCD1234"
+                    value={data.referralCode}
+                    onChange={(e) => updateData('referralCode', e.target.value.toUpperCase())}
+                    maxLength={8}
+                    className="font-mono tracking-widest text-center"
+                  />
+                  <p className="text-xs text-muted-foreground">Have a friend's code? Both of you get 5 free scans!</p>
                 </div>
                 
                 <div className="flex items-start space-x-2 text-sm">

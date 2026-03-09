@@ -18,23 +18,14 @@ import { WeeklyProgressChart } from "@/components/WeeklyProgressChart";
 
 // Community & extras (collapsible)
 import { EnhancedAchievements } from "@/components/EnhancedAchievements";
-
 import { UserStories } from "@/components/UserStories";
 import { DeathTrendsDashboard } from "@/components/DeathTrendsDashboard";
 import { DeathDuel } from "@/components/DeathDuel";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
-import { PremiumUpsell } from "@/components/PremiumUpsell";
-import { InAppPurchases } from "@/components/InAppPurchases";
-import { ViralSharingHub } from "@/components/ViralSharingHub";
-import { WildernessScanner } from "@/components/WildernessScanner";
 import { LiveGlobalFeed } from "@/components/LiveGlobalFeed";
 import { SurvivalStreakTracker } from "@/components/SurvivalStreakTracker";
-import { SurvivalGearMarketplace } from "@/components/SurvivalGearMarketplace";
-import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
-import { SurvivalistModeToggle } from "@/components/SurvivalistModeToggle";
-import { FieldManual } from "@/components/FieldManual";
 import { ViralChallengeHub } from "@/components/viral/ViralChallengeHub";
-import { CollaborativeDeathMap } from "@/components/viral/CollaborativeDeathMap";
+import { ReferralCard } from "@/components/ReferralCard";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -152,12 +143,10 @@ const Index = () => {
           <div className="glass-card border border-border hover:border-primary/40 transition-colors duration-200">
             <DeathScore />
           </div>
-          <div className="glass-card border border-border hover:border-primary/40 transition-colors duration-200">
-            <SurvivalStreakTracker />
-          </div>
+          <ReferralCard />
         </section>
 
-        {/* ── Section D: Community & More (collapsible) ── */}
+        {/* ── Section D: Community & More (collapsible, curated 8 cards) ── */}
         <section className="mb-12">
           <Button
             variant="outline"
@@ -179,34 +168,35 @@ const Index = () => {
 
           {showCommunity && (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-              <SurvivalistModeToggle />
-              <FieldManual />
-              <ViralChallengeHub />
-              <ViralSharingHub />
-              <WildernessScanner />
-              <LiveGlobalFeed />
-              <CollaborativeDeathMap />
-              <ImmortalModeCopilot />
               <CommunityLeaderboard />
+              <LiveGlobalFeed />
+              <SurvivalStreakTracker />
+              <EnhancedAchievements />
+              <ViralChallengeHub />
               <UserStories />
               <DeathDuel />
               <DeathTrendsDashboard />
-              <EnhancedAchievements />
-              <PremiumUpsell />
-              <InAppPurchases />
-              <SurvivalGearMarketplace />
             </div>
           )}
         </section>
 
         {/* Footer */}
-        <footer className="text-center text-muted-foreground font-playfair pb-8">
-          <p className="text-sm">Stay smart. Stay weird. Be BeatDeath. 💀</p>
-          <div className="flex justify-center gap-4 mt-2 text-xs">
+        <footer className="border-t border-border pt-8 pb-8 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Skull className="w-5 h-5 text-destructive" />
+            <span className="font-playfair font-bold text-lg gradient-text">BeatDeath</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            Stay smart. Stay weird. Beat death. 💀
+          </p>
+          <div className="flex justify-center gap-6 text-xs text-muted-foreground mb-3">
             <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+            <a href="mailto:support@beatdeath.com" className="hover:text-primary transition-colors">Support</a>
           </div>
-          <p className="text-xs mt-1 opacity-60">Version 2.0 • Powered by AI</p>
+          <p className="text-[10px] text-muted-foreground/60">
+            Version 2.0 · For Entertainment Only — Not Medical Advice · Powered by AI
+          </p>
         </footer>
 
         <PWAInstallPrompt />
