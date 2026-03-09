@@ -32,6 +32,19 @@ export function MainNavBar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const scanCredits = useScanCredits();
+  const [xpGain, setXpGain] = useState<number | null>(null);
+  const prevXp = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (profile?.total_xp !== undefined && prevXp.current !== undefined) {
+      const diff = profile.total_xp - prevXp.current;
+      if (diff > 0) {
+        setXpGain(diff);
+        setTimeout(() => setXpGain(null), 1500);
+      }
+    }
+    prevXp.current = profile?.total_xp;
+  }, [profile?.total_xp]);
 
   if (location.pathname === '/auth') {
     return null;
