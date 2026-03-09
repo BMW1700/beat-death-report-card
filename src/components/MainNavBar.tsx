@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useScanCredits } from "@/hooks/useScanCredits";
 import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
