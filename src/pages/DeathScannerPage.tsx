@@ -122,48 +122,18 @@ const DeathScannerPage = () => {
       finalWords: "Death finds a way, but so does Google... maybe try that first? 🤔"
     };
   };
-  const handleCommunityTraining = (imageFile: File, aiLabels: string[]) => {
-    setCurrentAiLabels(aiLabels);
-  };
-  const handleCorrection = (originalDetection: string, correctedItem: string, category: string) => {
-    console.log('Item correction received:', {
-      originalDetection,
-      correctedItem,
-      category
-    });
-    setShowCorrectionModal(false);
-    toast.success("🎯 Community Learning Updated!", {
-      description: `The scanner now knows "${originalDetection}" is actually "${correctedItem}". Next time anyone scans this, it will be detected correctly!`,
-      duration: 5000
-    });
-
-    // Optionally trigger re-analysis with the corrected item
-    if (currentImageFile) {
-      setTimeout(() => {
-        toast.info("🔄 Re-analyzing with correction...", {
-          description: "Testing the improved detection"
-        });
-        handleAnalyze(currentImageFile);
-      }, 2000);
-    }
-  };
-  const handleAnalyze = async (imageFile?: File, communityData?: any) => {
-    if (!scenario.trim() && !imageFile) {
+  const handleAnalyze = async () => {
+    if (!scenario.trim()) {
+      toast.info("Enter a scenario to analyze");
       return;
     }
     setShowProgress(true);
     try {
-      const result = await performAnalysis(scenario, imageFile, (stage, progress) => {
-        console.log(`Analysis progress: ${stage} - ${progress}%`);
-        setAnalysisProgress({
-          stage,
-          progress
-        });
+      const result = await performAnalysis(scenario, undefined, (stage, progress) => {
+        setAnalysisProgress({ stage, progress });
       });
       if (result) {
         setAnalysis(result);
-        setCurrentImageFile(imageFile || null);
-        // Deduct scan credit after successful analysis
         await scanCredits.deductScan();
       }
     } catch (error) {
