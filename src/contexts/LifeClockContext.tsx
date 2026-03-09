@@ -248,6 +248,7 @@ const LifeClockContext = createContext<LifeClockContextType | undefined>(undefin
 export function LifeClockProvider({ children }: { children: ReactNode }) {
   const { user, profile, refreshProfile } = useAuth();
   const hydratedRef = useRef(false);
+  const { checkAfterAction } = useAchievements();
   
   // Initialize state - try to load from localStorage first for persistence
   const [state, setState] = useState<LifeClockState>(() => {
