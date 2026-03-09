@@ -142,6 +142,7 @@ export const LifeClock = () => {
           <AnimatedGrimReaper 
             timeRemaining={timeRemaining}
             todayContribution={todayContribution}
+            actionCount={state.recentActions.length}
           />
         </div>
 

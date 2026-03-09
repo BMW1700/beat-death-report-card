@@ -12,11 +12,13 @@ interface AnimatedGrimReaperProps {
     seconds: number;
   };
   todayContribution: number;
+  actionCount?: number;
 }
 
 export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({ 
   timeRemaining, 
-  todayContribution 
+  todayContribution,
+  actionCount = 0
 }) => {
   const [isGripping, setIsGripping] = useState(false);
   const [handAnimation, setHandAnimation] = useState('idle');
@@ -63,7 +65,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         if (shakeTimer) clearTimeout(shakeTimer);
       };
     }
-  }, [todayContribution, isGainingTime]);
+  }, [todayContribution, isGainingTime, actionCount]);
 
   const lifePercentage = Math.max(5, Math.min(95, (timeRemaining.years / 80) * 100));
 
