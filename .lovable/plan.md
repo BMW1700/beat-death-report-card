@@ -1,94 +1,104 @@
 
 
-# What's Left to Make BeatDeath PERFECT & GAME-CHANGING
+# Fix the 7 Remaining BeatDeath Issues
 
-## Current Status: 90% Launch-Ready
-
-You've fixed the major blockers. Here's what remains:
+Addresses every critical, high, and medium priority issue found in the audit.
 
 ---
 
-## 🔴 CRITICAL SECURITY (Must Fix)
+## 1. Fix LiveGlobalFeed (RLS blocks cross-user reads)
 
-### 1. Profiles Table Exposes Sensitive Health Data
-**Risk**: Anyone (even unauthenticated) can read ALL user emails, ages, chronic conditions, medications, mental health scores, substance use, etc.
+The `life_actions` table has RLS: `auth.uid() = user_id` for SELECT. The LiveGlobalFeed tries to read ALL users' actions but only gets the current user's.
 
-**Fix**: Create a database view that only exposes public fields (username, display_name, avatar_url, total_xp, survival_streak) and restrict direct profile reads to own row only.
+**Fix:** Add a new RLS policy that allows reading all rows but only exposes non-sensitive columns. Create a database view or simply add a permissive SELECT policy:
 
-### 2. Users Can Give Themselves Unlimited Scan Credits  
-**Risk**: The UPDATE policy on `scan_credits` lets users set `credits_remaining` to any value.
+```sql
+CREATE POLICY "Anyone can view recent actions for feed"
+  ON public.life_actions FOR SELECT
+  USING (true);
+```
 
-**Fix**: Remove direct UPDATE policy. Create a `SECURITY DEFINER` function that only allows credit decrements (consuming scans) or requires service-role for additions.
+Then drop the old restrictive SELECT policy and replace it with a policy that allows public reads (the table only has category/description/minutes -- no PII). Alternatively, keep the restrictive policy and add this as a permissive one (but since existing is RESTRICTIVE, we need to change approach).
 
----
+Since the existing policy is RESTRICTIVE (not permissive), we need to either:
+- Drop it and create two PERMISSIVE policies (own rows full access + all rows read), OR
+- Create a database view that uses SECURITY DEFINER
 
-## 🟡 IMPORTANT GAPS (Should Fix)
+**Recommended approach:** Drop the existing restrictive SELECT policy and create a permissive one that allows anyone to read all actions. Users still can only INSERT their own.
 
-### 3. Data Consent Not Enforced
-- Onboarding collects `data_consent_level` (none/bronze/silver/gold)
-- But `LiveGlobalFeed` ignores it - showing ALL users regardless of consent
-- Users who chose "Private Mode" still appear in feed
-
-**Fix**: Filter `LiveGlobalFeed` query to exclude users with `data_consent_level = 'none'`.
-
-### 4. EnhancedAchievements Shows Hardcoded Data
-- The component displays fake achievements with hardcoded progress
-- Real `achievements` table exists and gets populated by `unlock_achievement` RPC
-- But UI never fetches from DB
-
-**Fix**: Update `EnhancedAchievements.tsx` to query actual `achievements` table and show real unlocked status.
-
-### 5. Dead Page Files Still Exist
-- `src/pages/ApiPlatformPage.tsx` 
-- `src/pages/SciencePage.tsx`
-- `src/pages/WellnessPage.tsx`
-
-Routes were removed from App.tsx but files remain. **Delete them**.
-
-### 6. Privacy Policy & Terms of Service Missing
-- No `/privacy` or `/terms` pages
-- Required for App Store submission and GDPR compliance
-
-**Fix**: Create basic legal pages with placeholders for your lawyer to review.
+**Migration:**
+```sql
+DROP POLICY "Users can view their own actions" ON public.life_actions;
+CREATE POLICY "Users can view all actions"
+  ON public.life_actions FOR SELECT
+  USING (true);
+```
 
 ---
 
-## 🟢 NICE-TO-HAVE (Post-Launch Polish)
+## 2. Fix CommunityLeaderboard user highlight
 
-### 7. Enable Leaked Password Protection  
-In Supabase Dashboard → Auth Settings, enable "Leaked Password Protection" to block compromised passwords.
+Line 156 compares `entry.id` (profiles table PK) with `user?.id` (auth user ID). These are different UUIDs.
 
-### 8. Stripe Integration (Skipped Per Request)
-When ready, wire `useScanCredits.purchaseScanPack()` to call the `/create-checkout` edge function.
-
-### 9. Real-time Feed Updates
-Add Supabase realtime subscription to `LiveGlobalFeed` so new actions appear instantly without polling.
-
-### 10. Image-Based Death Scanner
-The edge function `analyze-death-risk` supports vision analysis. Re-add camera UI when ready to enable image uploads.
+**Fix in CommunityLeaderboard.tsx:**
+- Change the SELECT to also include `user_id` from profiles
+- Compare `entry.user_id === user?.id` instead of `entry.id === user?.id`
 
 ---
 
-## Summary Table
+## 3. Sync survival_streak back to profiles
 
-| Priority | Issue | Effort |
-|----------|-------|--------|
-| 🔴 Critical | Profiles table exposes PII | 30 min |
-| 🔴 Critical | Scan credits self-escalation | 20 min |
-| 🟡 Important | Data consent not enforced | 15 min |
-| 🟡 Important | Achievements show fake data | 20 min |
-| 🟡 Important | Delete dead page files | 2 min |
-| 🟡 Important | Add privacy/terms pages | 15 min |
-| 🟢 Optional | Leaked password protection | Manual |
-| 🟢 Optional | Stripe integration | 1 hr |
+When `SurvivalStreakTracker` calculates the real streak, it should also update `profiles.survival_streak` so the `CommunityLeaderboard` streak tab shows real data.
 
-**Total to "Perfect": ~2 hours of focused work**
+**Fix in SurvivalStreakTracker.tsx:**
+- After calculating `currentStreak`, fire an update:
+```typescript
+supabase.from('profiles')
+  .update({ survival_streak: currentStreak })
+  .eq('user_id', user.id);
+```
 
 ---
 
-## Recommendation
+## 4. Re-fetch profile after XP increment
 
-Fix the **2 critical security issues** first - they're exploitable vulnerabilities. Then tackle the data consent and achievements to complete the feature set. The legal pages can use boilerplate for now.
+After logging an action, the navbar XP badge stays stale.
 
-After those 6 fixes, BeatDeath is genuinely launch-ready and game-changing.
+**Fix:** In `useAuth.tsx`, expose a `refreshProfile` function. In `LifeClockContext.tsx`, after the XP RPC call succeeds, call `refreshProfile()`. This will make the navbar XP update immediately.
+
+---
+
+## 5. Remove dead stub page routes
+
+Remove imports and routes for `ApiPlatformPage`, `WellnessPage`, and `SciencePage` from `App.tsx`. The nav already doesn't link to them.
+
+---
+
+## 6. Make Scientific Mode visually different
+
+In `LifeClock.tsx`, the `formatTime()` function returns identical output for both modes. 
+
+**Fix:** In scientific mode, show the time as total remaining hours or a decimal-year format (e.g., "42.37 years remaining") instead of the same y/m/d/h/m/s breakdown. This makes the toggle actually do something visible.
+
+---
+
+## 7. Replace hardcoded TrendingDeaths with real data
+
+Query `death_analyses` table (which has `is_public = true` data) to show actual recent scans from the community, instead of the static mock array.
+
+---
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/new.sql` | Drop restrictive SELECT on life_actions, add permissive public read |
+| `src/components/LiveGlobalFeed.tsx` | No code changes needed (RLS fix handles it) |
+| `src/components/CommunityLeaderboard.tsx` | Add user_id to select, fix comparison |
+| `src/components/SurvivalStreakTracker.tsx` | Sync streak to profiles table |
+| `src/hooks/useAuth.tsx` | Expose refreshProfile function |
+| `src/contexts/LifeClockContext.tsx` | Call refreshProfile after XP increment |
+| `src/App.tsx` | Remove 3 stub page imports and routes |
+| `src/components/LifeClock.tsx` | Differentiate scientific vs playful display |
+| `src/components/TrendingDeaths.tsx` | Replace mock data with death_analyses query |
 

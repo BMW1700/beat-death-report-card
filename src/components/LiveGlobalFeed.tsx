@@ -19,49 +19,20 @@ export const LiveGlobalFeed = () => {
 
   useEffect(() => {
     const fetchFeed = async () => {
-      // Get recent public life_actions joined with profiles for username
-      const { data, error } = await supabase
-        .from('life_actions')
-        .select('id, category, description, minutes_impact, logged_at, user_id')
-        .order('logged_at', { ascending: false })
-        .limit(15);
+      // Use secure RPC that handles consent filtering server-side
+      const { data, error } = await supabase.rpc('get_global_feed', { p_limit: 15 });
 
       if (error || !data) {
         setLoading(false);
         return;
       }
 
-      // Get usernames for these users
-      const userIds = [...new Set(data.map(d => d.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, username, display_name')
-        .in('user_id', userIds);
-
-      const profileMap = new Map(
-        (profiles || []).map(p => [p.user_id, p.display_name || p.username || 'Anonymous'])
-      );
-
-      // Anonymize: show first 3 chars + ***
-      const feedItems: FeedItem[] = data.map(d => {
-        const name = profileMap.get(d.user_id) || 'Anonymous';
-        const anonymized = name.length > 3 ? name.slice(0, 3) + '***' : name;
-        return {
-          id: d.id,
-          category: d.category,
-          description: d.description,
-          minutes_impact: d.minutes_impact,
-          logged_at: d.logged_at,
-          username: anonymized,
-        };
-      });
-
-      setItems(feedItems);
+      setItems(data as FeedItem[]);
       setLoading(false);
     };
 
     fetchFeed();
-    const interval = setInterval(fetchFeed, 30000); // refresh every 30s
+    const interval = setInterval(fetchFeed, 30000);
     return () => clearInterval(interval);
   }, []);
 

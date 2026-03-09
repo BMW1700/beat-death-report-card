@@ -9,6 +9,8 @@ import NotFound from "./pages/NotFound";
 import SurvivalistMapPage from "./pages/SurvivalistMapPage";
 import DeathScannerPage from "./pages/DeathScannerPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import { MainNavBar } from "@/components/MainNavBar";
 import { LifeClockProvider } from "@/contexts/LifeClockContext";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -32,6 +34,8 @@ const App = () => (
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/death-scanner" element={<DeathScannerPage />} />
                 <Route path="/survival-map" element={<SurvivalistMapPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

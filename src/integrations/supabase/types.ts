@@ -510,9 +510,59 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          danger_level: number | null
+          display_name: string | null
+          immortal_mode: boolean | null
+          survival_streak: number | null
+          survivalist_mode: boolean | null
+          total_xp: number | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          danger_level?: number | null
+          display_name?: string | null
+          immortal_mode?: boolean | null
+          survival_streak?: number | null
+          survivalist_mode?: boolean | null
+          total_xp?: number | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          danger_level?: number | null
+          display_name?: string | null
+          immortal_mode?: boolean | null
+          survival_streak?: number | null
+          survivalist_mode?: boolean | null
+          total_xp?: number | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      consume_scan_credit: { Args: { p_user_id: string }; Returns: boolean }
+      get_global_feed: {
+        Args: { p_limit?: number }
+        Returns: {
+          category: string
+          description: string
+          id: string
+          logged_at: string
+          minutes_impact: number
+          username: string
+        }[]
+      }
       increment_xp: {
         Args: { p_user_id: string; p_xp: number }
         Returns: undefined

@@ -100,21 +100,12 @@ export function useScanCredits() {
       }
 
       if (state.creditsRemaining > 0) {
-        // Find the oldest pack with remaining credits and deduct
-        const { data: packs } = await supabase
-          .from("scan_credits")
-          .select("id, credits_remaining")
-          .eq("user_id", user.id)
-          .gt("credits_remaining", 0)
-          .order("purchased_at", { ascending: true })
-          .limit(1);
+        // Use secure RPC to consume a credit
+        const { data: success } = await supabase.rpc('consume_scan_credit', {
+          p_user_id: user.id,
+        });
 
-        if (packs && packs.length > 0) {
-          await supabase
-            .from("scan_credits")
-            .update({ credits_remaining: packs[0].credits_remaining - 1 })
-            .eq("id", packs[0].id);
-
+        if (success) {
           const newRemaining = state.creditsRemaining - 1;
           setState(prev => ({
             ...prev,
