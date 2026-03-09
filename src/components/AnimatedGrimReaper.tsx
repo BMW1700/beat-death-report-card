@@ -65,7 +65,7 @@ export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({
         if (shakeTimer) clearTimeout(shakeTimer);
       };
     }
-  }, [todayContribution, isGainingTime]);
+  }, [todayContribution, isGainingTime, actionCount]);
 
   const lifePercentage = Math.max(5, Math.min(95, (timeRemaining.years / 80) * 100));
 

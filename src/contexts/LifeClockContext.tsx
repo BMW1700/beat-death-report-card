@@ -410,6 +410,9 @@ export function LifeClockProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
+    // Haptic feedback on mobile
+    if (navigator.vibrate) navigator.vibrate(50);
+
     // Calculate minutes
     const scientificMinutes = calculateScientificMinutes(mapping);
     const isVerified = method === 'verified';
