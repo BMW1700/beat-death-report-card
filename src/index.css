@@ -454,6 +454,11 @@
   animation: pulse 2s infinite;
 }
 
+@keyframes xpFloat {
+  0% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -24px); }
+}
+
 .temp-pin-marker div {
   animation: bounce 0.5s ease-in-out;
 }
