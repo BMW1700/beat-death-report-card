@@ -12,11 +12,13 @@ interface AnimatedGrimReaperProps {
     seconds: number;
   };
   todayContribution: number;
+  actionCount?: number;
 }
 
 export const AnimatedGrimReaper: React.FC<AnimatedGrimReaperProps> = ({ 
   timeRemaining, 
-  todayContribution 
+  todayContribution,
+  actionCount = 0
 }) => {
   const [isGripping, setIsGripping] = useState(false);
   const [handAnimation, setHandAnimation] = useState('idle');
