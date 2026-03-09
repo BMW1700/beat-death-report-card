@@ -26,6 +26,7 @@ import {
   Star,
   Trophy,
   Sparkles,
+  Gift,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
