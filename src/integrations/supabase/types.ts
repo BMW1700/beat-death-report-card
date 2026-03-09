@@ -517,7 +517,23 @@ export type Database = {
         Args: { p_user_id: string; p_xp: number }
         Returns: undefined
       }
+      unlock_achievement: {
+        Args: {
+          p_achievement_name: string
+          p_achievement_type: string
+          p_description: string
+          p_icon: string
+          p_rarity: string
+          p_user_id: string
+          p_xp_reward: number
+        }
+        Returns: boolean
+      }
       update_trending_scores: { Args: never; Returns: undefined }
+      upsert_leaderboard_entry: {
+        Args: { p_leaderboard_type: string; p_score: number; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

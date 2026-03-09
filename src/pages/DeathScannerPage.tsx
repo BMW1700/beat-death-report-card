@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skull, Calculator, AlertTriangle, ArrowLeft } from "lucide-react";
 import { DeathAnalyzer } from "@/components/DeathAnalyzer";
-import { analyzeImageForToxicity, generateDeathAnalysisReport, inferHazardMechanism } from "@/utils/imageAnalysis";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
@@ -18,7 +17,6 @@ import { useScanCredits } from "@/hooks/useScanCredits";
 import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
 import { ScanPaywall } from "@/components/ScanPaywall";
 const DeathScannerPage = () => {
-  console.log("DeathScannerPage component is rendering");
   const [userData, setUserData] = useState<UserData>({
     weight: "",
     weightUnit: "lbs",
@@ -28,25 +26,17 @@ const DeathScannerPage = () => {
   });
   const [scenario, setScenario] = useState("");
   const [analysis, setAnalysis] = useState<DeathAnalysis | null>(null);
-  const {
-    isAnalyzing,
-    performAnalysis
-  } = useDeathAnalysis();
-  const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
-  const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
-  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
-  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
-  const [lastDetection, setLastDetection] = useState<{
+  const { isAnalyzing, performAnalysis } = useDeathAnalysis();
+  const [needsCommunityTraining] = useState(false);
+  const [showCorrectionModal] = useState(false);
+  const [lastDetection] = useState<{
     label: string;
     confidence: number;
     source?: string;
     allClassificationResults?: any[];
     isFromCommunity?: boolean;
   } | null>(null);
-  const [analysisProgress, setAnalysisProgress] = useState({
-    stage: '',
-    progress: 0
-  });
+  const [analysisProgress, setAnalysisProgress] = useState({ stage: '', progress: 0 });
   const [showProgress, setShowProgress] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const scanCredits = useScanCredits();
@@ -132,48 +122,18 @@ const DeathScannerPage = () => {
       finalWords: "Death finds a way, but so does Google... maybe try that first? 🤔"
     };
   };
-  const handleCommunityTraining = (imageFile: File, aiLabels: string[]) => {
-    setCurrentAiLabels(aiLabels);
-  };
-  const handleCorrection = (originalDetection: string, correctedItem: string, category: string) => {
-    console.log('Item correction received:', {
-      originalDetection,
-      correctedItem,
-      category
-    });
-    setShowCorrectionModal(false);
-    toast.success("🎯 Community Learning Updated!", {
-      description: `The scanner now knows "${originalDetection}" is actually "${correctedItem}". Next time anyone scans this, it will be detected correctly!`,
-      duration: 5000
-    });
-
-    // Optionally trigger re-analysis with the corrected item
-    if (currentImageFile) {
-      setTimeout(() => {
-        toast.info("🔄 Re-analyzing with correction...", {
-          description: "Testing the improved detection"
-        });
-        handleAnalyze(currentImageFile);
-      }, 2000);
-    }
-  };
-  const handleAnalyze = async (imageFile?: File, communityData?: any) => {
-    if (!scenario.trim() && !imageFile) {
+  const handleAnalyze = async () => {
+    if (!scenario.trim()) {
+      toast.info("Enter a scenario to analyze");
       return;
     }
     setShowProgress(true);
     try {
-      const result = await performAnalysis(scenario, imageFile, (stage, progress) => {
-        console.log(`Analysis progress: ${stage} - ${progress}%`);
-        setAnalysisProgress({
-          stage,
-          progress
-        });
+      const result = await performAnalysis(scenario, undefined, (stage, progress) => {
+        setAnalysisProgress({ stage, progress });
       });
       if (result) {
         setAnalysis(result);
-        setCurrentImageFile(imageFile || null);
-        // Deduct scan credit after successful analysis
         await scanCredits.deductScan();
       }
     } catch (error) {
@@ -225,31 +185,44 @@ const DeathScannerPage = () => {
             {showProgress && isAnalyzing && <StreamingAnalysisProgress currentStage={analysisProgress.stage} progress={analysisProgress.progress} isComplete={analysisProgress.progress >= 100} />}
             
             <div className="glass-card success-glow transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
-              <DeathAnalyzer scenario={scenario} setScenario={setScenario} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} canAnalyze={true} needsCommunityTraining={needsCommunityTraining} onCommunityTraining={handleCommunityTraining} onCorrection={handleCorrection} showCorrectionModal={showCorrectionModal} lastDetection={lastDetection} canScan={scanCredits.canScan} onPaywallOpen={() => setShowPaywall(true)} />
+              <DeathAnalyzer
+                scenario={scenario}
+                setScenario={setScenario}
+                onAnalyze={handleAnalyze}
+                isAnalyzing={isAnalyzing}
+                canAnalyze={true}
+                needsCommunityTraining={needsCommunityTraining}
+                onCommunityTraining={() => {}}
+                onCorrection={() => {}}
+                showCorrectionModal={showCorrectionModal}
+                lastDetection={lastDetection}
+                canScan={scanCredits.canScan}
+                onPaywallOpen={() => setShowPaywall(true)}
+              />
             </div>
-            <TacticalScanner isScanning={isAnalyzing} detectionResults={analysis?.detectedItems?.map(item => ({
-            item: item.label,
-            confidence: item.confidence,
-            threatLevel: item.confidence > 80 ? 'high' : item.confidence > 60 ? 'moderate' : item.confidence > 40 ? 'low' : 'low',
-            category: item.category || 'Detection',
-            sources: [item.source || 'AI']
-          })) || []} onQuickScan={() => {
-            if (currentImageFile) {
-              handleAnalyze(currentImageFile);
-            } else {
-              toast.info("Upload an image first to use quick scan");
-            }
-          }} />
+            <TacticalScanner
+              isScanning={isAnalyzing}
+              detectionResults={analysis?.detectedItems?.map(item => ({
+                item: item.label,
+                confidence: item.confidence,
+                threatLevel: item.confidence > 80 ? 'high' : item.confidence > 60 ? 'moderate' : 'low',
+                category: item.category || 'Detection',
+                sources: [item.source || 'AI']
+              })) || []}
+              onQuickScan={handleAnalyze}
+            />
           </div>
 
           {/* Death Report */}
           <div className="space-y-4">
             <div className="glass-card shadow-2xl border-primary/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-              <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} imageFile={currentImageFile} />
+              <DeathReport analysis={analysis} userData={userData} isAnalyzing={isAnalyzing} imageFile={null} />
             </div>
-            {analysis && <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+            {analysis && (
+              <div className="glass-card transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                 <ShareDeathReport deathReport={`${analysis.item || ""} -- Kill Rating: ${analysis.killRating || ""}/5. "${analysis.killRatingText || ""}"`} />
-              </div>}
+              </div>
+            )}
           </div>
         </div>
 
