@@ -326,6 +326,7 @@ export default function OnboardingPage() {
                     className="font-mono tracking-widest text-center"
                   />
                   <p className="text-xs text-muted-foreground">Have a friend's code? Both of you get 5 free scans!</p>
+                </div>
                 
                 <div className="flex items-start space-x-2 text-sm">
                   <Checkbox 
