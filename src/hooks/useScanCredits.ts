@@ -79,18 +79,19 @@ export function useScanCredits() {
     try {
       // Priority: free scans first, then purchased credits
       if (state.freeScansLeft > 0) {
-        const newUsed = state.freeScansUsed + 1;
-        await supabase
-          .from("profiles")
-          .update({ free_scans_used: newUsed })
-          .eq("user_id", user.id);
+        const { data: success } = await supabase.rpc('deduct_free_scan', {
+          p_user_id: user.id,
+        });
 
-        setState(prev => ({
-          ...prev,
-          freeScansUsed: newUsed,
-          freeScansLeft: Math.max(0, FREE_SCAN_LIMIT - newUsed),
-          canScan: prev.isSubscriber || FREE_SCAN_LIMIT - newUsed > 0 || prev.creditsRemaining > 0,
-        }));
+        if (success) {
+          const newUsed = state.freeScansUsed + 1;
+          setState(prev => ({
+            ...prev,
+            freeScansUsed: newUsed,
+            freeScansLeft: Math.max(0, FREE_SCAN_LIMIT - newUsed),
+            canScan: prev.isSubscriber || FREE_SCAN_LIMIT - newUsed > 0 || prev.creditsRemaining > 0,
+          }));
+        }
         return;
       }
 
