@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useScanCredits } from "@/hooks/useScanCredits";
 import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
@@ -32,6 +32,19 @@ export function MainNavBar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const scanCredits = useScanCredits();
+  const [xpGain, setXpGain] = useState<number | null>(null);
+  const prevXp = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (profile?.total_xp !== undefined && prevXp.current !== undefined) {
+      const diff = profile.total_xp - prevXp.current;
+      if (diff > 0) {
+        setXpGain(diff);
+        setTimeout(() => setXpGain(null), 1500);
+      }
+    }
+    prevXp.current = profile?.total_xp;
+  }, [profile?.total_xp]);
 
   if (location.pathname === '/auth') {
     return null;
@@ -87,11 +100,16 @@ export function MainNavBar() {
                   {profile?.display_name || profile?.username || 'User'}
                 </span>
                 {profile?.total_xp !== undefined && (
-                  <div className="flex items-center gap-1">
+                  <div className="relative flex items-center gap-1">
                     <Trophy className="w-3 h-3 text-warning" />
                     <span className="text-[10px] text-warning font-mono">
                       {profile.total_xp} XP
                     </span>
+                    {xpGain && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold text-warning animate-fade-in pointer-events-none" style={{ animation: 'xpFloat 1.5s ease-out forwards' }}>
+                        +{xpGain} XP
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

@@ -1,121 +1,90 @@
 
 
-# BeatDeath — Brutal Honest Audit (March 9, 2026)
+# Fix the 7 Remaining BeatDeath Issues
 
-## VERDICT: 85% Done. Two CRITICAL Security Holes Found.
-
----
-
-## CRITICAL SECURITY ISSUES (Must Fix Before Launch)
-
-### 1. Profiles Table Leaks ALL Health Data to the Internet
-**Severity: CRITICAL**
-
-The `profiles` table has a SELECT policy `USING (true)` — meaning **anyone on the internet** (even unauthenticated) can read every user's email, age, weight, chronic conditions, medications, smoking status, mental health scores, and subscription tier. This is a HIPAA-adjacent nightmare.
-
-**Fix:** Replace the blanket `USING (true)` SELECT policy with `USING (auth.uid() = user_id)`. The `profiles_public` VIEW already exists for leaderboard data — that's what community features should use.
-
-### 2. Users Can Grant Themselves Unlimited Scan Credits
-**Severity: CRITICAL**
-
-The `scan_credits` table has an UPDATE policy with only a USING clause (`auth.uid() = user_id`) and **no WITH CHECK restriction**. Any authenticated user can set `credits_remaining` to 999999 via a simple Supabase client call. Your entire monetization model is bypassable.
-
-**Fix:** Drop the public UPDATE policy on `scan_credits`. All credit modifications must go through `SECURITY DEFINER` RPCs only (`consume_scan_credit`, `grant_scan_credits`).
-
-### 3. Life Actions Publicly Readable (WARN)
-The global feed intentionally reads all users' actions, but this is currently open to unauthenticated requests too. Should restrict to `auth.uid() IS NOT NULL` at minimum.
+Addresses every critical, high, and medium priority issue found in the audit.
 
 ---
 
-## What's Working Well
+## 1. Fix LiveGlobalFeed (RLS blocks cross-user reads)
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Auth + Onboarding | Solid | 12-step onboarding with life expectancy calc |
-| LifeClock | Solid | Scientific vs playful modes differentiated |
-| Death Scanner | Solid | Edge function + deduct-before-analyze |
-| Scan Credits System | Logic works | But UPDATE policy is exploitable (see above) |
-| Community Leaderboard | Solid | Uses `profiles_public` view correctly |
-| Referral System | NEW, Solid | Code generation, process_referral RPC, UI card |
-| Dashboard Curation | Improved | 8 community cards instead of 16 |
-| ShareDeathReport | Improved | navigator.share + referral code integration |
-| XP/Streak Sync | Working | refreshProfile after XP increment |
-| RLS on most tables | Working | SECURITY DEFINER RPCs for sensitive ops |
+The `life_actions` table has RLS: `auth.uid() = user_id` for SELECT. The LiveGlobalFeed tries to read ALL users' actions but only gets the current user's.
 
----
+**Fix:** Add a new RLS policy that allows reading all rows but only exposes non-sensitive columns. Create a database view or simply add a permissive SELECT policy:
 
-## What's NOT Game-Changing Yet
-
-1. **Stripe = $0 revenue.** Every purchase button shows "Stripe Setup Required" toast. This is the #1 business blocker.
-2. **DeathDuel = Demo Mode.** The most social, competitive feature is fake. Real-time duels would be a killer (pun intended) viral mechanic.
-3. **No push notifications.** PWA manifest exists but no subscription logic. Users forget to come back.
-4. **No image scanning.** Camera UI exists but the edge function only processes text. Vision AI would make "scan anything" literally true.
-5. **Data monetization tiers are vaporware.** The onboarding promises $1-100/month for data sharing but there's no backend to deliver on that promise.
-
----
-
-## What IS Game-Changing
-
-- **"Scan anything, see how it kills you"** — genuinely novel concept, no competitors
-- **Personalized life clock** — addictive real-time countdown based on YOUR health data
-- **Gamification loop** (XP, streaks, achievements, leaderboard) — well-designed retention mechanics
-- **Referral system** — organic growth lever built and ready
-- **The paywall design** — ScanPaywall is polished, professional, and well-priced ($1.99/40 scans)
-
----
-
-## Is It Visually Polished?
-
-**Yes, 8.5/10.** The purple gradient theme is cohesive. Glass-card system, Playfair Display headings, glow effects, smooth animations all work together. The ScanPaywall modal is particularly well-designed. The dashboard hierarchy (Hero → LifeClock → Stats → Featured → Community) flows logically.
-
-**Minor polish gaps:**
-- No loading skeletons on community cards (they just pop in)
-- No micro-animations on XP gain (should feel rewarding)
-- Empty states in community section are functional but bland
-
----
-
-## Addictiveness Rating: 7/10
-
-**What drives retention:**
-- LifeClock ticking down creates urgency
-- Daily streak tracker with sync to profiles
-- XP and achievements for logging actions
-- "Spin the Death Wheel" for random engagement
-
-**What's missing for 10/10:**
-- Push notifications ("Your streak is about to break!")
-- Daily challenges ("Scan 3 items today for bonus XP")
-- Social notifications ("Your friend just beat your score!")
-
----
-
-## Implementation Plan (Priority Order)
-
-### 1. Fix 2 Critical Security Holes (Migration)
 ```sql
--- Fix profiles: restrict SELECT to own row only
-DROP POLICY "Users can view all profiles" ON public.profiles;
-CREATE POLICY "Users can view own profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = user_id);
-
--- Fix scan_credits: remove public UPDATE entirely
-DROP POLICY IF EXISTS "Users can update own credits" ON public.scan_credits;
--- All credit ops go through RPCs only
-
--- Fix life_actions: require authentication for global feed
-DROP POLICY "Users can view all actions" ON public.life_actions;
-CREATE POLICY "Authenticated users can view all actions"
-  ON public.life_actions FOR SELECT TO authenticated
+CREATE POLICY "Anyone can view recent actions for feed"
+  ON public.life_actions FOR SELECT
   USING (true);
 ```
 
-### 2. Add XP Gain Micro-Animation
-When XP increments after logging an action, show a brief "+10 XP" floating animation near the navbar badge. Small but makes the reward loop feel tangible.
+Then drop the old restrictive SELECT policy and replace it with a policy that allows public reads (the table only has category/description/minutes -- no PII). Alternatively, keep the restrictive policy and add this as a permissive one (but since existing is RESTRICTIVE, we need to change approach).
 
-### 3. Add Loading Skeletons to Community Cards
-Replace the instant pop-in with skeleton placeholders for CommunityLeaderboard, LiveGlobalFeed, and SurvivalStreakTracker while data loads.
+Since the existing policy is RESTRICTIVE (not permissive), we need to either:
+- Drop it and create two PERMISSIVE policies (own rows full access + all rows read), OR
+- Create a database view that uses SECURITY DEFINER
+
+**Recommended approach:** Drop the existing restrictive SELECT policy and create a permissive one that allows anyone to read all actions. Users still can only INSERT their own.
+
+**Migration:**
+```sql
+DROP POLICY "Users can view their own actions" ON public.life_actions;
+CREATE POLICY "Users can view all actions"
+  ON public.life_actions FOR SELECT
+  USING (true);
+```
+
+---
+
+## 2. Fix CommunityLeaderboard user highlight
+
+Line 156 compares `entry.id` (profiles table PK) with `user?.id` (auth user ID). These are different UUIDs.
+
+**Fix in CommunityLeaderboard.tsx:**
+- Change the SELECT to also include `user_id` from profiles
+- Compare `entry.user_id === user?.id` instead of `entry.id === user?.id`
+
+---
+
+## 3. Sync survival_streak back to profiles
+
+When `SurvivalStreakTracker` calculates the real streak, it should also update `profiles.survival_streak` so the `CommunityLeaderboard` streak tab shows real data.
+
+**Fix in SurvivalStreakTracker.tsx:**
+- After calculating `currentStreak`, fire an update:
+```typescript
+supabase.from('profiles')
+  .update({ survival_streak: currentStreak })
+  .eq('user_id', user.id);
+```
+
+---
+
+## 4. Re-fetch profile after XP increment
+
+After logging an action, the navbar XP badge stays stale.
+
+**Fix:** In `useAuth.tsx`, expose a `refreshProfile` function. In `LifeClockContext.tsx`, after the XP RPC call succeeds, call `refreshProfile()`. This will make the navbar XP update immediately.
+
+---
+
+## 5. Remove dead stub page routes
+
+Remove imports and routes for `ApiPlatformPage`, `WellnessPage`, and `SciencePage` from `App.tsx`. The nav already doesn't link to them.
+
+---
+
+## 6. Make Scientific Mode visually different
+
+In `LifeClock.tsx`, the `formatTime()` function returns identical output for both modes. 
+
+**Fix:** In scientific mode, show the time as total remaining hours or a decimal-year format (e.g., "42.37 years remaining") instead of the same y/m/d/h/m/s breakdown. This makes the toggle actually do something visible.
+
+---
+
+## 7. Replace hardcoded TrendingDeaths with real data
+
+Query `death_analyses` table (which has `is_public = true` data) to show actual recent scans from the community, instead of the static mock array.
 
 ---
 
@@ -123,24 +92,13 @@ Replace the instant pop-in with skeleton placeholders for CommunityLeaderboard, 
 
 | File | Change |
 |------|--------|
-| `supabase/migrations/new.sql` | Fix 3 RLS policies (profiles SELECT, scan_credits UPDATE, life_actions SELECT) |
-| `src/components/MainNavBar.tsx` | Add XP gain animation |
-| `src/components/CommunityLeaderboard.tsx` | Add skeleton loading state |
-| `src/components/LiveGlobalFeed.tsx` | Add skeleton loading state |
-
----
-
-## Summary: What's Left Until "Done"
-
-| Task | Effort | Blocker? |
-|------|--------|----------|
-| Fix 2 critical security holes | 1 migration | **YES — ship-blocking** |
-| Connect Stripe | Need API key | YES — revenue-blocking |
-| XP micro-animation | Small | No |
-| Loading skeletons | Small | No |
-| Push notifications | Medium | No |
-| Real image scanning (Vision AI) | Large | No |
-| Real Death Duels | Large | No |
-
-**Bottom line:** Fix the two security holes, connect Stripe, and you have a shippable product. Everything else is polish and growth optimization.
+| `supabase/migrations/new.sql` | Drop restrictive SELECT on life_actions, add permissive public read |
+| `src/components/LiveGlobalFeed.tsx` | No code changes needed (RLS fix handles it) |
+| `src/components/CommunityLeaderboard.tsx` | Add user_id to select, fix comparison |
+| `src/components/SurvivalStreakTracker.tsx` | Sync streak to profiles table |
+| `src/hooks/useAuth.tsx` | Expose refreshProfile function |
+| `src/contexts/LifeClockContext.tsx` | Call refreshProfile after XP increment |
+| `src/App.tsx` | Remove 3 stub page imports and routes |
+| `src/components/LifeClock.tsx` | Differentiate scientific vs playful display |
+| `src/components/TrendingDeaths.tsx` | Replace mock data with death_analyses query |
 

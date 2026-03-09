@@ -1,6 +1,7 @@
 
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Users, Trophy, Skull, Target } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -121,9 +122,17 @@ export const CommunityLeaderboard = () => {
       </CardTitle>
       <CardContent className="space-y-2">
         {loading ? (
-          <div className="flex items-center justify-center py-4">
-            <Skull className="w-5 h-5 animate-death-pulse text-muted-foreground" />
-            <span className="text-muted-foreground ml-2">Loading...</span>
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-2">
+                <Skeleton className="w-8 h-5 rounded" />
+                <div className="flex-1 space-y-1">
+                  <Skeleton className="h-4 w-24 rounded" />
+                  <Skeleton className="h-3 w-16 rounded" />
+                </div>
+                <Skeleton className="h-4 w-14 rounded" />
+              </div>
+            ))}
           </div>
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground">

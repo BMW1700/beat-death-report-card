@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Clock, Users, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -69,9 +70,17 @@ export const LiveGlobalFeed = () => {
       </CardTitle>
       <CardContent className="space-y-2 max-h-96 overflow-y-auto">
         {loading ? (
-          <div className="text-center text-muted-foreground py-8">
-            <Activity className="w-8 h-8 mx-auto mb-2 animate-spin opacity-50" />
-            <p className="text-sm">Loading global activity...</p>
+          <div className="space-y-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-card/30">
+                <Skeleton className="w-8 h-8 rounded-full" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-3.5 w-28 rounded" />
+                  <Skeleton className="h-3 w-40 rounded" />
+                </div>
+                <Skeleton className="h-5 w-12 rounded-full" />
+              </div>
+            ))}
           </div>
         ) : items.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
