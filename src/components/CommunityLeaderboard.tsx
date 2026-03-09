@@ -1,6 +1,7 @@
 
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Users, Trophy, Skull, Target } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
