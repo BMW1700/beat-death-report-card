@@ -308,6 +308,23 @@ export default function OnboardingPage() {
                   />
                   <p className="text-xs text-muted-foreground">Required to save your results</p>
                 </div>
+
+                {/* Referral code input */}
+                <div className="space-y-2 text-left max-w-md mx-auto">
+                  <Label htmlFor="referral" className="flex items-center gap-2">
+                    <Gift className="w-4 h-4 text-primary" />
+                    Referral Code (optional)
+                  </Label>
+                  <Input 
+                    id="referral"
+                    type="text"
+                    placeholder="e.g. ABCD1234"
+                    value={data.referralCode}
+                    onChange={(e) => updateData('referralCode', e.target.value.toUpperCase())}
+                    maxLength={8}
+                    className="font-mono tracking-widest text-center"
+                  />
+                  <p className="text-xs text-muted-foreground">Have a friend's code? Both of you get 5 free scans!</p>
                 
                 <div className="flex items-start space-x-2 text-sm">
                   <Checkbox 
