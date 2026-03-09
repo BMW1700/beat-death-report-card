@@ -552,6 +552,7 @@ export type Database = {
     }
     Functions: {
       consume_scan_credit: { Args: { p_user_id: string }; Returns: boolean }
+      deduct_free_scan: { Args: { p_user_id: string }; Returns: boolean }
       get_global_feed: {
         Args: { p_limit?: number }
         Returns: {
