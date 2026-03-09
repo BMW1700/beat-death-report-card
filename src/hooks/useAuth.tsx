@@ -50,9 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetch to avoid potential deadlocks
           setTimeout(() => {
-            refreshProfile();
+            refreshProfile(session.user.id);
           }, 0);
         } else {
           setProfile(null);
