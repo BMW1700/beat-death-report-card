@@ -202,6 +202,10 @@ const Index = () => {
         {/* Footer */}
         <footer className="text-center text-muted-foreground font-playfair pb-8">
           <p className="text-sm">Stay smart. Stay weird. Be BeatDeath. 💀</p>
+          <div className="flex justify-center gap-4 mt-2 text-xs">
+            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+          </div>
           <p className="text-xs mt-1 opacity-60">Version 2.0 • Powered by AI</p>
         </footer>
 

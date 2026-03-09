@@ -332,8 +332,12 @@ const AuthPage = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6 text-xs text-muted-foreground">
-          ⚠️ For Entertainment Only - Not Medical Advice ⚠️
+        <div className="text-center mt-6 text-xs text-muted-foreground space-y-2">
+          <p>⚠️ For Entertainment Only - Not Medical Advice ⚠️</p>
+          <div className="flex justify-center gap-3">
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
+          </div>
         </div>
       </div>
     </div>
