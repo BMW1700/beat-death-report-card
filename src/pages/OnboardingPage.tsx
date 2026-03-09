@@ -73,6 +73,7 @@ interface OnboardingData {
   chronicConditions: string[];
   medications: string;
   desiredProducts: string[];
+  referralCode: string;
 }
 
 export default function OnboardingPage() {
