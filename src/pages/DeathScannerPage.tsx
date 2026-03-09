@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skull, Calculator, AlertTriangle, ArrowLeft } from "lucide-react";
 import { DeathAnalyzer } from "@/components/DeathAnalyzer";
-import { analyzeImageForToxicity, generateDeathAnalysisReport, inferHazardMechanism } from "@/utils/imageAnalysis";
 import { toast } from "sonner";
 import { UserProfile } from "@/components/UserProfile";
 import { DeathReport } from "@/components/DeathReport";
