@@ -105,6 +105,11 @@ export function MainNavBar() {
                     <span className="text-[10px] text-warning font-mono">
                       {profile.total_xp} XP
                     </span>
+                    {xpGain && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold text-warning animate-fade-in pointer-events-none" style={{ animation: 'xpFloat 1.5s ease-out forwards' }}>
+                        +{xpGain} XP
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
