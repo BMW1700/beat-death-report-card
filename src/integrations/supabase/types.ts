@@ -564,9 +564,39 @@ export type Database = {
           username: string
         }[]
       }
+      grant_scan_credits: {
+        Args: {
+          p_amount: number
+          p_source?: string
+          p_stripe_payment_id?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       increment_xp: {
         Args: { p_user_id: string; p_xp: number }
         Returns: undefined
+      }
+      join_viral_challenge: {
+        Args: { p_challenge_id: string }
+        Returns: boolean
+      }
+      like_viral_challenge: {
+        Args: { p_challenge_id: string }
+        Returns: boolean
+      }
+      share_viral_challenge: {
+        Args: { p_challenge_id: string }
+        Returns: boolean
+      }
+      submit_duel_response: {
+        Args: {
+          p_duel_id: string
+          p_opponent_id: string
+          p_opponent_scenario: string
+          p_opponent_score: number
+        }
+        Returns: boolean
       }
       unlock_achievement: {
         Args: {
