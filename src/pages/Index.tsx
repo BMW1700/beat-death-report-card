@@ -18,23 +18,14 @@ import { WeeklyProgressChart } from "@/components/WeeklyProgressChart";
 
 // Community & extras (collapsible)
 import { EnhancedAchievements } from "@/components/EnhancedAchievements";
-
 import { UserStories } from "@/components/UserStories";
 import { DeathTrendsDashboard } from "@/components/DeathTrendsDashboard";
 import { DeathDuel } from "@/components/DeathDuel";
 import { CommunityLeaderboard } from "@/components/CommunityLeaderboard";
-import { PremiumUpsell } from "@/components/PremiumUpsell";
-import { InAppPurchases } from "@/components/InAppPurchases";
-import { ViralSharingHub } from "@/components/ViralSharingHub";
-import { WildernessScanner } from "@/components/WildernessScanner";
 import { LiveGlobalFeed } from "@/components/LiveGlobalFeed";
 import { SurvivalStreakTracker } from "@/components/SurvivalStreakTracker";
-import { SurvivalGearMarketplace } from "@/components/SurvivalGearMarketplace";
-import { ImmortalModeCopilot } from "@/components/ImmortalModeCopilot";
-import { SurvivalistModeToggle } from "@/components/SurvivalistModeToggle";
-import { FieldManual } from "@/components/FieldManual";
 import { ViralChallengeHub } from "@/components/viral/ViralChallengeHub";
-import { CollaborativeDeathMap } from "@/components/viral/CollaborativeDeathMap";
+import { ReferralCard } from "@/components/ReferralCard";
 
 const Index = () => {
   const navigate = useNavigate();
