@@ -63,6 +63,7 @@ export const CommunityLeaderboard = () => {
 
       const leaderboardWithRanks = data?.map((entry, index) => ({
         ...entry,
+        id: entry.user_id || `rank-${index}`,
         rank: index + 1
       })) || [];
 

@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (session?.user) {
         setTimeout(() => {
-          refreshProfile();
+          refreshProfile(session.user.id);
         }, 0);
       }
       setLoading(false);
