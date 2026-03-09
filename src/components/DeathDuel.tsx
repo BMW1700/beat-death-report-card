@@ -14,9 +14,9 @@ export const DeathDuel = () => {
           onClick={() => setOpen(true)}
           className="w-full text-left focus:outline-none"
         >
-          <CardTitle className="p-3 flex items-center gap-2 text-red-400">
+          <CardTitle className="p-3 flex items-center gap-2 text-destructive">
             <Sword className="w-5 h-5" />
-            Death Duel <span className="text-xs text-gray-300">Try it now!</span>
+            Death Duel <span className="text-xs text-muted-foreground ml-1">Demo Mode</span>
           </CardTitle>
           <CardContent>
             <span className="text-gray-200 text-sm">

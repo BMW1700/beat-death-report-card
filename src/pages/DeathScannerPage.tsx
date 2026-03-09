@@ -49,12 +49,18 @@ const DeathScannerPage = () => {
     }
     setShowProgress(true);
     try {
+      // Deduct scan BEFORE analysis to prevent free-scan exploits
+      const deducted = await scanCredits.deductScan();
+      if (!deducted) {
+        toast.error("No scans remaining");
+        setShowProgress(false);
+        return;
+      }
       const result = await performAnalysis(scenario, undefined, (stage, progress) => {
         setAnalysisProgress({ stage, progress });
       });
       if (result) {
         setAnalysis(result);
-        await scanCredits.deductScan();
       }
     } catch (error) {
       console.error('Analysis error:', error);
