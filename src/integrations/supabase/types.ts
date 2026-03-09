@@ -552,6 +552,17 @@ export type Database = {
     }
     Functions: {
       consume_scan_credit: { Args: { p_user_id: string }; Returns: boolean }
+      get_global_feed: {
+        Args: { p_limit?: number }
+        Returns: {
+          category: string
+          description: string
+          id: string
+          logged_at: string
+          minutes_impact: number
+          username: string
+        }[]
+      }
       increment_xp: {
         Args: { p_user_id: string; p_xp: number }
         Returns: undefined
