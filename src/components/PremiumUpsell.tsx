@@ -105,8 +105,9 @@ export const PremiumUpsell = () => {
               <Button
                 onClick={() => purchaseSubscription(plan.name)}
                 className="w-full gradient-bg hover:scale-105 transition-transform"
+                disabled
               >
-                Get {plan.name}
+                Coming Soon
               </Button>
             </CardContent>
           </Card>
