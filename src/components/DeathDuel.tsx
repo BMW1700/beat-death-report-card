@@ -19,7 +19,7 @@ export const DeathDuel = () => {
             Death Duel <span className="text-xs text-muted-foreground ml-1">Demo Mode</span>
           </CardTitle>
           <CardContent>
-            <span className="text-gray-200 text-sm">
+            <span className="text-muted-foreground text-sm">
               Battle friends by scanning the same item—who gets the higher kill rating? Challenge mode live!
             </span>
           </CardContent>
