@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Clock, Users, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
