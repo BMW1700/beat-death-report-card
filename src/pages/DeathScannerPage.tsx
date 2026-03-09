@@ -17,7 +17,6 @@ import { useScanCredits } from "@/hooks/useScanCredits";
 import { ScanCreditsBadge } from "@/components/ScanCreditsBadge";
 import { ScanPaywall } from "@/components/ScanPaywall";
 const DeathScannerPage = () => {
-  console.log("DeathScannerPage component is rendering");
   const [userData, setUserData] = useState<UserData>({
     weight: "",
     weightUnit: "lbs",
@@ -27,25 +26,17 @@ const DeathScannerPage = () => {
   });
   const [scenario, setScenario] = useState("");
   const [analysis, setAnalysis] = useState<DeathAnalysis | null>(null);
-  const {
-    isAnalyzing,
-    performAnalysis
-  } = useDeathAnalysis();
-  const [needsCommunityTraining, setNeedsCommunityTraining] = useState(false);
-  const [currentAiLabels, setCurrentAiLabels] = useState<string[]>([]);
-  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
-  const [showCorrectionModal, setShowCorrectionModal] = useState(false);
-  const [lastDetection, setLastDetection] = useState<{
+  const { isAnalyzing, performAnalysis } = useDeathAnalysis();
+  const [needsCommunityTraining] = useState(false);
+  const [showCorrectionModal] = useState(false);
+  const [lastDetection] = useState<{
     label: string;
     confidence: number;
     source?: string;
     allClassificationResults?: any[];
     isFromCommunity?: boolean;
   } | null>(null);
-  const [analysisProgress, setAnalysisProgress] = useState({
-    stage: '',
-    progress: 0
-  });
+  const [analysisProgress, setAnalysisProgress] = useState({ stage: '', progress: 0 });
   const [showProgress, setShowProgress] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const scanCredits = useScanCredits();
