@@ -51,8 +51,8 @@ export const CommunityLeaderboard = () => {
       const orderBy = leaderboardType === 'xp' ? 'total_xp' : 'survival_streak';
       
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, user_id, display_name, username, total_xp, survival_streak')
+        .from('profiles_public')
+        .select('user_id, display_name, username, total_xp, survival_streak')
         .order(orderBy, { ascending: false })
         .limit(10);
 
