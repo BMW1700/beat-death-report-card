@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
+import { Clock, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
