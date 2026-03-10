@@ -11,8 +11,8 @@ import { ScanPaywall } from "@/components/ScanPaywall";
 const navItems = [
   {
     path: "/",
-    icon: <Home className="w-5 h-5" />,
-    label: "Dashboard",
+    icon: <Clock className="w-5 h-5" />,
+    label: "Life Clock",
   },
   {
     path: "/death-scanner",
