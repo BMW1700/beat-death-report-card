@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
+import { Clock, Skull, Map, User, LogOut, Trophy, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
@@ -11,8 +11,8 @@ import { ScanPaywall } from "@/components/ScanPaywall";
 const navItems = [
   {
     path: "/",
-    icon: <Home className="w-5 h-5" />,
-    label: "Dashboard",
+    icon: <Clock className="w-5 h-5" />,
+    label: "Life Clock",
   },
   {
     path: "/death-scanner",

@@ -111,6 +111,12 @@ const Index = () => {
 
         {/* ── Section B: Life Clock + Tracker + Daily Stats ── */}
         <section className="mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold font-playfair gradient-text mb-2">Your Life Clock</h2>
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+              A real-time countdown of your remaining life, personalized to your age, health, and daily habits. Every action you log shifts your projected death date. Watch it tick. Beat it.
+            </p>
+          </div>
           <LifeClock />
         </section>
 
