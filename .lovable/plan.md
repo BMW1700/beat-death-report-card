@@ -1,104 +1,23 @@
+# Expand the Rork iPhone rebuild prompt into a complete BeatDeath playbook
 
+## Deliverable
+Produce one paste-ready master prompt for Rork that retains the attached SwiftUI/iOS, Supabase, Life Clock, Grim Reaper, camera, AR, HealthKit, sharing, and visual ambitions. Add the missing product behavior in enough detail that Rork can build the actual experience rather than a collection of screens. This is a prompt deliverable, not a change to the existing web app.
 
-# Fix the 7 Remaining BeatDeath Issues
+## Scan-to-share experience
+- Specify the complete path: launch camera or select photo or enter a scenario; confirm what was recognized and allow correction; show a brief, skippable Reaper reveal; deliver an easy-to-read verdict, contextual risk explanation, practical safer action, and a witty, non-repetitive closing line; offer save, rescan, and share.
+- Define structured AI output and rendering for identified items, uncertainty, evidence limits, relevant profile context, risk level, useful next action, concise humor, and an optional share-safe caption. Require reliable parsing, error states, and consistent rating units end-to-end.
+- Preserve the character's irreverent voice for ordinary objects, but make suspected poisoning, self-harm, overdose, severe symptoms, or emergencies sober and supportive: no jokes, graphic predictions, fabricated lethal-dose precision, or encouragement of dangerous stunts. Surface appropriate urgent-help guidance and make it clear this is not medical advice or an actual diagnosis.
+- Make every result feel distinct through tailored Reaper reactions, timing, haptics and sound settings, and meaningful follow-up actions; never block the safety guidance behind an animation or a payment gate.
 
-Addresses every critical, high, and medium priority issue found in the audit.
+## Repeat use, sharing, and revenue
+- Define a user-controlled loop from interesting scan to saved collection, optional daily challenge, life-action follow-up, streak/progress, and a shareable result with explicit privacy choices. Avoid fabricated life-extension claims and notifications that pressure users with fear.
+- Define the generated share card, deep-link destination, attribution and referral redemption; no automatic posting or exposure of health details, precise location, or identifiable photos without explicit consent.
+- Specify the free entitlement and premium value clearly, with truthful limits, a fair upgrade moment, and App Store-compliant StoreKit 2 purchases for digital iPhone features, server-verified entitlements, restore purchases, and transparent cancellation/pricing. Do not describe unfinished web checkout as working iOS billing or promise viral growth/revenue as guaranteed outcomes.
 
----
+## Implementation and quality bar for Rork
+- Instruct Rork to inspect the repository and Supabase schema/policies/functions before reusing anything, and to fix mismatches rather than transcribe them. Current code prompts for a 0–100 kill rating while the report shows /5; the parent scan handler ignores its image argument; purchase buttons currently say Stripe is not connected. Treat these as defects to resolve in the new app, not features to preserve.
+- Keep AI credentials and prompts on a secure server boundary; authorize scans and deduct entitlements atomically only for chargeable successful requests, with idempotency and recovery. Support no-permission, offline, blurry image, unrecognized object, unavailable AI, blocked requests, and interrupted purchases.
+- Call for native, testable SwiftUI flows with Supabase Auth/RLS, permission-aware HealthKit and AR capability fallback, accessible/reduced-motion design, and acceptance tests for first scan, urgent-risk output, corrected detection, save/share/deep link, free-to-paid conversion, restore, and repeat action. Require clear reporting of anything blocked by missing access or App Store credentials rather than placeholder success.
 
-## 1. Fix LiveGlobalFeed (RLS blocks cross-user reads)
-
-The `life_actions` table has RLS: `auth.uid() = user_id` for SELECT. The LiveGlobalFeed tries to read ALL users' actions but only gets the current user's.
-
-**Fix:** Add a new RLS policy that allows reading all rows but only exposes non-sensitive columns. Create a database view or simply add a permissive SELECT policy:
-
-```sql
-CREATE POLICY "Anyone can view recent actions for feed"
-  ON public.life_actions FOR SELECT
-  USING (true);
-```
-
-Then drop the old restrictive SELECT policy and replace it with a policy that allows public reads (the table only has category/description/minutes -- no PII). Alternatively, keep the restrictive policy and add this as a permissive one (but since existing is RESTRICTIVE, we need to change approach).
-
-Since the existing policy is RESTRICTIVE (not permissive), we need to either:
-- Drop it and create two PERMISSIVE policies (own rows full access + all rows read), OR
-- Create a database view that uses SECURITY DEFINER
-
-**Recommended approach:** Drop the existing restrictive SELECT policy and create a permissive one that allows anyone to read all actions. Users still can only INSERT their own.
-
-**Migration:**
-```sql
-DROP POLICY "Users can view their own actions" ON public.life_actions;
-CREATE POLICY "Users can view all actions"
-  ON public.life_actions FOR SELECT
-  USING (true);
-```
-
----
-
-## 2. Fix CommunityLeaderboard user highlight
-
-Line 156 compares `entry.id` (profiles table PK) with `user?.id` (auth user ID). These are different UUIDs.
-
-**Fix in CommunityLeaderboard.tsx:**
-- Change the SELECT to also include `user_id` from profiles
-- Compare `entry.user_id === user?.id` instead of `entry.id === user?.id`
-
----
-
-## 3. Sync survival_streak back to profiles
-
-When `SurvivalStreakTracker` calculates the real streak, it should also update `profiles.survival_streak` so the `CommunityLeaderboard` streak tab shows real data.
-
-**Fix in SurvivalStreakTracker.tsx:**
-- After calculating `currentStreak`, fire an update:
-```typescript
-supabase.from('profiles')
-  .update({ survival_streak: currentStreak })
-  .eq('user_id', user.id);
-```
-
----
-
-## 4. Re-fetch profile after XP increment
-
-After logging an action, the navbar XP badge stays stale.
-
-**Fix:** In `useAuth.tsx`, expose a `refreshProfile` function. In `LifeClockContext.tsx`, after the XP RPC call succeeds, call `refreshProfile()`. This will make the navbar XP update immediately.
-
----
-
-## 5. Remove dead stub page routes
-
-Remove imports and routes for `ApiPlatformPage`, `WellnessPage`, and `SciencePage` from `App.tsx`. The nav already doesn't link to them.
-
----
-
-## 6. Make Scientific Mode visually different
-
-In `LifeClock.tsx`, the `formatTime()` function returns identical output for both modes. 
-
-**Fix:** In scientific mode, show the time as total remaining hours or a decimal-year format (e.g., "42.37 years remaining") instead of the same y/m/d/h/m/s breakdown. This makes the toggle actually do something visible.
-
----
-
-## 7. Replace hardcoded TrendingDeaths with real data
-
-Query `death_analyses` table (which has `is_public = true` data) to show actual recent scans from the community, instead of the static mock array.
-
----
-
-## Files Changed
-
-| File | Change |
-|------|--------|
-| `supabase/migrations/new.sql` | Drop restrictive SELECT on life_actions, add permissive public read |
-| `src/components/LiveGlobalFeed.tsx` | No code changes needed (RLS fix handles it) |
-| `src/components/CommunityLeaderboard.tsx` | Add user_id to select, fix comparison |
-| `src/components/SurvivalStreakTracker.tsx` | Sync streak to profiles table |
-| `src/hooks/useAuth.tsx` | Expose refreshProfile function |
-| `src/contexts/LifeClockContext.tsx` | Call refreshProfile after XP increment |
-| `src/App.tsx` | Remove 3 stub page imports and routes |
-| `src/components/LifeClock.tsx` | Differentiate scientific vs playful display |
-| `src/components/TrendingDeaths.tsx` | Replace mock data with death_analyses query |
-
+## Final handoff
+After approval, provide the revised single master prompt in chat, ready to copy into Rork. Do not modify the current app or claim that the iOS app, payments, or growth outcomes are already built.
