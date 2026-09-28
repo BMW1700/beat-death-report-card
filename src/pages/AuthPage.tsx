@@ -314,6 +314,16 @@ const AuthPage = () => {
               Continue with Google
             </Button>
 
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className="w-full mt-3 text-muted-foreground hover:text-foreground"
+            >
+              <Skull className="w-4 h-4 mr-2" />
+              Skip — Browse as Guest
+            </Button>
+
             <div className="mt-6 text-center">
               <button
                 onClick={() => { setIsLogin(!isLogin); setAwaitingConfirmation(false); }}
