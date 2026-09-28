@@ -34,11 +34,7 @@ const Index = () => {
 
   useEffect(() => {
     if (loading) return;
-
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
+    if (!user) return; // guest preview mode — browse freely
 
     const hasLocalOnboarded = localStorage.getItem('beatdeath_onboarded') === 'true';
     const hasProfileOnboarded = Boolean(profile?.onboarding_completed_at);
@@ -59,26 +55,6 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen gradient-secondary-bg flex items-center justify-center">
-        <Card className="glass-card max-w-md mx-auto">
-          <CardHeader className="text-center">
-            <CardTitle className="gradient-text">Authentication Required</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">Please sign in to access BeatDeath</p>
-            <Link to="/auth">
-              <Button className="gradient-bg">
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen gradient-secondary-bg pt-16 transition-colors duration-300">
