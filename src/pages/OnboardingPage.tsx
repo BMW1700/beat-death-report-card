@@ -179,10 +179,13 @@ export default function OnboardingPage() {
     }
 
     if (!user) {
-      toast({ title: "Please log in first", variant: "destructive" });
-      navigate('/auth', { replace: true });
+      // Guest preview: save locally and continue without an account
+      localStorage.setItem('beatdeath_onboarded', 'true');
+      toast({ title: "Preview mode", description: "Exploring without an account." });
+      navigate('/', { replace: true });
       return;
     }
+
 
     try {
       // Save all data to Supabase profiles
